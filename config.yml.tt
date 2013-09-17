@@ -1,0 +1,18 @@
+tracker_token:      
+tracker_requester:  
+
+jira_login:         
+jira_password:      
+jira_host:          
+jira_uri_scheme:    http
+jira_port:          80
+
+learning_network:
+  tracker_project_id: 761971
+  jira_project:       SM
+  jira_filter:        10500
+
+learning_list:
+  tracker_project_id: 852847
+  jira_project:       LQ
+  jira_filter:        11001
