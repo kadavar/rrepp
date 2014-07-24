@@ -18,41 +18,5 @@ module Jira2Pivotal
     def [](key)
       @config[key]
     end
-
-    def jira_url
-      "#{@config['jira_uri_scheme']}://#{@config['jira_host']}"
-    end
-
-    def status_map
-      {
-        '1'     => 'unstarted',
-        '3'     => 'started',
-        '4'     => 'rejected',
-        '10001' => 'delivered',
-        '10008' => 'accepted',
-        '5'     => 'delivered',
-        '6'     => 'accepted',
-        '400'   => 'finished',
-        '401'   => 'finished'
-      }
-    end
-
-    def type_map
-      {
-        '1'   => 'bug',
-        '2'   => 'feature',
-        '3'   => 'feature',
-        '4'   => 'feature',
-        '5'   => 'feature',
-        '6'   => 'feature',
-        '7'   => 'feature',
-        '8'   => 'feature',
-        '9'   => 'feature',
-        '10'  => 'feature'
-      }
-    end
-
-
-
   end
 end
