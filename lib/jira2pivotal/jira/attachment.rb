@@ -15,7 +15,7 @@ module Jira2Pivotal
 
       def download
         puts "Downloading #{attachment.filename}"
-        uri = URI.parse(URI.encode("#{project.config['jira_uri_scheme']}://#{@config['jira_host']}/secure/attachment/#{attachment.id}/#{attachment.filename}"))
+        uri = URI.parse(URI.encode("#{@project.config.jira_url}/secure/attachment/#{attachment.id}/#{attachment.filename}"))
         Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
           req = Net::HTTP::Get.new uri.request_uri
           req.basic_auth project.config['jira_login'], project.config['jira_password']

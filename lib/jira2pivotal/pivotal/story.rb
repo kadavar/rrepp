@@ -13,8 +13,12 @@ module Jira2Pivotal
         story.notes.create(args)
       end
 
-      def upload_atachment(filepath)
+      def upload_attachment(filepath)
         story.upload_attachment(filepath)
+      end
+
+      def url
+        story.url
       end
     end
   end

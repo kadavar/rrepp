@@ -15,7 +15,7 @@ module Jira2Pivotal
         @client = JIRA::Client.new({
              username:     config['jira_login'],
              password:     config['jira_password'],
-             site:         config.jira_url,
+             site:         url,
              context_path: '',
              auth_type:    :basic,
              use_ssl:      false,
@@ -24,9 +24,11 @@ module Jira2Pivotal
       end
 
       def project
-
-        DT.p config
-        @project ||= @client.Project.find(@@config['jira_project'])
+        begin
+          @project ||= @client.Project.find(@config['jira_project'])
+        rescue JIRA::HTTPError =>  error
+          raise StandardError.new 'Sorry, but project not found...'
+        end
       end
 
       def url
@@ -37,11 +39,12 @@ module Jira2Pivotal
       def next_issues
         list = issues(@start_index)
 
-        if list.any?
+        if list.present?
           @start_index += per_page
+
           list
         else
-          false
+          []
         end
       end
 
@@ -51,9 +54,11 @@ module Jira2Pivotal
 
       def load_unsynchronized_issues
         unsynchronized_issues = []
-        issues = jira.next_issues()
+        issues = next_issues
 
         while issues.count > 0
+
+          puts "Issues Find: #{issues.count}"
 
           issues.each do |issue|
             # Expand the issue with changelog information
@@ -85,7 +90,7 @@ module Jira2Pivotal
             unsynchronized_issues << Issue.new(self, issue) unless already_scheduled?(issue)
           end
 
-          issues = jira.next_issues()
+          issues = issues.count > per_page ? next_issues : []
         end
 
         unsynchronized_issues
@@ -125,7 +130,6 @@ end
 JIRA::Resource::Project.class_eval do
   # Returns all the issues for this project
   def issues(start_index=0)
-    DT.p 'HERE'
     response = client.get(client.options[:rest_base_path] + "/search?jql=project%3D'#{key}'&startIndex=#{start_index}")
     json = self.class.parse_json(response.body)
     json['issues'].map do |issue|
@@ -139,8 +143,6 @@ JIRA::Resource::Project.class_eval do
 
     response = client.get(filter_data['searchUrl'])
     json = self.class.parse_json(response.body)
-
-    DT.p json
 
     json['issues'].map do |issue|
       client.Issue.build(issue)

@@ -14,25 +14,25 @@ module Jira2Pivotal
       end
 
       def attachments
-        @attachments ||= issue.comments.map { |attachment| Attachment.new(project, attachment) }
+        @attachments ||= issue.attachments.map { |attachment| Attachment.new(project, attachment) }
       end
 
       def add_marker_comment(story_url)
         # Add comment to the original JIRA issue
         puts 'Adding a comment to the JIRA issue'
         comment = issue.comments.build
-        comment.save( :body => "#{comment_text}: #{story_url}(iddqd)" )
+        comment.save( :body => "#{comment_text}: #{story_url}" )
       end
 
       def to_pivotal
         story_args = {
             name:           issue.summary,
-            current_state:  pivotal_story_state,
+            current_state:  issue_status_to_story_state,
             requested_by:   project.config['tracker_requester'],
             description:    issue.description,
-            story_type:     pivotal_story_type,
+            story_type:     issue_type_to_story_type,
             jira_id:        issue.key,
-            jira_url:       jira.url
+            jira_url:       project.url
 
         }
 
@@ -40,7 +40,7 @@ module Jira2Pivotal
           story_args['estimate'] = 1
         end
 
-        if pivotal_story_state == 'accepted'
+        if issue_status_to_story_state == 'accepted'
           last_accepted = nil
           issue.changelog['histories'].each do |history|
             history['items'].each do |change|
@@ -92,6 +92,9 @@ module Jira2Pivotal
         type_map[issue.issuetype.id]
       end
 
+      def comment_text
+        'A Pivotal Tracker story has been created for this Issue'
+      end
     end
   end
 end

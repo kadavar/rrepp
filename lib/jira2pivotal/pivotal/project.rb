@@ -16,7 +16,13 @@ module Jira2Pivotal
       end
 
       def create_story(story_args)
-        Story.new(@project, @project.stories.create(story_args))
+        story = @project.stories.create(story_args)
+        if story.errors.empty?
+          Story.new(@project, story)
+        else
+          puts "Can't create Pivotal Story: #{story.errors.uniq}"
+          nil
+        end
       end
     end
   end

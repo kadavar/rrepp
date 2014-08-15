@@ -1,8 +1,7 @@
 module Jira2Pivotal
   class Config < Base
 
-    def initialize(path, project_name=nil)
-
+    def initialize(path, project_name)
       if File.exist?(path)
         @config = YAML.load_file(path)
         project_options = @config.delete(project_name)
@@ -17,6 +16,10 @@ module Jira2Pivotal
 
     def [](key)
       @config[key]
+    end
+
+    def jira_url
+      "#{@config['jira_uri_scheme']}://#{@config['jira_host']}:#{@config['jira_port']}"
     end
   end
 end
