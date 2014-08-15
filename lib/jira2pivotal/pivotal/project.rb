@@ -20,9 +20,17 @@ module Jira2Pivotal
         if story.errors.empty?
           Story.new(@project, story)
         else
-          puts "Can't create Pivotal Story: #{story.errors.uniq}"
+          puts "Can't create Pivotal Story: #{story.errors.errors.uniq.join(', ')}"
           nil
         end
+      end
+
+      def unsynchronized_stories
+        @unsynchronized_stories ||= load_unsynchronized_stories
+      end
+
+      def load_unsynchronized_issues
+        @peroject.stories.all(story_type: %w(bug chore feature)).keep_if { |story| story.jira_url.nil? }
       end
     end
   end

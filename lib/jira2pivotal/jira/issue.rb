@@ -24,16 +24,17 @@ module Jira2Pivotal
         comment.save( :body => "#{comment_text}: #{story_url}" )
       end
 
+      def key
+        issue.key
+      end
+
       def to_pivotal
         story_args = {
             name:           issue.summary,
             current_state:  issue_status_to_story_state,
             requested_by:   project.config['tracker_requester'],
             description:    issue.description,
-            story_type:     issue_type_to_story_type,
-            jira_id:        issue.key,
-            jira_url:       project.url
-
+            story_type:     issue_type_to_story_type
         }
 
         if issue_type_to_story_type == 'feature'

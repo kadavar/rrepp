@@ -35,6 +35,9 @@ module Jira2Pivotal
         config.jira_url
       end
 
+      def build_issue
+
+      end
 
       def next_issues
         list = issues(@start_index)
