@@ -35,8 +35,10 @@ module Jira2Pivotal
         config.jira_url
       end
 
-      def build_issue
+      def build_issue(attributes)
+        attributes = { 'fields' =>  { 'project' =>  { 'id' => project.id } }.merge(attributes) }
 
+        Issue.new @project, @client.Issue.build(attributes)
       end
 
       def next_issues

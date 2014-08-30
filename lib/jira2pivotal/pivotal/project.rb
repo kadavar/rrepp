@@ -29,8 +29,8 @@ module Jira2Pivotal
         @unsynchronized_stories ||= load_unsynchronized_stories
       end
 
-      def load_unsynchronized_issues
-        @peroject.stories.all(story_type: %w(bug chore feature)).keep_if { |story| story.jira_url.nil? }
+      def load_unsynchronized_stories
+        @project.stories.all(story_type: %w(bug chore feature)).keep_if { |story| story.jira_url.nil? }.map { |story| Story.new(@project, story) }
       end
     end
   end

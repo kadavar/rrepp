@@ -9,6 +9,10 @@ module Jira2Pivotal
         @story = story
       end
 
+      def notes
+        @note ||= story.notes.all
+      end
+
       def add_note(args)
         story.notes.create(args)
       end
@@ -23,6 +27,24 @@ module Jira2Pivotal
 
       def assign_to_jira_issue(key, url)
         story.update(jira_id: key, jira_url: url)
+      end
+
+      def  to_jira
+        {
+          'summary'     => story.name,
+          'description' => story.description,
+          'issuetype'   => { 'id' => story_type_to_issue_type }
+        }
+      end
+
+      def story_type_to_issue_type
+        type_map = {
+            'bug'     => '1',
+            'feature' => '2',
+            'chore'   => '2'
+        }
+
+        type_map[story.story_type]
       end
     end
   end

@@ -2,11 +2,7 @@ module Jira2Pivotal
   class Bridge < Base
 
     def initialize(config_file, project_name)
-      DT.p config_file
-
       @config = Config.new(config_file, project_name)
-
-      DT.p @config
     end
 
     def jira
@@ -19,7 +15,7 @@ module Jira2Pivotal
 
     def sync!
       from_jira_to_pivotal!
-      # from_pivotal_to_jira!
+      from_pivotal_to_jira!
     end
 
     def from_pivotal_to_jira!
@@ -35,40 +31,30 @@ module Jira2Pivotal
       stories.each do |story|
         putc '.'
 
-        issue = jira.build_issue(story.to_jira)
+        issue = jira.build_issue story.to_jira
 
-        if issue.present?
+        issue.save!
 
-          story.comments.each do |comment|
-            begin
-              comment = issue.comments.build
-              issue.add_note( author: comment.author['displayName'], text: "*Real Author: #{comment.author['displayName']}*\n\n#{comment.body}", noted_at: comment.created)
-            rescue Exception => e
-              nil
+        story.notes.each do |note|
+          begin
+            comment = issue.build_comment
+            if note.text.present? # pivotal add empty note for attachment
+              comment.save({ 'body' => "#{note.author} added a comment in Pivotal Tracker:: \n\n #{note.text} \n View this Pivotal Tracker story: #{story.url}" })
             end
+          rescue Exception => e
+            nil
           end
-
-          # Add attachments to the story
-          puts 'Checking for any attachments'
-
-          issue.attachments.each do |attachment|
-            puts 'uploading attachment...'
-            attachment.download
-            story.upload_attachment(attachment.to_path)
-            puts "Added attachment: #{attachment.to_path}"
-          end
-
-
-          issue.add_marker_comment(story.url)
-          story.assign_to_jira_issue(issue.key, jira.url)
-
-
-          counter += 1
         end
 
+        #*********************************************************************************************************#
+        #   We can't grab attachments because there is a bug in gem and it returns all attachments from project   #
+        #*********************************************************************************************************#
+
+        issue.add_marker_comment(story.url)
+        story.assign_to_jira_issue(issue.issue.key, jira.url)
+
+        counter += 1
       end
-
-
     end
 
     def from_jira_to_pivotal!
@@ -113,13 +99,10 @@ module Jira2Pivotal
           end
 
           # Add attachments to the story
-          puts 'Checking for any attachments'
 
           issue.attachments.each do |attachment|
-            puts 'uploading attachment...'
             attachment.download
             story.upload_attachment(attachment.to_path)
-            puts "Added attachment: #{attachment.to_path}"
           end
 
           issue.add_marker_comment(story.url)

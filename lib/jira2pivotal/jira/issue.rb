@@ -24,8 +24,16 @@ module Jira2Pivotal
         comment.save( :body => "#{comment_text}: #{story_url}" )
       end
 
+      def build_comment
+        issue.comments.build
+      end
+
       def key
         issue.key
+      end
+
+      def save!
+        issue.save! issue.attrs
       end
 
       def to_pivotal
