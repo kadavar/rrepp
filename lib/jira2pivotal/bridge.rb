@@ -19,21 +19,30 @@ module Jira2Pivotal
     end
 
     def from_pivotal_to_jira!
-
       puts "Getting all stories from #{@config['tracker_project_id']}"
 
-      counter =  0
       stories = pivotal.unsynchronized_stories
 
-      puts 'Find Stories: ', stories.count
+      puts 'Find Stories: ', stories[:to_create].count + stories[:to_update].count
       puts 'Start uploading to Jira'
+
+      import_counter = create_jira_issues!(stories[:to_create])
+      update_counter = update_jira_issues!(stories[:to_update])
+
+      puts "Successfully imported #{import_counter} and updated #{update_counter} stories in Jira"
+    end
+
+    def create_jira_issues!(stories)
+      counter = 0
+      puts 'Create new issues'
 
       stories.each do |story|
         putc '.'
 
-        issue = jira.build_issue story.to_jira
+        issue, attributes = jira.build_issue story.to_jira
 
-        issue.save!
+        issue.save!(attributes, @config)
+        issue.update_status!(jira.build_api_client, story)
 
         story.notes.each do |note|
           begin
@@ -55,6 +64,29 @@ module Jira2Pivotal
 
         counter += 1
       end
+
+      return counter
+    end
+
+    def update_jira_issues!(stories)
+      counter = 0
+      puts 'Update exists issues'
+
+      jira_issues = jira.find_issues("id in #{@pivotal.map_stories_by_jira_id(stories)}")
+
+      stories.each do |story|
+        putc '.'
+
+        jira_issue = story.select_issue_by_jira_issue_id(jira_issues)
+        issue, attributes = jira.build_issue(story.to_jira, jira_issue)
+
+        issue.save!(attributes, @config)
+        issue.update_status!(jira.build_api_client, story)
+
+        counter += 1
+      end
+
+      return counter
     end
 
     def from_jira_to_pivotal!

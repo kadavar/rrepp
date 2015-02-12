@@ -29,8 +29,27 @@ module Jira2Pivotal
         @unsynchronized_stories ||= load_unsynchronized_stories
       end
 
+      def map_stories_by_jira_id(stories)
+        "(#{stories.map(&:jira_issue_id).join(', ')})"
+      end
+
+      private
+
       def load_unsynchronized_stories
-        @project.stories.all(story_type: %w(bug chore feature)).keep_if { |story| story.jira_url.nil? }.map { |story| Story.new(@project, story) }
+        { to_create: load_to_create_stories, to_update: load_to_update_stories }
+      end
+
+      # TODO Refactor 2 methods below
+      def load_to_create_stories
+        usefull_stories.select { |story| story.jira_url.nil? }.map { |story| Story.new(@project, story, @config) }
+      end
+
+      def load_to_update_stories
+        usefull_stories.select { |story| !story.jira_url.nil? }.map { |story| Story.new(@project, story, @config) }
+      end
+
+      def usefull_stories
+        @project.stories.all(story_type: %w(bug chore feature), state: %w(unstarted started finished delivered rejected))
       end
     end
   end

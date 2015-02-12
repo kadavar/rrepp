@@ -32,8 +32,19 @@ module Jira2Pivotal
         issue.key
       end
 
-      def save!
-        issue.save! issue.attrs
+      def save!(attrs, config=nil)
+        # Remove pivotal_points field if type Bug
+        # Becouse issues with Bug type doesn't have this field
+        # And it cause an error while request
+        if is_bug? && config.present?
+          attrs['fields'].except!("customfield_#{config['jira_custom_fields']['pivotal_points']}")
+        end
+
+        issue.save! attrs
+      end
+
+      def is_bug?
+        issue.attrs['fields']['issuetype']['name'] == 'Bug'
       end
 
       def to_pivotal
@@ -103,6 +114,44 @@ module Jira2Pivotal
 
       def comment_text
         'A Pivotal Tracker story has been created for this Issue'
+      end
+
+      def update_status!(client, story)
+        @client = client
+
+        # Jira give only several status options to select
+        # So if we try to change status that not in list
+        # Status would not change
+        set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
+      end
+
+      private
+
+      # TODO: Refactor this(use gem logic to make request or something else)
+      def set_issue_status!(args)
+        http_method = :post
+        url = "/rest/api/2/issue/#{issue.id}/transitions"
+
+        response = @client.send(http_method, url, args.to_json)
+      end
+
+      # TODO: Refactor this(use gem logic to make request or something else)
+      def get_available_statuses
+        http_method = :get
+        url = "/rest/api/2/issue/#{issue.id}/transitions"
+
+        response = @client.send(http_method, url)
+
+        hash_of_data = JSON.parse(response.body)
+        transitions = hash_of_data['transitions'].map { |t| {t['name'] => t['id']} }.reduce Hash.new, :merge
+      end
+
+      def can_change_status?(story)
+        get_available_statuses.keys.include?(story.story_status_to_issue_status)
+      end
+
+      def args_for_change_status(story)
+        args = {'update' => {}, 'transition' => get_available_statuses[story.story_status_to_issue_status] }
       end
     end
   end

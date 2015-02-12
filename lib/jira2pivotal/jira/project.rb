@@ -18,8 +18,8 @@ module Jira2Pivotal
              site:         url,
              context_path: '',
              auth_type:    :basic,
-             use_ssl:      false,
-             #ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
+             # use_ssl:      false,
+             # ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
          })
       end
 
@@ -35,10 +35,11 @@ module Jira2Pivotal
         config.jira_url
       end
 
-      def build_issue(attributes)
+      def build_issue(attributes, issue=nil)
         attributes = { 'fields' =>  { 'project' =>  { 'id' => project.id } }.merge(attributes) }
 
-        Issue.new @project, @client.Issue.build(attributes)
+        issue = issue.present? ? issue : @client.Issue.build(attributes)
+        return Issue.new(@project, issue), attributes
       end
 
       def next_issues
@@ -99,6 +100,10 @@ module Jira2Pivotal
         end
 
         unsynchronized_issues
+      end
+
+      def find_issues(jql)
+        JIRA::Resource::Issue.jql(@client, jql)
       end
 
       private
