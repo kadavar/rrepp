@@ -33,6 +33,70 @@ module Jira2Pivotal
         "(#{stories.map(&:jira_issue_id).join(', ')})"
       end
 
+      def create_tasks!(issues)
+        counter =  0
+
+        issues.each do |issue|
+          putc '.'
+
+          story = create_story(issue.to_pivotal)
+
+          if story.present?
+            # note_text = ''
+            #
+            # if issue.issuetype == '6'
+            #   note_text = 'This was an epic from JIRA.'
+            # end
+            #
+            # # Don't create comment with src, we use straight integration
+            # #note_text += "\n\nSubmitted through Jira\n#{@config['jira_uri_scheme']}://#{@config['jira_host']}/browse/#{issue.key}"
+            #
+            # story.notes.create(text: note_text) unless note_text.blank?
+
+            # Add notes to the story
+            puts 'Checking for comments'
+
+            story.create_notes!(issue)
+
+            # Add attachments to the story
+            issue.attachments.each do |attachment|
+              attachment.download
+              story.upload_attachment(attachment.to_path)
+            end
+
+            issue.add_marker_comment(story.url)
+            story.assign_to_jira_issue(issue.key, jira.url) #we should assign jira task only at the and to prevent recending comments and attaches back
+
+            counter += 1
+          end
+        end
+
+        return counter
+      end
+
+      def update_tasks!(issues)
+        counter =  0
+
+        pivotal_stories = find_stories(issues)
+
+        issues.each do |issue|
+          putc '.'
+
+          story = select_task(pivotal_stories, issue)
+
+          puts 'Updates for comments'
+          story.create_notes!(issue)
+
+          counter += 1
+        end
+
+        return counter
+      end
+
+      def select_task(stories, issue)
+        stories.find { |story| story.jira_issue_id == issue.issue.attrs['key'] }
+      end
+
       private
 
       def load_unsynchronized_stories

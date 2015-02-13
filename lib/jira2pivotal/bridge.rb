@@ -15,10 +15,13 @@ module Jira2Pivotal
 
     def sync!
       from_jira_to_pivotal!
-      # from_pivotal_to_jira!
+      from_pivotal_to_jira!
     end
 
     def from_pivotal_to_jira!
+      # Make connection with Jira
+
+      # Get all stories for the project from Pivotal Tracker
       puts "Getting all stories from #{@config['tracker_project_id']}"
 
       stories = pivotal.unsynchronized_stories
@@ -26,67 +29,10 @@ module Jira2Pivotal
       puts 'Find Stories: ', stories[:to_create].count + stories[:to_update].count
       puts 'Start uploading to Jira'
 
-      import_counter = create_jira_issues!(stories[:to_create])
-      update_counter = update_jira_issues!(stories[:to_update])
+      import_counter = jira.create_tasks!(stories[:to_create])
+      update_counter = jira.update_tasks!(stories[:to_update])
 
       puts "Successfully imported #{import_counter} and updated #{update_counter} stories in Jira"
-    end
-
-    def create_jira_issues!(stories)
-      counter = 0
-      puts 'Create new issues'
-
-      stories.each do |story|
-        putc '.'
-
-        issue, attributes = jira.build_issue story.to_jira
-
-        issue.save!(attributes, @config)
-        issue.update_status!(jira.build_api_client, story)
-
-        story.notes.each do |note|
-          begin
-            comment = issue.build_comment
-            if note.text.present? # pivotal add empty note for attachment
-              comment.save({ 'body' => "#{note.author} added a comment in Pivotal Tracker:: \n\n #{note.text} \n View this Pivotal Tracker story: #{story.url}" })
-            end
-          rescue Exception => e
-            nil
-          end
-        end
-
-        #*********************************************************************************************************#
-        #   We can't grab attachments because there is a bug in gem and it returns all attachments from project   #
-        #*********************************************************************************************************#
-
-        issue.add_marker_comment(story.url)
-        story.assign_to_jira_issue(issue.issue.key, jira.url)
-
-        counter += 1
-      end
-
-      return counter
-    end
-
-    def update_jira_issues!(stories)
-      counter = 0
-      puts 'Update exists issues'
-
-      jira_issues = jira.find_issues("id in #{@pivotal.map_stories_by_jira_id(stories)}")
-
-      stories.each do |story|
-        putc '.'
-
-        jira_issue = story.select_issue_by_jira_issue_id(jira_issues)
-        issue, attributes = jira.build_issue(story.to_jira, jira_issue)
-
-        issue.save!(attributes, @config)
-        issue.update_status!(jira.build_api_client, story)
-
-        counter += 1
-      end
-
-      return counter
     end
 
     def from_jira_to_pivotal!
@@ -100,66 +46,10 @@ module Jira2Pivotal
       puts 'Find Issues: ', issues.count
       puts 'Start uploading to Pivotal Tracker'
 
-      import_counter = crate_pivotal_stories!(issues[:to_create])
-      update_counter = update_pivotal_stories!(issues[:to_update])
+      import_counter = pivotal.create_tasks!(issues[:to_create])
+      update_counter = pivotal.update_tasks!(issues[:to_update])
 
       puts "Successfully imported #{import_counter} and updated #{update_counter} issues into Pivotal Tracker"
-    end
-
-    def crate_pivotal_stories!(issues)
-      counter =  0
-
-      issues.each do |issue|
-        putc '.'
-
-        story = pivotal.create_story(issue.to_pivotal)
-
-        if story.present?
-
-          # note_text = ''
-          #
-          # if issue.issuetype == '6'
-          #   note_text = 'This was an epic from JIRA.'
-          # end
-          #
-          # # Don't create comment with src, we use straight integration
-          # #note_text += "\n\nSubmitted through Jira\n#{@config['jira_uri_scheme']}://#{@config['jira_host']}/browse/#{issue.key}"
-          #
-          # story.notes.create(text: note_text) unless note_text.blank?
-
-          # Add notes to the story
-          puts 'Checking for comments'
-
-          issue.comments.each do |comment|
-            begin     #TODO wtf?
-              story.add_note( author: comment.author['displayName'], text: "*Real Author: #{comment.author['displayName']}*\n\n#{comment.body}", noted_at: comment.created)
-            rescue Exception => e
-              story.add_note( author: comment.author['displayName'], text: "*Real Author: #{comment.author['displayName']}*\n\n#{comment.body}", noted_at: comment.created)
-            end
-          end
-
-          # Add attachments to the story
-
-          issue.attachments.each do |attachment|
-            attachment.download
-            story.upload_attachment(attachment.to_path)
-          end
-
-          issue.add_marker_comment(story.url)
-          story.assign_to_jira_issue(issue.key, jira.url) #we should assign jira task only at the and to prevent recending comments and attaches back
-
-          counter += 1
-        end
-      end
-
-      return counter
-    end
-
-    def update_pivotal_stories!(issues)
-      # TODO: Add logic
-      counter =  0
-
-      return counter
     end
   end
 end

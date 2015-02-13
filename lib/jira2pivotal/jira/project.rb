@@ -120,6 +120,57 @@ module Jira2Pivotal
         JIRA::Resource::Issue.jql(@client, jql)
       end
 
+      def create_tasks!(stories)
+        counter = 0
+        puts 'Create new issues'
+
+        stories.each do |story|
+          putc '.'
+
+          issue, attributes = build_issue story.to_jira
+
+          issue.save!(attributes, @config)
+          issue.update_status!(jira.build_api_client, story)
+          issue.create_notes!(story)
+          issue.add_marker_comment(story.url)
+
+          #*********************************************************************************************************#
+          #   We can't grab attachments because there is a bug in gem and it returns all attachments from project   #
+          #*********************************************************************************************************#
+
+          story.assign_to_jira_issue(issue.issue.key, jira.url)
+
+          counter += 1
+        end
+
+        return counter
+      end
+
+      def update_tasks!(stories)
+        counter = 0
+        puts 'Update exists issues'
+
+        jira_issues = jira.find_issues("id in #{@pivotal.map_stories_by_jira_id(stories)}")
+
+        stories.each do |story|
+          putc '.'
+
+          jira_issue = select_task(jira_issues, story)
+          issue, attributes = build_issue(story.to_jira, jira_issue)
+
+          issue.save!(attributes, @config)
+          issue.update_status!(jira.build_api_client, story)
+
+          counter += 1
+        end
+
+        return counter
+      end
+
+      def select_task(issues, story)
+        issues.find { |issue| issue.attrs['key'] == story.jira_issue_id }
+      end
+
       private
 
       def comment_text

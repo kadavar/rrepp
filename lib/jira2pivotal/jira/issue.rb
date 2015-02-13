@@ -125,6 +125,19 @@ module Jira2Pivotal
         set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
       end
 
+      def create_notes!(story)
+        story.notes.each do |note|
+          begin
+            comment = build_comment
+            if note.text.present? # pivotal add empty note for attachment
+              comment.save({ 'body' => "#{note.author} added a comment in Pivotal Tracker:: \n\n #{note.text} \n View this Pivotal Tracker story: #{story.url}" })
+            end
+          rescue Exception => e
+            nil
+          end
+        end
+      end
+
       private
 
       # TODO: Refactor this(use gem logic to make request or something else)

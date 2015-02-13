@@ -18,6 +18,16 @@ module Jira2Pivotal
         story.notes.create(args)
       end
 
+      def create_notes!(issue)
+        issue.comments.each do |comment|
+          begin     #TODO wtf?
+            story.add_note( author: comment.author['displayName'], text: "*Real Author: #{comment.author['displayName']}*\n\n#{comment.body}", noted_at: comment.created)
+          rescue Exception => e
+            story.add_note( author: comment.author['displayName'], text: "*Real Author: #{comment.author['displayName']}*\n\n#{comment.body}", noted_at: comment.created)
+          end
+        end
+      end
+
       def upload_attachment(filepath)
         story.upload_attachment(filepath)
       end
@@ -71,10 +81,6 @@ module Jira2Pivotal
 
       def jira_issue_id
         story.jira_url.split('/').last
-      end
-
-      def select_issue_by_jira_issue_id(issues)
-        issues.find { |issue| issue.attrs['key'] == jira_issue_id }
       end
 
       def is_bug?
