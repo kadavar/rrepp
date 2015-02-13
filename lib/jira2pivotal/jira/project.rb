@@ -59,6 +59,7 @@ module Jira2Pivotal
       end
 
       def load_unsynchronized_issues
+        binding.pry
         unsynchronized_issues = []
         issues = next_issues
 
@@ -99,7 +100,20 @@ module Jira2Pivotal
           issues = issues.count > per_page ? next_issues : []
         end
 
-        unsynchronized_issues
+        # unsynchronized_issues
+        split_issues_for_create_update(unsynchronized_issues)
+      end
+
+      def split_issues_for_create_update(issues)
+        result = { to_create: [], to_update: [] }
+        issues.each do |issue|
+          if issue.issue.attrs['fields']['customfield_10200'].present?
+            result[:to_create] << issue
+          else
+            result[:to_update] << issue
+          end
+        end
+        result
       end
 
       def find_issues(jql)

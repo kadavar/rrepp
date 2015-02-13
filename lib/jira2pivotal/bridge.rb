@@ -15,7 +15,7 @@ module Jira2Pivotal
 
     def sync!
       from_jira_to_pivotal!
-      from_pivotal_to_jira!
+      # from_pivotal_to_jira!
     end
 
     def from_pivotal_to_jira!
@@ -95,11 +95,19 @@ module Jira2Pivotal
       # Get all issues for the project from JIRA
       puts "Getting all the issues for #{@config['jira_project']}"
 
-      counter =  0
       issues = jira.unsynchronized_issues
 
       puts 'Find Issues: ', issues.count
       puts 'Start uploading to Pivotal Tracker'
+
+      import_counter = crate_pivotal_stories!(issues[:to_create])
+      update_counter = update_pivotal_stories!(issues[:to_update])
+
+      puts "Successfully imported #{import_counter} and updated #{update_counter} issues into Pivotal Tracker"
+    end
+
+    def crate_pivotal_stories!(issues)
+      counter =  0
 
       issues.each do |issue|
         putc '.'
@@ -144,7 +152,14 @@ module Jira2Pivotal
         end
       end
 
-      puts "Successfully imported #{counter} issues into Pivotal Tracker"
+      return counter
+    end
+
+    def update_pivotal_stories!(issues)
+      # TODO: Add logic
+      counter =  0
+
+      return counter
     end
   end
 end
