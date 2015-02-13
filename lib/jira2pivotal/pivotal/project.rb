@@ -65,7 +65,7 @@ module Jira2Pivotal
             end
 
             issue.add_marker_comment(story.url)
-            story.assign_to_jira_issue(issue.key, jira.url) #we should assign jira task only at the and to prevent recending comments and attaches back
+            story.assign_to_jira_issue(issue.key, @config.jira_url) #we should assign jira task only at the and to prevent recending comments and attaches back
 
             counter += 1
           end
@@ -77,12 +77,13 @@ module Jira2Pivotal
       def update_tasks!(issues)
         counter =  0
 
-        pivotal_stories = find_stories(issues)
+        pivotal_stories = find_stories_by(integration:'Jira')
 
         issues.each do |issue|
           putc '.'
 
-          story = select_task(pivotal_stories, issue)
+          pivotal_story = select_task(pivotal_stories, issue)
+          story = Story.new(@project, pivotal_story)
 
           puts 'Updates for comments'
           story.create_notes!(issue)
@@ -94,7 +95,7 @@ module Jira2Pivotal
       end
 
       def select_task(stories, issue)
-        stories.find { |story| story.jira_issue_id == issue.issue.attrs['key'] }
+        stories.find { |story| story.jira_url == "#{@config.jira_url}/browse/#{issue.key}" }
       end
 
       private
@@ -114,6 +115,10 @@ module Jira2Pivotal
 
       def usefull_stories
         @project.stories.all(story_type: %w(bug chore feature), state: %w(unstarted started finished delivered rejected))
+      end
+
+      def find_stories_by(attrs={})
+        @project.stories.all(attrs)
       end
     end
   end

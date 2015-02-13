@@ -59,7 +59,6 @@ module Jira2Pivotal
       end
 
       def load_unsynchronized_issues
-        binding.pry
         unsynchronized_issues = []
         issues = next_issues
 
@@ -94,7 +93,7 @@ module Jira2Pivotal
 
             issue.fetch
 
-            unsynchronized_issues << Issue.new(self, issue) unless already_scheduled?(issue)
+            unsynchronized_issues << Issue.new(self, issue) #unless already_scheduled?(issue)
           end
 
           issues = issues.count > per_page ? next_issues : []
@@ -108,9 +107,9 @@ module Jira2Pivotal
         result = { to_create: [], to_update: [] }
         issues.each do |issue|
           if issue.issue.attrs['fields']['customfield_10200'].present?
-            result[:to_create] << issue
-          else
             result[:to_update] << issue
+          else
+            result[:to_create] << issue
           end
         end
         result
@@ -138,7 +137,7 @@ module Jira2Pivotal
           #   We can't grab attachments because there is a bug in gem and it returns all attachments from project   #
           #*********************************************************************************************************#
 
-          story.assign_to_jira_issue(issue.issue.key, jira.url)
+          story.assign_to_jira_issue(issue.issue.key, url)
 
           counter += 1
         end

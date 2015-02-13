@@ -47,7 +47,9 @@ module Jira2Pivotal
       puts 'Start uploading to Pivotal Tracker'
 
       import_counter = pivotal.create_tasks!(issues[:to_create])
-      update_counter = pivotal.update_tasks!(issues[:to_update])
+      # Not finished yet
+      # Need more clarification
+      # update_counter = pivotal.update_tasks!(issues[:to_update])
 
       puts "Successfully imported #{import_counter} and updated #{update_counter} issues into Pivotal Tracker"
     end
