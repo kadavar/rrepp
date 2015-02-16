@@ -87,7 +87,7 @@ module Jira2Pivotal
       end
 
       def jira_issue_id
-        story.jira_url.split('/').last
+        story.jira_url.present? ? story.jira_url.split('/').last : nil
       end
 
       def is_bug?

@@ -18,6 +18,23 @@ module Jira2Pivotal
       from_pivotal_to_jira!
     end
 
+    def first_sync!
+      first_from_pivotal_to_jira!
+    end
+
+    def first_from_pivotal_to_jira!
+      stories = pivotal.unsynchronized_stories[:to_create]
+      issues = jira.unsynchronized_issues(options)[:to_update]
+
+      mapped_issues = map_issues_by_pivotal_url(issues)[0]
+      stories_to_update = stories_to_update(mapped_issues, stories)
+      puts "Pivotal stories need update: #{stories_to_update.count}"
+
+      pivotal_jira_connection(stories_to_update, issues, stories)
+      puts 'Successfully synchronized'
+    end
+
+
     def from_pivotal_to_jira!
       # Make connection with Jira
 
@@ -60,6 +77,32 @@ module Jira2Pivotal
       {
         custom_fields: jira.get_custom_fields
       }
+    end
+
+    private
+
+    def pivotal_jira_connection(stories_to_update, issues, stories)
+      stories_to_update.each do |key, value|
+        issue = issues.find  { |issue| issue.issue.key == key }
+        story = stories.find { |story| story.story.url == value }
+
+        story.assign_to_jira_issue(issue.issue.key, jira.url)
+      end
+    end
+
+    def stories_to_update(mapped_issues, stories)
+      result = Hash.new
+      stories.each do |story|
+        next if mapped_issues[story.story.url].nil?
+
+        result[mapped_issues[story.story.url]] = story.story.url if story.jira_issue_id != mapped_issues[story.story.url]
+      end
+      result
+    end
+
+    def map_issues_by_pivotal_url(issues)
+      pivotal_url_id = options[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
+      issues.map { |issue| { issue.issue.send(pivotal_url_id) => issue.issue.key } }
     end
   end
 end
