@@ -26,11 +26,11 @@ module Jira2Pivotal
 
       stories = pivotal.unsynchronized_stories
 
-      puts 'Find Stories: ', stories[:to_create].count + stories[:to_update].count
+      puts 'Needs to create: ', stories[:to_create].count
+      puts 'Needs to update: ', stories[:to_update].count
       puts 'Start uploading to Jira'
 
-      import_counter = jira.create_tasks!(stories[:to_create])
-      update_counter = jira.update_tasks!(stories[:to_update])
+      import_counter, update_counter = jira.sync!(stories, options)
 
       puts "Successfully imported #{import_counter} and updated #{update_counter} stories in Jira"
     end
@@ -41,17 +41,25 @@ module Jira2Pivotal
       # Get all issues for the project from JIRA
       puts "Getting all the issues for #{@config['jira_project']}"
 
-      issues = jira.unsynchronized_issues
+      issues = jira.unsynchronized_issues(options)
 
-      puts 'Find Issues: ', issues.count
+      puts 'Needs to create: ', issues[:to_create].count
+      puts 'Needs to update: ', issues[:to_update].count
       puts 'Start uploading to Pivotal Tracker'
 
-      import_counter = pivotal.create_tasks!(issues[:to_create])
+      import_counter = pivotal.create_tasks!(issues[:to_create], options)
       # Not finished yet
       # Need more clarification
       # update_counter = pivotal.update_tasks!(issues[:to_update])
+      update_counter = 0
 
       puts "Successfully imported #{import_counter} and updated #{update_counter} issues into Pivotal Tracker"
+    end
+
+    def options
+      {
+        custom_fields: jira.get_custom_fields
+      }
     end
   end
 end

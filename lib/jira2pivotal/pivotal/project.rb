@@ -29,16 +29,12 @@ module Jira2Pivotal
         @unsynchronized_stories ||= load_unsynchronized_stories
       end
 
-      def map_stories_by_jira_id(stories)
-        "(#{stories.map(&:jira_issue_id).join(', ')})"
-      end
-
-      def create_tasks!(issues)
+      def create_tasks!(issues, options)
+        @options = options
         counter =  0
 
         issues.each do |issue|
           putc '.'
-
           story = create_story(issue.to_pivotal)
 
           if story.present?
@@ -64,8 +60,9 @@ module Jira2Pivotal
               story.upload_attachment(attachment.to_path)
             end
 
-            issue.add_marker_comment(story.url)
+            # issue.add_marker_comment(story.url)
             story.assign_to_jira_issue(issue.key, @config.jira_url) #we should assign jira task only at the and to prevent recending comments and attaches back
+            issue.assign_to_pivotal_issue(story.url, @config.merge!(@options)) #we should add pivotal url to JIRA issue
 
             counter += 1
           end
@@ -106,11 +103,15 @@ module Jira2Pivotal
 
       # TODO Refactor 2 methods below
       def load_to_create_stories
-        usefull_stories.select { |story| story.jira_url.nil? }.map { |story| Story.new(@project, story, @config) }
+        usefull_stories.select { |story| (story.jira_url.nil? || story_ends_with_nil?(story)) }.map { |story| Story.new(@project, story, @config) }
       end
 
       def load_to_update_stories
-        usefull_stories.select { |story| !story.jira_url.nil? }.map { |story| Story.new(@project, story, @config) }
+        usefull_stories.select { |story| (!story.jira_url.nil? && !story_ends_with_nil?(story)) }.map { |story| Story.new(@project, story, @config) }
+      end
+
+      def story_ends_with_nil?(story)
+        story.jira_url.present? ? story.jira_url.split('/').last == 'nil' : true
       end
 
       def usefull_stories

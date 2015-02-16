@@ -40,21 +40,28 @@ module Jira2Pivotal
         story.update(jira_id: key, jira_url: url)
       end
 
-      def to_jira
+      def to_jira(custom_fields)
         attrs =
         {
           'summary'     => story.name,
           'description' => story.description,
           'issuetype'   => { 'id' => story_type_to_issue_type },
         }
+        attrs.merge!(custom_fields_attrs(custom_fields))
+      end
 
+      def custom_fields_attrs(custom_fields)
+        attrs = Hash.new
         # Custom fields in Jira
-        # Set ID in config.yml file
-        pivotal_url = @config['jira_custom_fields']['pivotal_url']
+        # Set Name in config.yml file
+        pivotal_url    = @config['jira_custom_fields']['pivotal_url']
         pivotal_points = @config['jira_custom_fields']['pivotal_points']
 
-        attrs["customfield_#{pivotal_url}"]    = story.url      if pivotal_url.present?
-        attrs["customfield_#{pivotal_points}"] = story.estimate if pivotal_points.present? && !is_bug?
+        pivotal_url_id    = custom_fields.key(pivotal_url)
+        pivotal_points_id = custom_fields.key(pivotal_points)
+
+        attrs[pivotal_url_id]    = story.url      if pivotal_url.present?
+        attrs[pivotal_points_id] = story.estimate if pivotal_points.present? && !is_bug?
         attrs
       end
 
