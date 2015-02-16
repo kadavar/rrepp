@@ -14,7 +14,7 @@ module Jira2Pivotal
     end
 
     def sync!
-      from_jira_to_pivotal!
+      # from_jira_to_pivotal!
       from_pivotal_to_jira!
     end
 
@@ -26,7 +26,7 @@ module Jira2Pivotal
       stories = pivotal.unsynchronized_stories[:to_create]
       issues = jira.unsynchronized_issues(options)[:to_update]
 
-      mapped_issues = map_issues_by_pivotal_url(issues)[0]
+      mapped_issues = map_issues_by_pivotal_url(issues).reduce Hash.new, :merge
       stories_to_update = stories_to_update(mapped_issues, stories)
       puts "Pivotal stories need update: #{stories_to_update.count}"
 
@@ -46,7 +46,6 @@ module Jira2Pivotal
       puts 'Needs to create: ', stories[:to_create].count
       puts 'Needs to update: ', stories[:to_update].count
       puts 'Start uploading to Jira'
-
       import_counter, update_counter = jira.sync!(stories, options)
 
       puts "Successfully imported #{import_counter} and updated #{update_counter} stories in Jira"
@@ -61,7 +60,7 @@ module Jira2Pivotal
       issues = jira.unsynchronized_issues(options)
 
       puts 'Needs to create: ', issues[:to_create].count
-      puts 'Needs to update: ', issues[:to_update].count
+      # puts 'Needs to update: ', issues[:to_update].count
       puts 'Start uploading to Pivotal Tracker'
 
       import_counter = pivotal.create_tasks!(issues[:to_create], options)
