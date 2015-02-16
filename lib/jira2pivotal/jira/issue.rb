@@ -37,7 +37,8 @@ module Jira2Pivotal
         # Becouse issues with Bug type doesn't have this field
         # And it cause an error while request
         if is_bug? && config.present?
-          attrs['fields'].except!("customfield_#{config['jira_custom_fields']['pivotal_points']}")
+          pivotal_story_points = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
+          attrs['fields'].except!(pivotal_story_points)
         end
 
         issue.save! attrs
@@ -136,6 +137,13 @@ module Jira2Pivotal
             nil
           end
         end
+      end
+
+      def assign_to_pivotal_issue(story_url, config)
+        pivotal_url_id = config[:custom_fields].key(config['jira_custom_fields']['pivotal_url'])
+        attributes = { 'fields' =>  { pivotal_url_id => story_url } }
+
+        save!(attributes, config)
       end
 
       private
