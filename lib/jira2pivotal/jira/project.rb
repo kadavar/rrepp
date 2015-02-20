@@ -18,8 +18,8 @@ module Jira2Pivotal
              site:         url,
              context_path: '',
              auth_type:    :basic,
-             use_ssl:      false,
-             #ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
+             # use_ssl:      false,
+             # ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
          })
       end
 
@@ -35,10 +35,15 @@ module Jira2Pivotal
         config.jira_url
       end
 
-      def build_issue(attributes)
+      def options_for_issue(issue=nil)
+        { client: build_api_client, project: project, issue: issue }
+      end
+
+      def build_issue(attributes, issue=nil)
         attributes = { 'fields' =>  { 'project' =>  { 'id' => project.id } }.merge(attributes) }
 
-        Issue.new @project, @client.Issue.build(attributes)
+        issue ||= issue.present? ? issue : @client.Issue.build(attributes)
+        return Issue.new(options_for_issue(issue)), attributes
       end
 
       def next_issues
@@ -53,7 +58,8 @@ module Jira2Pivotal
         end
       end
 
-      def unsynchronized_issues
+      def unsynchronized_issues(options)
+        @options = options
         @unsynchronized_issues ||= load_unsynchronized_issues
       end
 
@@ -92,16 +98,125 @@ module Jira2Pivotal
 
             issue.fetch
 
-            unsynchronized_issues << Issue.new(self, issue) unless already_scheduled?(issue)
+            unsynchronized_issues << Issue.new(options_for_issue(issue)) #unless already_scheduled?(issue)
           end
 
           issues = issues.count > per_page ? next_issues : []
         end
 
-        unsynchronized_issues
+        # unsynchronized_issues
+        split_issues_for_create_update(unsynchronized_issues)
+      end
+
+      def split_issues_for_create_update(issues)
+        pivotal_url_id = @options[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
+
+        result = { to_create: [], to_update: [] }
+        issues.each do |issue|
+          if issue.issue.attrs['fields'][pivotal_url_id].present?
+            result[:to_update] << issue
+          else
+            result[:to_create] << issue
+          end
+        end
+        result
+      end
+
+      def find_issues(jql)
+        response = JIRA::Resource::Issue.jql(@client, jql)
+      end
+
+      def sync!(stories, options)
+        @options = options
+
+        import_counter = create_tasks!(stories[:to_create])
+        update_counter = update_tasks!(stories[:to_update])
+
+        return import_counter, update_counter
+      end
+
+      def create_tasks!(stories)
+        counter = 0
+        puts 'Create new issues'
+
+        stories.each do |story|
+          putc '.'
+          issue, attributes = build_issue story.to_jira(@options[:custom_fields])
+
+          issue.save!(attributes, @config.merge!(@options))
+          issue.update_status!(story)
+          issue.create_notes!(story)
+          # issue.add_marker_comment(story.url)
+
+          #*********************************************************************************************************#
+          #   We can't grab attachments because there is a bug in gem and it returns all attachments from project   #
+          #*********************************************************************************************************#
+
+          story.assign_to_jira_issue(issue.issue.key, url)
+
+          counter += 1
+        end
+
+        return counter
+      end
+
+      def update_tasks!(stories)
+        counter = 0
+        puts 'Update exists issues'
+
+        incorrect_jira_ids, correct_jira_ids = check_deleted_issues_in_jira(stories.map(&:jira_issue_id))
+
+        cleaned_stories_count = remove_jira_id_from_pivotal(incorrect_jira_ids, stories)
+        jira_issues = find_issues("id in #{map_jira_ids_for_search(correct_jira_ids)}")
+
+        stories.each { |story| update_issue(story, jira_issues); counter += 1 }
+
+        return counter + cleaned_stories_count
+      end
+
+      def update_issue(story, jira_issues)
+        putc '.'
+
+        jira_issue = select_task(jira_issues, story)
+        return if jira_issue.nil?
+
+        issue, attributes = build_issue(story.to_jira(@options[:custom_fields]), jira_issue)
+
+        issue.save!(attributes, @config.merge!(@options))
+        issue.update_status!(story)
+      end
+
+      def select_task(issues, story)
+        issues.find { |issue| issue.key == story.jira_issue_id }
+      end
+
+      def get_custom_fields
+        issue ||= project.issue_with_name_expand
+        issue.names
       end
 
       private
+
+      def map_jira_ids_for_search(jira_ids)
+        "(#{jira_ids.join(', ')})"
+      end
+
+      def check_deleted_issues_in_jira(pivotal_jira_ids)
+        jira_project   = @config['jira_project']
+        jira_ids = find_issues("project = #{jira_project} AND 'Pivotal Tracker URL' is not EMPTY" )
+
+        correct_jira_ids   = jira_ids.map(&:key) & pivotal_jira_ids
+        incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+
+        return incorrect_jira_ids, correct_jira_ids
+      end
+
+      def remove_jira_id_from_pivotal(jira_ids, stories)
+        for_clean_stories = stories.select { |s| jira_ids.include?(s.jira_issue_id) }
+        for_clean_stories.each { |story| story.assign_to_jira_issue('nil', 'nil') }
+
+        return for_clean_stories.count
+      end
 
       def comment_text
         'A Pivotal Tracker story has been created for this Issue'
@@ -152,5 +267,11 @@ JIRA::Resource::Project.class_eval do
     json['issues'].map do |issue|
       client.Issue.build(issue)
     end
+  end
+
+  def issue_with_name_expand
+    response = client.get(client.options[:rest_base_path] + "/search?jql=project%3D'#{key}'&maxResults=1&expand=names")
+    json = self.class.parse_json(response.body)
+    client.Issue.build(json)
   end
 end

@@ -4,9 +4,10 @@ module Jira2Pivotal
 
       attr_accessor :project, :story
 
-      def initialize(project, story=nil)
+      def initialize(project, story=nil, config=nil)
         @project = project
         @story = story
+        @config = config
       end
 
       def notes
@@ -15,6 +16,16 @@ module Jira2Pivotal
 
       def add_note(args)
         story.notes.create(args)
+      end
+
+      def create_notes!(issue)
+        issue.comments.each do |comment|
+          begin     #TODO wtf?
+            add_note( author: comment.author['displayName'], text: "*Real Author: #{comment.author['displayName']}*\n\n#{comment.body}", noted_at: comment.created)
+          rescue Exception => e
+            add_note( author: comment.author['displayName'], text: "*Real Author: #{comment.author['displayName']}*\n\n#{comment.body}", noted_at: comment.created)
+          end
+        end
       end
 
       def upload_attachment(filepath)
@@ -29,22 +40,58 @@ module Jira2Pivotal
         story.update(jira_id: key, jira_url: url)
       end
 
-      def  to_jira
+      def to_jira(custom_fields)
+        attrs =
         {
           'summary'     => story.name,
           'description' => story.description,
-          'issuetype'   => { 'id' => story_type_to_issue_type }
+          'issuetype'   => { 'id' => story_type_to_issue_type },
         }
+        attrs.merge!(custom_fields_attrs(custom_fields))
+      end
+
+      def custom_fields_attrs(custom_fields)
+        attrs = Hash.new
+        # Custom fields in Jira
+        # Set Name in config.yml file
+        pivotal_url    = @config['jira_custom_fields']['pivotal_url']
+        pivotal_points = @config['jira_custom_fields']['pivotal_points']
+
+        pivotal_url_id    = custom_fields.key(pivotal_url)
+        pivotal_points_id = custom_fields.key(pivotal_points)
+
+        attrs[pivotal_url_id]    = story.url      if pivotal_url.present?
+        attrs[pivotal_points_id] = story.estimate if pivotal_points.present? && !is_bug?
+        attrs
       end
 
       def story_type_to_issue_type
         type_map = {
             'bug'     => '1',
             'feature' => '2',
-            'chore'   => '2'
+            'chore'   => '10005'
         }
 
         type_map[story.story_type]
+      end
+
+      def story_status_to_issue_status
+        status_map = {
+          'started'   => 'Start Progress',
+          'unstarted' => 'Stop Progress',
+          'delivered' => 'Resolve Issue',
+          'rejected'  => 'Reopen Issue'
+        }
+
+        status_map[story.current_state]
+      end
+
+      def jira_issue_id
+        story.jira_url.present? ? story.jira_url.split('/').last : nil
+      end
+
+      def is_bug?
+        story.story_type == 'bug'
       end
     end
   end

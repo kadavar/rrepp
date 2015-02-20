@@ -4,9 +4,10 @@ module Jira2Pivotal
 
       attr_accessor :issue, :project
 
-      def initialize(project, issue=nil)
-        @project = project
-        @issue = issue
+      def initialize(options={})
+        @client  = options[:client]
+        @project = options[:project]
+        @issue   = options[:issue]
       end
 
       def comments
@@ -32,8 +33,20 @@ module Jira2Pivotal
         issue.key
       end
 
-      def save!
-        issue.save! issue.attrs
+      def save!(attrs, config)
+        # Remove pivotal_points field if type Bug
+        # Becouse issues with Bug type doesn't have this field
+        # And it cause an error while request
+        if is_bug? && config.present?
+          pivotal_story_points = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
+          attrs['fields'].except!(pivotal_story_points)
+        end
+
+        issue.save! attrs
+      end
+
+      def is_bug?
+        issue.attrs['fields']['issuetype']['name'] == 'Bug'
       end
 
       def to_pivotal
@@ -103,6 +116,64 @@ module Jira2Pivotal
 
       def comment_text
         'A Pivotal Tracker story has been created for this Issue'
+      end
+
+      def update_status!(story)
+        # Jira give only several status options to select
+        # So if we try to change status that not in list
+        # Status would not change
+        set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
+      end
+
+      def create_notes!(story)
+        story.notes.each do |note|
+          begin
+            comment = build_comment
+            if note.text.present? # pivotal add empty note for attachment
+              comment.save({ 'body' => "#{note.author} added a comment in Pivotal Tracker:: \n\n #{note.text} \n View this Pivotal Tracker story: #{story.url}" })
+            end
+          rescue Exception => e
+            nil
+          end
+        end
+      end
+
+      def assign_to_pivotal_issue(story_url, config)
+        pivotal_url_id = config[:custom_fields].key(config['jira_custom_fields']['pivotal_url'])
+        attributes = { 'fields' =>  { pivotal_url_id => story_url } }
+
+        save!(attributes, config)
+      end
+
+      private
+
+      # TODO: Refactor this(use gem logic to make request or something else)
+      def set_issue_status!(args)
+        http_method = :post
+
+        response = @client.send(http_method, transitions_api_url, args.to_json)
+      end
+
+      # TODO: Refactor this(use gem logic to make request or something else)
+      def get_available_statuses
+        http_method = :get
+
+        response = @client.send(http_method, transitions_api_url)
+
+        hash_of_data = JSON.parse(response.body)
+        transitions = hash_of_data['transitions'].map { |t| {t['name'] => t['id']} }.reduce Hash.new, :merge
+      end
+
+      def transitions_api_url
+        "/rest/api/2/issue/#{issue.id}/transitions"
+      end
+
+      def can_change_status?(story)
+        get_available_statuses.keys.include?(story.story_status_to_issue_status)
+      end
+
+      def args_for_change_status(story)
+        args = {'update' => {}, 'transition' => get_available_statuses[story.story_status_to_issue_status] }
       end
     end
   end

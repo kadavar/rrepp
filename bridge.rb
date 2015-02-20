@@ -78,8 +78,6 @@ issues = jira_project.issues()
 
 DT.p 'Issues: ', issues.count
 
-binding.pry
-
 if issues.count > 0
 
   issues.each do |issue|

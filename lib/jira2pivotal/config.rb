@@ -19,7 +19,11 @@ module Jira2Pivotal
     end
 
     def jira_url
-      "#{@config['jira_uri_scheme']}://#{@config['jira_host']}:#{@config['jira_port']}"
+      "#{@config['jira_uri_scheme']}://#{@config['jira_host']}"
+    end
+
+    def merge!(attrs)
+      @config.merge!(attrs)
     end
   end
 end

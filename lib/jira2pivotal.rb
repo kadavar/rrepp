@@ -1,7 +1,4 @@
-$: << File.expand_path(File.dirname(__FILE__))
-
-#$LOAD_PATH << './jira4r/lib'
-$: << './jira4r/lib'
+$LOAD_PATH << File.expand_path(File.dirname(__FILE__))
 
 require 'active_support/inflector'
 ActiveSupport::Inflector.inflections do |inflector|
