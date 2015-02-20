@@ -4,6 +4,7 @@ gem 'jira-ruby'
 gem 'pivotal-tracker'
 gem 'certified'
 gem 'thor'
+gem 'colorize'
 
 group :development do
   gem 'rails_dt'
