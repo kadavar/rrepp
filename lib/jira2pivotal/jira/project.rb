@@ -137,7 +137,7 @@ module Jira2Pivotal
 
       def create_tasks!(stories)
         counter = 0
-        puts 'Create new issues'
+        puts "\nCreate new issues"
 
         stories.each do |story|
           putc '.'
@@ -162,7 +162,7 @@ module Jira2Pivotal
 
       def update_tasks!(stories)
         counter = 0
-        puts 'Update exists issues'
+        puts "\nUpdate exists issues"
 
         incorrect_jira_ids, correct_jira_ids = check_deleted_issues_in_jira(stories.map(&:jira_issue_id))
 

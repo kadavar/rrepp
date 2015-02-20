@@ -14,6 +14,7 @@ require 'yaml'
 require 'rails_dt'
 require 'pry'
 require 'pry-nav'
+require 'colorize'
 
 require 'jira2pivotal/base'
 require 'jira2pivotal/config'

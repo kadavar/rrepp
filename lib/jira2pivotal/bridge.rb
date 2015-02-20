@@ -14,41 +14,37 @@ module Jira2Pivotal
     end
 
     def sync!
+      connect_jira_to_pivotal!
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
     end
 
-    def first_sync!
-      first_from_pivotal_to_jira!
-    end
-
-    def first_from_pivotal_to_jira!
+    def connect_jira_to_pivotal!
       stories = pivotal.unsynchronized_stories[:to_create]
       issues = jira.unsynchronized_issues(options)[:to_update]
 
       mapped_issues = map_issues_by_pivotal_url(issues).reduce Hash.new, :merge
       stories_to_update = stories_to_update(mapped_issues, stories)
-      puts "Pivotal stories need update: #{stories_to_update.count}"
+      puts "\nPivotal stories need update: #{stories_to_update.count}".blue
 
       pivotal_jira_connection(stories_to_update, issues, stories)
-      puts 'Successfully synchronized'
+      puts "\nSuccessfully synchronized".green
     end
-
 
     def from_pivotal_to_jira!
       # Make connection with Jira
 
       # Get all stories for the project from Pivotal Tracker
-      puts "Getting all stories from #{@config['tracker_project_id']}"
+      puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project\n"
 
       stories = pivotal.unsynchronized_stories
 
-      puts 'Needs to create: ', stories[:to_create].count
-      puts 'Needs to update: ', stories[:to_update].count
-      puts 'Start uploading to Jira'
+      puts "Needs to create: #{stories[:to_create].count}".blue
+      puts "Needs to update: #{stories[:to_update].count}".blue
+      puts "\nStart uploading to Jira"
       import_counter, update_counter = jira.sync!(stories, options)
 
-      puts "Successfully imported #{import_counter} and updated #{update_counter} stories in Jira"
+      puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end
 
     def from_jira_to_pivotal!
@@ -69,7 +65,7 @@ module Jira2Pivotal
       # update_counter = pivotal.update_tasks!(issues[:to_update])
       update_counter = 0
 
-      puts "Successfully imported #{import_counter} and updated #{update_counter} issues into Pivotal Tracker"
+      puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} issues into Pivotal Tracker"
     end
 
     def options

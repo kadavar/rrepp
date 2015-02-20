@@ -43,11 +43,17 @@ module Jira2Pivotal
       def to_jira(custom_fields)
         attrs =
         {
-          'summary'     => story.name,
-          'description' => story.description,
-          'issuetype'   => { 'id' => story_type_to_issue_type },
+          'summary'      => story.name,
+          'description'  => story.description,
+          'issuetype'    => { 'id' => story_type_to_issue_type },
         }
+        attrs['timetracking'] = { 'originalEstimate' => "#{checked_estimate}h" } if unstarted?
         attrs.merge!(custom_fields_attrs(custom_fields))
+      end
+
+      def checked_estimate
+        estimate = story.estimate.to_i
+        estimate < 0 ? 0 : estimate
       end
 
       def custom_fields_attrs(custom_fields)
@@ -60,8 +66,8 @@ module Jira2Pivotal
         pivotal_url_id    = custom_fields.key(pivotal_url)
         pivotal_points_id = custom_fields.key(pivotal_points)
 
-        attrs[pivotal_url_id]    = story.url      if pivotal_url.present?
-        attrs[pivotal_points_id] = story.estimate if pivotal_points.present? && !is_bug?
+        attrs[pivotal_url_id]    = story.url        if pivotal_url.present?
+        attrs[pivotal_points_id] = checked_estimate unless is_bug?
         attrs
       end
 
@@ -88,6 +94,10 @@ module Jira2Pivotal
 
       def jira_issue_id
         story.jira_url.present? ? story.jira_url.split('/').last : nil
+      end
+
+      def unstarted?
+        story.current_state == 'unstarted'
       end
 
       def is_bug?
