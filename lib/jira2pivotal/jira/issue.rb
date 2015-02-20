@@ -4,9 +4,10 @@ module Jira2Pivotal
 
       attr_accessor :issue, :project
 
-      def initialize(project, issue=nil)
-        @project = project
-        @issue = issue
+      def initialize(options={})
+        @client  = options[:client]
+        @project = options[:project]
+        @issue   = options[:issue]
       end
 
       def comments
@@ -32,7 +33,7 @@ module Jira2Pivotal
         issue.key
       end
 
-      def save!(attrs, config=nil)
+      def save!(attrs, config)
         # Remove pivotal_points field if type Bug
         # Becouse issues with Bug type doesn't have this field
         # And it cause an error while request
@@ -117,9 +118,7 @@ module Jira2Pivotal
         'A Pivotal Tracker story has been created for this Issue'
       end
 
-      def update_status!(client, story)
-        @client = client
-
+      def update_status!(story)
         # Jira give only several status options to select
         # So if we try to change status that not in list
         # Status would not change
@@ -151,20 +150,22 @@ module Jira2Pivotal
       # TODO: Refactor this(use gem logic to make request or something else)
       def set_issue_status!(args)
         http_method = :post
-        url = "/rest/api/2/issue/#{issue.id}/transitions"
 
-        response = @client.send(http_method, url, args.to_json)
+        response = @client.send(http_method, transitions_api_url, args.to_json)
       end
 
       # TODO: Refactor this(use gem logic to make request or something else)
       def get_available_statuses
         http_method = :get
-        url = "/rest/api/2/issue/#{issue.id}/transitions"
 
-        response = @client.send(http_method, url)
+        response = @client.send(http_method, transitions_api_url)
 
         hash_of_data = JSON.parse(response.body)
         transitions = hash_of_data['transitions'].map { |t| {t['name'] => t['id']} }.reduce Hash.new, :merge
+      end
+
+      def transitions_api_url
+        "/rest/api/2/issue/#{issue.id}/transitions"
       end
 
       def can_change_status?(story)

@@ -35,11 +35,15 @@ module Jira2Pivotal
         config.jira_url
       end
 
+      def options_for_issue(issue=nil)
+        { client: build_api_client, project: project, issue: issue }
+      end
+
       def build_issue(attributes, issue=nil)
         attributes = { 'fields' =>  { 'project' =>  { 'id' => project.id } }.merge(attributes) }
 
-        issue = issue.present? ? issue : @client.Issue.build(attributes)
-        return Issue.new(@project, issue), attributes
+        issue ||= issue.present? ? issue : @client.Issue.build(attributes)
+        return Issue.new(options_for_issue(issue)), attributes
       end
 
       def next_issues
@@ -94,7 +98,7 @@ module Jira2Pivotal
 
             issue.fetch
 
-            unsynchronized_issues << Issue.new(self, issue) #unless already_scheduled?(issue)
+            unsynchronized_issues << Issue.new(options_for_issue(issue)) #unless already_scheduled?(issue)
           end
 
           issues = issues.count > per_page ? next_issues : []
@@ -140,7 +144,7 @@ module Jira2Pivotal
           issue, attributes = build_issue story.to_jira(@options[:custom_fields])
 
           issue.save!(attributes, @config.merge!(@options))
-          issue.update_status!(build_api_client, story)
+          issue.update_status!(story)
           issue.create_notes!(story)
           # issue.add_marker_comment(story.url)
 
@@ -178,8 +182,8 @@ module Jira2Pivotal
 
         issue, attributes = build_issue(story.to_jira(@options[:custom_fields]), jira_issue)
 
-        issue.save!(attributes, @config)
-        issue.update_status!(build_api_client, story)
+        issue.save!(attributes, @config.merge!(@options))
+        issue.update_status!(story)
       end
 
       def select_task(issues, story)
