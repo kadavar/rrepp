@@ -15,19 +15,16 @@ module Jira2Pivotal
 
     def sync!
       connect_jira_to_pivotal!
+      # Right now flow jira -> pivotal is disabled
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
     end
 
     def connect_jira_to_pivotal!
       stories = pivotal.unsynchronized_stories[:to_create]
-      issues = jira.unsynchronized_issues(options)[:to_update]
+      issues = jira.unsynchronized_issues[:to_update]
 
-      mapped_issues = map_issues_by_pivotal_url(issues).reduce Hash.new, :merge
-      stories_to_update = stories_to_update(mapped_issues, stories)
-      puts "\nPivotal stories need update: #{stories_to_update.count}".blue
-
-      pivotal_jira_connection(stories_to_update, issues, stories)
+      pivotal_jira_connection(issues, stories)
       puts "\nSuccessfully synchronized".green
     end
 
@@ -35,14 +32,23 @@ module Jira2Pivotal
       # Make connection with Jira
 
       # Get all stories for the project from Pivotal Tracker
-      puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project\n"
-
-      stories = pivotal.unsynchronized_stories
-
-      puts "Needs to create: #{stories[:to_create].count}".blue
-      puts "Needs to update: #{stories[:to_update].count}".blue
+      puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project"
+      puts "Before update".light_blue
+      puts "\nNeeds to create: #{pivotal.unsynchronized_stories[:to_create].count}".blue
+      puts "Needs to update: #{pivotal.unsynchronized_stories[:to_update].count}".blue
       puts "\nStart uploading to Jira"
-      import_counter, update_counter = jira.sync!(stories, options)
+
+      update_counter = jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
+
+      # After update issues and stories grep pivotal stories again
+      # because some of them might be updated
+      stories = pivotal.reload_unsynchronized_stories
+
+      puts "\nAfter update".light_blue
+      puts "\nNeeds to create: #{stories[:to_create].count}".blue
+
+      import_counter = jira.create_sub_task_for_invosed_issues!(stories[:to_create])
+      import_counter += jira.create_tasks!(stories[:to_create])
 
       puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end
@@ -53,13 +59,11 @@ module Jira2Pivotal
       # Get all issues for the project from JIRA
       puts "Getting all the issues for #{@config['jira_project']}"
 
-      issues = jira.unsynchronized_issues(options)
-
-      puts 'Needs to create: ', issues[:to_create].count
+      puts 'Needs to create: ', jira.unsynchronized_issues[:to_create].count
       # puts 'Needs to update: ', issues[:to_update].count
       puts 'Start uploading to Pivotal Tracker'
 
-      import_counter = pivotal.create_tasks!(issues[:to_create], options)
+      import_counter = pivotal.create_tasks!(jira.unsynchronized_issues[:to_create], options)
       # Not finished yet
       # Need more clarification
       # update_counter = pivotal.update_tasks!(issues[:to_update])
@@ -70,14 +74,16 @@ module Jira2Pivotal
 
     def options
       {
-        custom_fields: jira.get_custom_fields
+        custom_fields: jira.issue_custom_fields
       }
     end
 
     private
 
-    def pivotal_jira_connection(stories_to_update, issues, stories)
-      stories_to_update.each do |key, value|
+    def pivotal_jira_connection(issues, stories)
+      mapped_issues = map_issues_by_pivotal_url(issues).reduce Hash.new, :merge
+
+      stories_to_update(mapped_issues, stories).each do |key, value|
         issue = issues.find  { |issue| issue.issue.key == key }
         story = stories.find { |story| story.story.url == value }
 
@@ -92,6 +98,8 @@ module Jira2Pivotal
 
         result[mapped_issues[story.story.url]] = story.story.url if story.jira_issue_id != mapped_issues[story.story.url]
       end
+      puts "\nPivotal stories need update: #{result.count}".blue
+
       result
     end
 
