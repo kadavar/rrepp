@@ -24,11 +24,7 @@ module Jira2Pivotal
       stories = pivotal.unsynchronized_stories[:to_create]
       issues = jira.unsynchronized_issues[:to_update]
 
-      mapped_issues = map_issues_by_pivotal_url(issues).reduce Hash.new, :merge
-      stories_to_update = stories_to_update(mapped_issues, stories)
-      puts "\nPivotal stories need update: #{stories_to_update.count}".blue
-
-      pivotal_jira_connection(stories_to_update, issues, stories)
+      pivotal_jira_connection(issues, stories)
       puts "\nSuccessfully synchronized".green
     end
 
@@ -42,7 +38,17 @@ module Jira2Pivotal
       puts "Needs to update: #{pivotal.unsynchronized_stories[:to_update].count}".blue
       puts "\nStart uploading to Jira"
 
-      import_counter, update_counter = jira.sync!(pivotal.unsynchronized_stories, pivotal)
+      update_counter = jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
+
+      # After update issues and stories grep pivotal stories again
+      # because some of them might be updated
+      stories = pivotal.reload_unsynchronized_stories
+
+      puts "\nAfter update".light_blue
+      puts "\nNeeds to create: #{stories[:to_create].count}".blue
+
+      import_counter = jira.create_sub_task_for_invosed_issues!(stories[:to_create])
+      import_counter += jira.create_tasks!(stories[:to_create])
 
       puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end
@@ -68,14 +74,16 @@ module Jira2Pivotal
 
     def options
       {
-        custom_fields: jira.get_custom_fields
+        custom_fields: jira.issue_custom_fields
       }
     end
 
     private
 
-    def pivotal_jira_connection(stories_to_update, issues, stories)
-      stories_to_update.each do |key, value|
+    def pivotal_jira_connection(issues, stories)
+      mapped_issues = map_issues_by_pivotal_url(issues).reduce Hash.new, :merge
+
+      stories_to_update(mapped_issues, stories).each do |key, value|
         issue = issues.find  { |issue| issue.issue.key == key }
         story = stories.find { |story| story.story.url == value }
 
@@ -90,6 +98,8 @@ module Jira2Pivotal
 
         result[mapped_issues[story.story.url]] = story.story.url if story.jira_issue_id != mapped_issues[story.story.url]
       end
+      puts "\nPivotal stories need update: #{result.count}".blue
+
       result
     end
 

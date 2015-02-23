@@ -9,6 +9,8 @@ module Jira2Pivotal
         @start_index = 0
 
         build_api_client
+
+        @config.merge!(custom_fields: issue_custom_fields)
       end
 
       def build_api_client
@@ -63,8 +65,6 @@ module Jira2Pivotal
       end
 
       def load_unsynchronized_issues
-        get_custom_fields
-
         unsynchronized_issues = []
         issues = next_issues
 
@@ -124,25 +124,6 @@ module Jira2Pivotal
 
       def find_issues(jql)
         response = JIRA::Resource::Issue.jql(@client, jql)
-      end
-
-      def sync!(stories, pivotal)
-        get_custom_fields
-
-        update_counter = update_tasks!(stories[:to_update])
-
-        # After update issues and stories grep pivotal stories again
-        # because some of them might be updated
-        stories = pivotal.reload_unsynchronized_stories
-
-        puts "\nAfter update".light_blue
-        puts "\nNeeds to create: #{stories[:to_create].count}".blue
-        puts 'Needs to update: 0'.blue
-
-        import_counter = create_sub_task_for_invosed_issues!(stories[:to_create])
-        import_counter += create_tasks!(stories[:to_create])
-
-        return import_counter, update_counter
       end
 
       def create_tasks!(stories)
@@ -247,10 +228,8 @@ module Jira2Pivotal
         issues.find { |issue| issue.key == story.jira_issue_id }
       end
 
-      def get_custom_fields
+      def issue_custom_fields
         @issue ||= project.issue_with_name_expand
-        @config.merge!(custom_fields: @issue.names)
-
         @issue.names
       end
 
