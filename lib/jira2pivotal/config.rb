@@ -7,11 +7,11 @@ module Jira2Pivotal
         project_options = @config.delete(project_name)
         @config.merge!(project_options) unless project_options.nil?
 
-        say("Jira user: #{@config['jira_login']}")
-        @config['jira_password'] = ask('Jira password: ') { |q| q.echo = 'x' }
+        say("Jira User: #{@config['jira_login']}")
+        @config['jira_password'] = ask('Jira Password: ') { |q| q.echo = 'x' }
 
         say("Pivotal Requester: #{@config['tracker_requester']}") { |q| q.echo = 'x'}
-        @config['tracker_token'] = ask('Pivotal tracker api: ')
+        @config['tracker_token'] = ask('Pivotaltracker API token: ')
 
         @config
       else
