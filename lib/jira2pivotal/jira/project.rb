@@ -63,7 +63,7 @@ module Jira2Pivotal
       end
 
       def load_unsynchronized_issues
-         get_custom_fields
+        get_custom_fields
 
         unsynchronized_issues = []
         issues = next_issues
