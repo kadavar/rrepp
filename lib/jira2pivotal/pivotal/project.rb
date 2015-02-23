@@ -29,6 +29,10 @@ module Jira2Pivotal
         @unsynchronized_stories ||= load_unsynchronized_stories
       end
 
+      def reload_unsynchronized_stories
+        load_unsynchronized_stories
+      end
+
       def create_tasks!(issues, options)
         @options = options
         counter =  0

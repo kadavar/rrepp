@@ -36,14 +36,16 @@ module Jira2Pivotal
       # Make connection with Jira
 
       # Get all stories for the project from Pivotal Tracker
-      puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project\n"
+      puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project"
 
       stories = pivotal.unsynchronized_stories
 
-      puts "Needs to create: #{stories[:to_create].count}".blue
+      puts "Before update".light_blue
+      puts "\nNeeds to create: #{stories[:to_create].count}".blue
       puts "Needs to update: #{stories[:to_update].count}".blue
       puts "\nStart uploading to Jira"
-      import_counter, update_counter = jira.sync!(stories)
+
+      import_counter, update_counter = jira.sync!(stories, pivotal)
 
       puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end

@@ -44,8 +44,8 @@ module Jira2Pivotal
         # Becouse issues with Bug and Sub-task type doesn't have this field
         # And it cause an error while request
         # Also remove issue-type for sub-task because it can't be changed
-        
-        if (is_bug? || is_subtask?) && config.present? 
+
+        if (is_bug? || is_subtask?) && config.present?
           pivotal_story_points = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
           attrs['fields'].except!(pivotal_story_points)
           attrs['fields'].except!('issuetype') if is_subtask?
@@ -53,11 +53,11 @@ module Jira2Pivotal
       end
 
       def is_bug?
-        issue.attrs['fields']['issuetype']['name'] == 'Bug'
+        issue.fields['issuetype']['name'] == 'Bug'
       end
 
       def is_subtask?
-        issue.attrs['fields']['issuetype']['name'] == 'Sub-task'
+        issue.fields['issuetype']['name'] == 'Sub-task'
       end
 
       def to_pivotal

@@ -126,12 +126,21 @@ module Jira2Pivotal
         response = JIRA::Resource::Issue.jql(@client, jql)
       end
 
-      def sync!(stories)
+      def sync!(stories, pivotal)
         get_custom_fields
 
         update_counter = update_tasks!(stories[:to_update])
-        update_counter += create_sub_task_for_invosed_issues!(stories[:to_create])
-        import_counter = create_tasks!(stories[:to_create])
+
+        # After update issues and stories grep pivotal stories again
+        # because some of them might be updated
+        stories = pivotal.reload_unsynchronized_stories
+
+        puts "\nAfter update".light_blue
+        puts "\nNeeds to create: #{stories[:to_create].count}".blue
+        puts 'Needs to update: 0'.blue
+
+        import_counter = create_sub_task_for_invosed_issues!(stories[:to_create])
+        import_counter += create_tasks!(stories[:to_create])
 
         return import_counter, update_counter
       end
@@ -172,7 +181,7 @@ module Jira2Pivotal
 
         stories.each { |story| update_issue!(story, jira_issues); counter += 1 }
 
-        return counter + cleaned_stories_count
+        return counter
       end
 
       def create_sub_task_for_invosed_issues!(stories)
@@ -218,7 +227,7 @@ module Jira2Pivotal
         putc '.'
 
         attributes =
-          { 'parent' => { 'id' => issue.id },
+          { 'parent' => { 'id' => get_parent_id(issue) },
             'summary' => issue.fields['summary'],
             'issuetype' => {'id' => '5'},
             'description' => issue.fields['description'],
@@ -228,6 +237,11 @@ module Jira2Pivotal
         issue, attrs = build_issue(attributes)
         issue.save!(attrs, @config)
         issue
+      end
+
+      def get_parent_id(issue)
+        j2p_issue, attrs = build_issue({}, issue)
+        j2p_issue.is_subtask? ? issue.fields['parent']['id'] : issue.id
       end
 
       def select_task(issues, story)
