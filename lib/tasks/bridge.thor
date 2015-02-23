@@ -2,7 +2,7 @@ require File.expand_path('../../../lib/jira2pivotal.rb', __FILE__)
 
 class Bridge < Thor
   desc 'sync', 'sync stories and issues'
-  method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_config/config.yml'
+  method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_configs/config.yml'
   method_option :project, aliases: '-p', desc: 'Project name from config file', required: true
   def sync
     bridge = init_bridge

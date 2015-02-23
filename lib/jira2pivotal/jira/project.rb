@@ -196,6 +196,7 @@ module Jira2Pivotal
           story = stories.find { |story| story.url == issue.send(jira_pivotal_field) }
 
           next unless story.present?
+          putc '.'
 
           subtask = create_sub_task!(issue)
           story.assign_to_jira_issue(subtask.key, url)
@@ -224,10 +225,8 @@ module Jira2Pivotal
       end
 
       def create_sub_task!(issue)
-        putc '.'
-
         attributes =
-          { 'parent' => { 'id' => get_parent_id(issue) },
+          { 'parent' => { 'id' => parent_id_for(issue) },
             'summary' => issue.fields['summary'],
             'issuetype' => {'id' => '5'},
             'description' => issue.fields['description'],
@@ -239,7 +238,7 @@ module Jira2Pivotal
         issue
       end
 
-      def get_parent_id(issue)
+      def parent_id_for(issue)
         j2p_issue, attrs = build_issue({}, issue)
         j2p_issue.is_subtask? ? issue.fields['parent']['id'] : issue.id
       end

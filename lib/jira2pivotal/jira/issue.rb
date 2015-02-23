@@ -36,7 +36,7 @@ module Jira2Pivotal
       def save!(attrs, config)
         remove_not_saveable_fields(attrs, config)
 
-        issue.save! attrs
+        issue.save!(attrs)
       end
 
       def remove_not_saveable_fields(attrs, config)

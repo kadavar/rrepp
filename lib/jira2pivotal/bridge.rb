@@ -15,7 +15,7 @@ module Jira2Pivotal
 
     def sync!
       connect_jira_to_pivotal!
-      # Right now we dont use this flow
+      # Right now flow jira -> pivotal is disabled
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
     end
@@ -37,15 +37,12 @@ module Jira2Pivotal
 
       # Get all stories for the project from Pivotal Tracker
       puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project"
-
-      stories = pivotal.unsynchronized_stories
-
       puts "Before update".light_blue
-      puts "\nNeeds to create: #{stories[:to_create].count}".blue
-      puts "Needs to update: #{stories[:to_update].count}".blue
+      puts "\nNeeds to create: #{pivotal.unsynchronized_stories[:to_create].count}".blue
+      puts "Needs to update: #{pivotal.unsynchronized_stories[:to_update].count}".blue
       puts "\nStart uploading to Jira"
 
-      import_counter, update_counter = jira.sync!(stories, pivotal)
+      import_counter, update_counter = jira.sync!(pivotal.unsynchronized_stories, pivotal)
 
       puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end
@@ -56,13 +53,11 @@ module Jira2Pivotal
       # Get all issues for the project from JIRA
       puts "Getting all the issues for #{@config['jira_project']}"
 
-      issues = jira.unsynchronized_issues
-
-      puts 'Needs to create: ', issues[:to_create].count
+      puts 'Needs to create: ', jira.unsynchronized_issues[:to_create].count
       # puts 'Needs to update: ', issues[:to_update].count
       puts 'Start uploading to Pivotal Tracker'
 
-      import_counter = pivotal.create_tasks!(issues[:to_create], options)
+      import_counter = pivotal.create_tasks!(jira.unsynchronized_issues[:to_create], options)
       # Not finished yet
       # Need more clarification
       # update_counter = pivotal.update_tasks!(issues[:to_update])
