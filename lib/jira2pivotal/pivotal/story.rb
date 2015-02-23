@@ -41,14 +41,25 @@ module Jira2Pivotal
       end
 
       def to_jira(custom_fields)
+        description = replace_image_tag
+
         attrs =
         {
           'summary'      => story.name,
-          'description'  => story.description,
+          'description'  => description,
           'issuetype'    => { 'id' => story_type_to_issue_type },
         }
         attrs['timetracking'] = { 'originalEstimate' => "#{make_estimate_positive}h" } if unstarted?
         attrs.merge!(custom_fields_attrs(custom_fields))
+      end
+
+      def replace_image_tag
+        story.description.gsub(regexp_for_image_tag_replace, '!\1!')
+      end
+
+      def regexp_for_image_tag_replace
+        #Match ![some_title](http://some.site.com/some_imge.png)
+        /\!\[\w*\]\(([\w\p{P}\p{S}]+)\)/u
       end
 
       def make_estimate_positive
