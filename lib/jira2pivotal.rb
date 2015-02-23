@@ -15,6 +15,8 @@ require 'rails_dt'
 require 'pry'
 require 'pry-nav'
 require 'colorize'
+require 'rufus-scheduler'
+require 'highline/import'
 
 require 'jira2pivotal/base'
 require 'jira2pivotal/config'

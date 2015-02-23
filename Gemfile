@@ -5,6 +5,8 @@ gem 'pivotal-tracker'
 gem 'certified'
 gem 'thor'
 gem 'colorize'
+gem 'highline'
+gem 'rufus-scheduler'
 
 group :development do
   gem 'rails_dt'

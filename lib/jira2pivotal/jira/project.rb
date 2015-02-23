@@ -44,7 +44,7 @@ module Jira2Pivotal
       def build_issue(attributes, issue=nil)
         attributes = { 'fields' =>  { 'project' =>  { 'id' => project.id } }.merge(attributes) }
 
-        issue ||= issue.present? ? issue : @client.Issue.build(attributes)
+        issue = issue.present? ? issue : @client.Issue.build(attributes)
         return Issue.new(options_for_issue(issue)), attributes
       end
 

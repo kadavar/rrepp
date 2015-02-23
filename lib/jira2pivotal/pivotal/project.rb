@@ -26,10 +26,6 @@ module Jira2Pivotal
       end
 
       def unsynchronized_stories
-        @unsynchronized_stories ||= load_unsynchronized_stories
-      end
-
-      def reload_unsynchronized_stories
         load_unsynchronized_stories
       end
 

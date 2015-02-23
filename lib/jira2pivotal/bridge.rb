@@ -42,7 +42,7 @@ module Jira2Pivotal
 
       # After update issues and stories grep pivotal stories again
       # because some of them might be updated
-      stories = pivotal.reload_unsynchronized_stories
+      stories = pivotal.unsynchronized_stories
 
       puts "\nAfter update".light_blue
       puts "\nNeeds to create: #{stories[:to_create].count}".blue
