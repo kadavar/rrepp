@@ -110,11 +110,10 @@ module Jira2Pivotal
       end
 
       def split_issues_for_create_update(issues)
-        pivotal_url_id = @config[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
-
         result = { to_create: [], to_update: [] }
+
         issues.each do |issue|
-          if issue.issue.attrs['fields'][pivotal_url_id].present?
+          if issue.issue.attrs['fields'][jira_pivotal_field].present?
             result[:to_update] << issue
           else
             result[:to_create] << issue
@@ -179,7 +178,7 @@ module Jira2Pivotal
       def create_sub_task_for_invosed_issues!(stories)
         story_urls = stories.map{ |story| story.story.url }
         jira_issues = find_issues("project=#{@config['jira_project']} AND 'Pivotal Tracker URL' IN #{map_jira_ids_for_search(story_urls)}")
-        
+
 
         counter = 0
         puts "\nUpdate Invoiced issues - create subtasks"
@@ -188,15 +187,14 @@ module Jira2Pivotal
           story = stories.find { |story| story.url == issue.send(jira_pivotal_field) }
 
           next unless story.present?
-          
+
           subtask = create_sub_task!(issue)
-          story.assign_to_jira_issue(subtask.key, url) 
+          story.assign_to_jira_issue(subtask.key, url)
 
           stories.delete(story)
-          counter += 1          
+          counter += 1
         end
 
-        # puts "\nWas created #{counter} subtasks for Invoiced issues"
         counter
       end
 
@@ -253,7 +251,7 @@ module Jira2Pivotal
         jira_project   = @config['jira_project']
         jira_issues = find_issues("project = #{jira_project} AND 'Pivotal Tracker URL' is not EMPTY" )
 
-        invoiced_issues_ids = jira_issues.select { |issue| issue.status.name == 'Invoiced' }.map(&:key) 
+        invoiced_issues_ids = jira_issues.select { |issue| issue.status.name == 'Invoiced' }.map(&:key)
 
         correct_jira_ids   = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
         incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids

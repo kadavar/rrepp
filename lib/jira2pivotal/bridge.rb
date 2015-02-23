@@ -15,6 +15,7 @@ module Jira2Pivotal
 
     def sync!
       connect_jira_to_pivotal!
+      # Right now we dont use this flow
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
     end
@@ -42,7 +43,7 @@ module Jira2Pivotal
       puts "Needs to create: #{stories[:to_create].count}".blue
       puts "Needs to update: #{stories[:to_update].count}".blue
       puts "\nStart uploading to Jira"
-      import_counter, update_counter = jira.sync!(stories)#, options)
+      import_counter, update_counter = jira.sync!(stories)
 
       puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end
