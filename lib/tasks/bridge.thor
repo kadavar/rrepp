@@ -5,8 +5,17 @@ class Bridge < Thor
   method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_configs/config.yml'
   method_option :project, aliases: '-p', desc: 'Project name from config file', required: true
   def sync
+    scheduler = Rufus::Scheduler.new
     bridge = init_bridge
-    bridge.sync!
+
+    say 'Set repeat time: 1s 5m 10h'
+    repeat_time = ask 'time: '
+
+    scheduler.every repeat_time do
+      bridge.sync!
+    end
+
+    scheduler.join
   end
 
   no_commands do
