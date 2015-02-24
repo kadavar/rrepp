@@ -1,0 +1,3 @@
+[submodule "cap-recipes"]
+	path = cap-recipes
+	url = git@github.com:linko/cap-recipes.git
