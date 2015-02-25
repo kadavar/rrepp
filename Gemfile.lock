@@ -38,6 +38,7 @@ GEM
       safe_yaml (~> 1.0.0)
     daemons (1.1.9)
     debug_inspector (0.0.2)
+    differ (0.1.2)
     happymapper (0.4.1)
       libxml-ruby (~> 2.0)
     highline (1.7.1)
@@ -139,6 +140,7 @@ DEPENDENCIES
   certified
   colorize
   daemons
+  differ
   highline
   jira-ruby
   pivotal-tracker

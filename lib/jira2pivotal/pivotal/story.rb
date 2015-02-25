@@ -92,6 +92,18 @@ module Jira2Pivotal
         type_map[story.story_type]
       end
 
+      def current_story_status_to_issue_status
+        status_map = {
+          'started'   => 'In Progress',
+          'unstarted' => 'Open',
+          'finished'  => 'In Progress',
+          'delivered' => 'Resolved',
+          'rejected'  => 'Reopened'
+        }
+
+        status_map[story.current_state]
+      end
+
       def story_status_to_issue_status
         status_map = {
           'started'   => 'Start Progress',

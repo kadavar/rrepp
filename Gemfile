@@ -13,14 +13,12 @@ gem 'sidekiq-failures'
 gem 'sidekiq-limit_fetch'
 gem 'sinatra', require: false
 gem 'daemons'
+gem 'differ'
 
-
-group :development do
-  gem 'rails_dt'
-  gem 'pry'
-  gem 'pry-nav'
-  gem 'pry-stack_explorer'
-end
+gem 'rails_dt'
+gem 'pry'
+gem 'pry-nav'
+gem 'pry-stack_explorer'
 
 group :tools do
   gem 'capistrano', '~> 2.0'
