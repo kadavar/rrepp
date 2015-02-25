@@ -8,6 +8,13 @@ gem 'colorize'
 gem 'highline'
 gem 'rufus-scheduler'
 
+gem 'sidekiq'
+gem 'sidekiq-failures'
+gem 'sidekiq-limit_fetch'
+gem 'sinatra', require: false
+gem 'daemons'
+
+
 group :development do
   gem 'rails_dt'
   gem 'pry'
