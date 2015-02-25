@@ -1,0 +1,20 @@
+I, [2015-02-25T15:33:21.631231 #5062]  INFO -- : *****************
+I, [2015-02-25T15:33:21.631337 #5062]  INFO -- : Crete connection between exists pivotal stories and jira issues
+I, [2015-02-25T15:33:21.631804 #5062]  INFO -- : *****************
+I, [2015-02-25T15:33:21.631840 #5062]  INFO -- : Update exists issues
+I, [2015-02-25T15:33:29.626492 #5062]  INFO -- : Changes for pair JP-11 - https://www.pivotaltracker.com/story/show/86423420
+I, [2015-02-25T15:33:29.626888 #5062]  INFO -- : Title difference:
+I, [2015-02-25T15:33:29.627038 #5062]  INFO -- : {"Cart manipulation should be AJAXy" >> "Cart manipulation should be AJAXy(UPDATE)"}
+I, [2015-02-25T15:33:29.627226 #5062]  INFO -- : Description difference:
+I, [2015-02-25T15:33:29.627388 #5062]  INFO -- : !https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRipuZZhdGOzpDDE4EMDEkmcm7NnlR5SJAg7ctZnLPHw584f6BQtb_sV7gs!{+"\n\nADDD NEW SOME TEXT BLA BLA"}
+I, [2015-02-25T15:33:29.627624 #5062]  INFO -- : Story points difference:
+I, [2015-02-25T15:33:29.627772 #5062]  INFO -- : nil
+I, [2015-02-25T15:33:32.517431 #5062]  INFO -- : Changes for pair JP-33 - https://www.pivotaltracker.com/story/show/88779600
+I, [2015-02-25T15:33:32.517855 #5062]  INFO -- : Status difference:
+I, [2015-02-25T15:33:32.518027 #5062]  INFO -- : {"Open" >> "In Progress"}
+I, [2015-02-25T15:33:32.518227 #5062]  INFO -- : Story points difference:
+I, [2015-02-25T15:33:32.518350 #5062]  INFO -- : nil
+I, [2015-02-25T15:33:35.031421 #5062]  INFO -- : Changes for pair JP-50 - https://www.pivotaltracker.com/story/show/89082160
+I, [2015-02-25T15:33:37.453467 #5062]  INFO -- : Changes for pair JP-48 - https://www.pivotaltracker.com/story/show/89080744
+I, [2015-02-25T15:33:37.453743 #5062]  INFO -- : Title difference:
+I, [2015-02-25T15:33:37.453888 #5062]  INFO -- : {"Test issue" >> "Test issue for connect"}
