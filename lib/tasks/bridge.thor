@@ -14,11 +14,9 @@ class Bridge < Thor
     repeat_time = ask 'time: '
 
 
-    Daemons.daemonize({ log_output: true })
+    Daemons.daemonize()
 
     scheduler = Rufus::Scheduler.new
-
-    puts_options_in_output_file
 
     scheduler.every repeat_time, first_in: 5 do
       SyncWorker.perform_async(updated_config, options[:project])
@@ -28,14 +26,6 @@ class Bridge < Thor
   end
 
   no_commands do
-    def puts_options_in_output_file
-      path = File.expand_path('../../../daemons.rb.pid', __FILE__)
-      puts '*******************'
-      puts "project #{options[:project]}"
-      puts "config: #{options[:config]}"
-      puts "process pid: #{File.open(path).first.strip}"
-    end
-
     def update_config
       config_file_path = File.expand_path("../../../#{options[:config]}", __FILE__)
       config_file_exists?(config_file_path)
