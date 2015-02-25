@@ -4,10 +4,10 @@ require 'capistrano_colors'
 # require 'recap_rails'
 
 # require 'capistrano-unicorn'
-# require 'capistrano/sidekiq'
+require 'capistrano/sidekiq'
 
-# set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
-# set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
+set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
+set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
 
 server '10.0.1.252', :web, :app, :db, primary: true
 
