@@ -7,6 +7,7 @@ gem 'thor'
 gem 'colorize'
 gem 'highline'
 gem 'rufus-scheduler'
+gem 'airbrake'
 
 group :development do
   gem 'rails_dt'
