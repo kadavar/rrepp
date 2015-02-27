@@ -8,7 +8,7 @@ module Jira2Pivotal
       @config.merge!('project_name' => project_name)
 
       logger = init_logger(@config['log_file_name'])
-      logger.formatter = logger_formatter#(project_name)
+      logger.formatter = logger_formatter
 
       @config.merge!(logger: logger)
 
@@ -35,10 +35,14 @@ module Jira2Pivotal
 
     def logger_formatter
       proc do |severity, datetime, progname, msg|
-        if severity == "INFO" or severity == "WARN"
-          "#{@config['project_name']} [#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid}]  #{severity} -- : #{msg}\n"
+        if severity == "INFO" || severity == "WARN"
+          if @config['sync_action'] == 'INVOICED'
+            "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}] #{@config['sync_action']} -- #{msg}\n"
+          else
+            "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}]   #{@config['sync_action']} -- #{msg}\n"
+          end
         else
-          "#{@config['project_name']} [#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid}] #{severity} -- : #{msg}\n"
+          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}] #{severity} -- #{msg}\n"
         end
       end
     end

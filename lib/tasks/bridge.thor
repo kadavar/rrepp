@@ -13,10 +13,7 @@ class Bridge < Thor
     say 'Set repeat time: 1s 5m 10h'
     repeat_time = ask 'time: '
 
-    # bridge = ::Jira2Pivotal::Bridge.new(updated_config, options[:project])
-    # bridge.sync!
-
-    # Daemons.daemonize()
+    Daemons.daemonize()
 
     scheduler = Rufus::Scheduler.new
 

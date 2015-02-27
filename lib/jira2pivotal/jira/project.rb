@@ -145,7 +145,8 @@ module Jira2Pivotal
 
           story.assign_to_jira_issue(issue.issue.key, url)
 
-          @config[:logger].info "Create #{story.story.url} >> #{url}/#{issue.issue.key}"
+          @config.merge!('sync_action' => 'CREATE')
+          @config[:logger].info ":: #{issue.issue.key} :: >> For: #{story.story.id} - #{story.story.url} >> #{url}/#{issue.issue.key}"
 
           counter += 1
         end
@@ -184,7 +185,9 @@ module Jira2Pivotal
           subtask = create_sub_task!(issue)
           story.assign_to_jira_issue(subtask.key, url)
 
-          @config[:logger].info "Update #{story.url} >> #{url}/#{issue.key} : Invoiced >> Sub-task, #{url}/#{issue.key} >> #{url}/#{subtask.key}"
+          @config.merge!('sync_action' => 'INVOICED')
+          @config[:logger].info ":: #{issue.key} :: >> Sub Task #{subtask.key} - #{story.story.url} >> #{url}/browse/#{issue.key}"
+
           stories.delete(story)
           counter += 1
         end
@@ -214,11 +217,13 @@ module Jira2Pivotal
         title_diff_for_log(story_short['title'], jira_short['title'])
         description_diff_for_log(story_short['desc'], jira_short['desc'])
         status_diff_for_log(story_short['status'], jira_short['status'])
-        # story_points_diff_for_log(story_short['points'], jira_short['ponts']) unless story.is_bug?
       end
 
       def log_header(issue=nil,story=nil)
-        @header ||= "Update #{story.url} >> #{url}/#{issue.key}"
+        @config.merge!('sync_action' => 'UPDATE')
+
+        @connection_for_log ||= "#{story.url} >> #{url}/#{issue.key}"
+        @jira_issue_for_log ||= ":: #{issue.key} :: >>"
       end
 
       def string_diff(current, original)
@@ -228,26 +233,20 @@ module Jira2Pivotal
 
       def title_diff_for_log(jira_tittle, pivotal_title)
         if string_diff(pivotal_title, jira_tittle)
-          @config[:logger].info "#{log_header} - Title: #{string_diff(pivotal_title, jira_tittle)}"
+          @config[:logger].info "#{@jira_issue_for_log} Title: #{string_diff(pivotal_title, jira_tittle)} - #{@connection_for_log}"
         end
       end
 
       def description_diff_for_log(jira_desc, pivotal_desc)
         if string_diff(pivotal_desc, jira_desc)
-          @config[:logger].info "#{log_header} - Description: #{string_diff(pivotal_desc, jira_desc)}"
+          @config[:logger].info "#{@jira_issue_for_log} Description: #{string_diff(pivotal_desc, jira_desc)} - #{@connection_for_log}"
         end
       end
 
       def status_diff_for_log(jira_status, pivotal_status)
 
         if string_diff(pivotal_status, jira_status)
-          @config[:logger].info "#{log_header} - Status: #{string_diff(pivotal_status, jira_status)}"
-        end
-      end
-
-      def story_points_diff_for_log(jira_points, pivotal_points)
-        if string_diff(pivotal_points, jira_points)
-          @config[:logger].info "#{log_header} - Points: string_diff(jira_points, jira_points)"
+          @config[:logger].info "#{@jira_issue_for_log} Status: #{string_diff(pivotal_status, jira_status)} - #{@connection_for_log}"
         end
       end
 
@@ -293,11 +292,11 @@ module Jira2Pivotal
         jira_story = story.to_jira(@config[:custom_fields])
 
         story_short = {
-            'title'  => jira_story['summary'],
-            'desc'   => (jira_story['description'].to_s || ''),
-            'status' => (story.current_story_status_to_issue_status || ''),
-            'points' => (jira_story[jira_pivotal_points].to_s || '')
-          }
+          'title'  => jira_story['summary'],
+          'desc'   => (jira_story['description'].to_s || ''),
+          'status' => (story.current_story_status_to_issue_status || ''),
+          'points' => (jira_story[jira_pivotal_points].to_s || '')
+        }
 
         jira_short = {
           'title'  => issue.fields['summary'],
@@ -346,6 +345,10 @@ module Jira2Pivotal
 
       def per_page
         50
+      end
+
+      def jira_pivotal_connection_for_log(issue, story)
+        "#{story.story.url} >> #{url}/browse/#{issue.issue.key}"
       end
 
       def issues(start_index)
