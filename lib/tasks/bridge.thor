@@ -18,7 +18,7 @@ class Bridge < Thor
 
     scheduler = Rufus::Scheduler.new
 
-    scheduler.every repeat_time, first_in: 5 do
+    scheduler.every repeat_time, first_in: updated_config['script_first_start'] do
       SyncWorker.perform_async(updated_config, options[:project])
     end
 
@@ -30,10 +30,10 @@ class Bridge < Thor
       config_file_path = File.expand_path("../../../#{options[:config]}", __FILE__)
       config_file_exists?(config_file_path)
 
-      receive_passwords(YAML.load_file(config_file_path))
+      ask_credentials(YAML.load_file(config_file_path))
     end
 
-    def receive_passwords(config)
+    def ask_credentials(config)
       say("Jira User: #{config['jira_login']}")
       config['jira_password'] = ask('Jira Password: ') { |q| q.echo = 'x' }
 

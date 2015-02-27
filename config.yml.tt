@@ -1,14 +1,14 @@
-tracker_token:
 tracker_requester:
 tracker_project_id:
 
 jira_login:
-jira_password:
 jira_host:
 jira_uri_scheme:    https
 jira_port:          80
 jira_project:       JP
 jira_filter:        10800
+
+script_first_start: 5
 
 jira_custom_fields:
   pivotal_points:   'Story Points'
