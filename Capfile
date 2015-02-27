@@ -9,7 +9,7 @@ require 'capistrano/sidekiq'
 set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
 set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
 
-server '10.0.1.252', :web, :app, :db, primary: true
+server '83.143.200.3:55022', :web, :app, :db, primary: true
 
 set :domain_name,      'j2p'
 set :ruby_version,     '2.2.0'

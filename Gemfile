@@ -7,6 +7,7 @@ gem 'thor'
 gem 'colorize'
 gem 'highline'
 gem 'rufus-scheduler'
+gem 'airbrake'
 
 gem 'sidekiq'
 gem 'sidekiq-failures'
