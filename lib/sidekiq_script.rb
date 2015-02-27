@@ -1,2 +1,2 @@
-($LOAD_PATH << '.' << 'lib' << 'lib/workers').uniq!
+($LOAD_PATH << 'lib/workers').uniq!
 require 'sync_worker'

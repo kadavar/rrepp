@@ -7,6 +7,9 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    airbrake (4.1.0)
+      builder
+      multi_json
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     builder (3.2.2)
@@ -53,6 +56,7 @@ GEM
     mime-types (1.25.1)
     mini_portile (0.6.2)
     minitest (5.5.1)
+    multi_json (1.10.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-sftp (2.1.2)
@@ -131,6 +135,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  airbrake
   bundler-audit
   capistrano (~> 2.0)
   capistrano-colorized-stream
