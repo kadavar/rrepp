@@ -11,3 +11,4 @@ logs/
 
 daemons.rb.output
 daemons.rb.pid
+tmp/
