@@ -7,3 +7,4 @@ project_configs/
 /cap-recipes
 daemons.rb.output
 daemons.rb.pid
+tmp/
