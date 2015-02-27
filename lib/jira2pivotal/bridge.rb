@@ -1,8 +1,8 @@
 module Jira2Pivotal
   class Bridge < Base
 
-    def initialize(config_file, project_name)
-      @config = Config.new(config_file, project_name)
+    def initialize(config, project_name)
+      @config = Config.new(config, project_name)
     end
 
     def jira
@@ -38,17 +38,22 @@ module Jira2Pivotal
       puts "Needs to update: #{pivotal.unsynchronized_stories[:to_update].count}".blue
       puts "\nStart uploading to Jira"
 
-      update_counter = jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
+      begin
+        update_counter = jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
 
-      # After update issues and stories grep pivotal stories again
-      # because some of them might be updated
-      stories = pivotal.unsynchronized_stories
+        # After update issues and stories grep pivotal stories again
+        # because some of them might be updated
+        stories = pivotal.unsynchronized_stories
 
-      puts "\nAfter update".light_blue
-      puts "\nNeeds to create: #{stories[:to_create].count}".blue
+        puts "\nAfter update".light_blue
+        puts "\nNeeds to create: #{stories[:to_create].count}".blue
 
-      import_counter = jira.create_sub_task_for_invosed_issues!(stories[:to_create])
-      import_counter += jira.create_tasks!(stories[:to_create])
+        import_counter = jira.create_sub_task_for_invosed_issues!(stories[:to_create])
+        import_counter += jira.create_tasks!(stories[:to_create])
+      rescue => e
+        @config[:logger].error e.message
+        @config[:logger].error e.backtrace.inspect
+      end
 
       puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end
@@ -98,6 +103,9 @@ module Jira2Pivotal
 
         result[mapped_issues[story.story.url]] = story.story.url if story.jira_issue_id != mapped_issues[story.story.url]
       end
+
+      result.each { |pair| @config[:logger].info "Create connection #{pair}" } unless result.empty?
+
       puts "\nPivotal stories need update: #{result.count}".blue
 
       result
