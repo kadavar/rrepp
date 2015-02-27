@@ -13,6 +13,9 @@ GEM
       multi_json (~> 1.3)
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
+    airbrake (4.1.0)
+      builder
+      multi_json
     atomic (1.1.13)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
@@ -134,6 +137,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  airbrake
   bundler-audit
   capistrano (~> 2.0)
   capistrano-colorized-stream
