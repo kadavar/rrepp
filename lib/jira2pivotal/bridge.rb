@@ -14,10 +14,18 @@ module Jira2Pivotal
     end
 
     def sync!
-      connect_jira_to_pivotal!
-      # Right now flow jira -> pivotal is disabled
-      # from_jira_to_pivotal!
-      from_pivotal_to_jira!
+      begin
+        connect_jira_to_pivotal!
+        # Right now flow jira -> pivotal is disabled
+        # from_jira_to_pivotal!
+        from_pivotal_to_jira!
+      rescue Exception => e
+        Airbrake.notify_or_ignore(
+          e,
+          cgi_data: ENV.to_hash
+        )
+        raise
+      end
     end
 
     def connect_jira_to_pivotal!
