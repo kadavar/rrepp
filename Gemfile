@@ -15,11 +15,6 @@ gem 'sidekiq-limit_fetch'
 gem 'sinatra', require: false
 gem 'daemons'
 
-gem 'rails_dt'
-gem 'pry'
-gem 'pry-nav'
-gem 'pry-stack_explorer'
-
 group :tools do
   gem 'capistrano', '~> 2.0'
   gem 'capistrano_colors'
