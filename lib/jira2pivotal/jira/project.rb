@@ -210,7 +210,7 @@ module Jira2Pivotal
           { 'parent' => { 'id' => parent_id_for(issue) },
             'summary' => issue.fields['summary'],
             'issuetype' => {'id' => '5'},
-            'description' => issue.fields['description'],
+            'description' => issue.fields['description'].to_s,
             jira_pivotal_field => issue.send(jira_pivotal_field)
           }
 

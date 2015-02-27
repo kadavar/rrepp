@@ -1,23 +1,12 @@
 module Jira2Pivotal
   class Config < Base
 
-    def initialize(path, project_name)
-      if File.exist?(path)
-        @config = YAML.load_file(path)
-        project_options = @config.delete(project_name)
-        @config.merge!(project_options) unless project_options.nil?
+    def initialize(config, project_name)
+      @config = config
+      project_options = @config.delete(project_name)
+      @config.merge!(project_options) unless project_options.nil?
 
-        say("Jira User: #{@config['jira_login']}")
-        @config['jira_password'] = ask('Jira Password: ') { |q| q.echo = 'x' }
-
-        say("Pivotal Requester: #{@config['tracker_requester']}") { |q| q.echo = 'x'}
-        @config['tracker_token'] = ask('Pivotaltracker API token: ')
-
-        @config
-      else
-        puts "Missing config file: #{path}"
-        exit 1
-      end
+      @config
     end
 
     def [](key)
