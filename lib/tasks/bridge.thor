@@ -24,7 +24,7 @@ class Bridge < Thor
   no_commands do
     def create_log_file
       file_name = "#{options[:project].gsub(' ', '_')}.log"
-      file = open("logs/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
+      file = open("tmp/logs/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
       file_name
       return file_name
     end

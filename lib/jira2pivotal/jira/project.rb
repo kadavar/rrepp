@@ -209,45 +209,37 @@ module Jira2Pivotal
         issue.update_status!(story)
       end
 
-      def difference_for_log(issue, story)
-        story_short, jira_short = shorcut_for(issue, story)
+      def difference_for_log(issue_object, story_object)
+        story, issue = shorcut_for(issue_object, story_object)
 
-        log_header(issue, story)
+        log_header(issue_object, story_object)
 
-        title_diff_for_log(story_short['title'], jira_short['title'])
-        description_diff_for_log(story_short['desc'], jira_short['desc'])
-        status_diff_for_log(story_short['status'], jira_short['status'])
+        title_diff_for_log(story['title'], issue['title'])     if Differ.diff_from_original?(story['title'], issue['title'])
+        description_diff_for_log(story['desc'], issue['desc']) if Differ.diff_from_original?(story['desc'], issue['desc'])
+        status_diff_for_log(story['status'], issue['status'])  if Differ.diff_from_original?(story['status'], issue['status'])
       end
 
       def log_header(issue=nil,story=nil)
         @config.merge!('sync_action' => 'UPDATE')
 
-        @connection_for_log ||= "#{story.url} >> #{url}/#{issue.key}"
-        @jira_issue_for_log ||= ":: #{issue.key} :: >>"
+        @connection_for_log = "#{story.url} >> #{url}/#{issue.key}"
+        @jira_issue_for_log = ":: #{issue.key} :: >>"
       end
 
       def string_diff(current, original)
-        difference = Differ.diff_by_line(current, original).to_s
-        difference != original ? difference : false
+        Differ.diff_by_line(current, original).to_s
       end
 
-      def title_diff_for_log(jira_tittle, pivotal_title)
-        if string_diff(pivotal_title, jira_tittle)
-          @config[:logger].info "#{@jira_issue_for_log} Title: #{string_diff(pivotal_title, jira_tittle)} - #{@connection_for_log}"
-        end
+      def title_diff_for_log(pivotal_title, jira_tittle)
+        @config[:logger].info "#{@jira_issue_for_log} Title: #{string_diff(pivotal_title, jira_tittle)} - #{@connection_for_log}"
       end
 
-      def description_diff_for_log(jira_desc, pivotal_desc)
-        if string_diff(pivotal_desc, jira_desc)
-          @config[:logger].info "#{@jira_issue_for_log} Description: #{string_diff(pivotal_desc, jira_desc)} - #{@connection_for_log}"
-        end
+      def description_diff_for_log(pivotal_desc, jira_desc)
+        @config[:logger].info "#{@jira_issue_for_log} Description: #{string_diff(pivotal_desc, jira_desc)} - #{@connection_for_log}"
       end
 
-      def status_diff_for_log(jira_status, pivotal_status)
-
-        if string_diff(pivotal_status, jira_status)
-          @config[:logger].info "#{@jira_issue_for_log} Status: #{string_diff(pivotal_status, jira_status)} - #{@connection_for_log}"
-        end
+      def status_diff_for_log(pivotal_status, jira_status)
+        @config[:logger].info "#{@jira_issue_for_log} Status: #{string_diff(pivotal_status, jira_status)} - #{@connection_for_log}"
       end
 
       def jira_pivotal_field

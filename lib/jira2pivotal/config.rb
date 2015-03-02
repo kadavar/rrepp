@@ -30,7 +30,7 @@ module Jira2Pivotal
     private
 
     def init_logger(log_file_name)
-      Logger.new("logs/#{log_file_name}")
+      Logger.new("tmp/logs/#{log_file_name}")
     end
 
     def logger_formatter

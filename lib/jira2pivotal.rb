@@ -17,7 +17,8 @@ require 'highline/import'
 require 'sidekiq'
 require 'sidekiq_script'
 require 'daemons'
-require 'differ'
+
+require 'differ_updates'
 
 require 'jira2pivotal/base'
 require 'jira2pivotal/config'
