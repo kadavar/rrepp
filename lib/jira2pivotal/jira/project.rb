@@ -145,8 +145,7 @@ module Jira2Pivotal
 
           story.assign_to_jira_issue(issue.issue.key, url)
 
-          @config.merge!('sync_action' => 'CREATE')
-          @config[:logger].info ":: #{issue.issue.key} :: >> For: #{story.story.id} - #{story.story.url} >> #{url}/#{issue.issue.key}"
+          @config[:logger].jira_logger.create_issue_log(story, issue)
 
           counter += 1
         end
@@ -185,8 +184,7 @@ module Jira2Pivotal
           subtask = create_sub_task!(issue)
           story.assign_to_jira_issue(subtask.key, url)
 
-          @config.merge!('sync_action' => 'INVOICED')
-          @config[:logger].info ":: #{issue.key} :: >> Sub Task #{subtask.key} - #{story.story.url} >> #{url}/browse/#{issue.key}"
+          @config[:logger].jira_logger.invoced_issue_log(story, issue)
 
           stories.delete(story)
           counter += 1
@@ -203,48 +201,10 @@ module Jira2Pivotal
 
         issue, attributes = build_issue(story.to_jira(@config[:custom_fields]), jira_issue)
 
-        difference_for_log(jira_issue, story)
+        @config(:logger).jira_logger.update_issue_log
 
         issue.save!(attributes, @config)
         issue.update_status!(story)
-      end
-
-      def difference_for_log(issue_object, story_object)
-        Differ.separator = "\n"
-        story, issue = shorcut_for(issue_object, story_object)
-
-        log_header(issue_object, story_object)
-
-        title_diff_for_log(story['title'], issue['title'])     if story['title'].diff?(issue['title'])
-        description_diff_for_log(story['desc'], issue['desc']) if story['desc'].diff?(issue['desc'])
-        status_diff_for_log(story['status'], issue['status'])  if story['status'].diff?(issue['status'])
-      end
-
-      def log_header(issue=nil,story=nil)
-        @config.merge!('sync_action' => 'UPDATE')
-
-        @connection_for_log = "#{story.url} >> #{url}/#{issue.key}"
-        @jira_issue_for_log = ":: #{issue.key} :: >>"
-      end
-
-      def title_diff_for_log(pivotal_title, jira_tittle)
-        @config[:logger].info "#{@jira_issue_for_log} Title: #{pivotal_title - jira_tittle} - #{@connection_for_log}"
-      end
-
-      def description_diff_for_log(pivotal_desc, jira_desc)
-        @config[:logger].info "#{@jira_issue_for_log} Description: #{pivotal_desc - jira_desc} - #{@connection_for_log}"
-      end
-
-      def status_diff_for_log(pivotal_status, jira_status)
-        @config[:logger].info "#{@jira_issue_for_log} Status: #{pivotal_status - jira_status} - #{@connection_for_log}"
-      end
-
-      def jira_pivotal_field
-        @config[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
-      end
-
-      def jira_pivotal_points
-        @config[:custom_fields].key(@config['jira_custom_fields']['pivotal_points'])
       end
 
       def create_sub_task!(issue)
@@ -276,26 +236,6 @@ module Jira2Pivotal
       end
 
       private
-
-      def shorcut_for(issue, story)
-        jira_story = story.to_jira(@config[:custom_fields])
-
-        story_short = {
-          'title'  => jira_story['summary'],
-          'desc'   => (jira_story['description'].to_s || ''),
-          'status' => (story.current_story_status_to_issue_status || ''),
-          'points' => (jira_story[jira_pivotal_points].to_s || '')
-        }
-
-        jira_short = {
-          'title'  => issue.fields['summary'],
-          'desc'   => (issue.fields['description'].to_s || ''),
-          'status' => (issue.fields['status']['name'].to_s || ''),
-          'points' => (issue.fields[jira_pivotal_points].to_i.to_s || '')
-        }
-        return story_short, jira_short
-      end
-
 
       def map_jira_ids_for_search(jira_ids)
         jira_ids.present? ? "(#{jira_ids.map { |s| "'#{s}'" }.join(',')})" : "('')"
@@ -334,10 +274,6 @@ module Jira2Pivotal
 
       def per_page
         50
-      end
-
-      def jira_pivotal_connection_for_log(issue, story)
-        "#{story.story.url} >> #{url}/browse/#{issue.issue.key}"
       end
 
       def issues(start_index)

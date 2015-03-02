@@ -1,8 +1,8 @@
 module Jira2Pivotal
   class Bridge < Base
 
-    def initialize(config, project_name)
-      @config = Config.new(config, project_name)
+    def initialize(config)
+      @config = Config.new(config)
     end
 
     def jira
