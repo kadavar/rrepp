@@ -210,13 +210,14 @@ module Jira2Pivotal
       end
 
       def difference_for_log(issue_object, story_object)
+        Differ.separator = "\n"
         story, issue = shorcut_for(issue_object, story_object)
 
         log_header(issue_object, story_object)
 
-        title_diff_for_log(story['title'], issue['title'])     if Differ.diff_from_original?(story['title'], issue['title'])
-        description_diff_for_log(story['desc'], issue['desc']) if Differ.diff_from_original?(story['desc'], issue['desc'])
-        status_diff_for_log(story['status'], issue['status'])  if Differ.diff_from_original?(story['status'], issue['status'])
+        title_diff_for_log(story['title'], issue['title'])     if story['title'].diff?(issue['title'])
+        description_diff_for_log(story['desc'], issue['desc']) if story['desc'].diff?(issue['desc'])
+        status_diff_for_log(story['status'], issue['status'])  if story['status'].diff?(issue['status'])
       end
 
       def log_header(issue=nil,story=nil)
@@ -226,20 +227,16 @@ module Jira2Pivotal
         @jira_issue_for_log = ":: #{issue.key} :: >>"
       end
 
-      def string_diff(current, original)
-        Differ.diff_by_line(current, original).to_s
-      end
-
       def title_diff_for_log(pivotal_title, jira_tittle)
-        @config[:logger].info "#{@jira_issue_for_log} Title: #{string_diff(pivotal_title, jira_tittle)} - #{@connection_for_log}"
+        @config[:logger].info "#{@jira_issue_for_log} Title: #{pivotal_title - jira_tittle} - #{@connection_for_log}"
       end
 
       def description_diff_for_log(pivotal_desc, jira_desc)
-        @config[:logger].info "#{@jira_issue_for_log} Description: #{string_diff(pivotal_desc, jira_desc)} - #{@connection_for_log}"
+        @config[:logger].info "#{@jira_issue_for_log} Description: #{pivotal_desc - jira_desc} - #{@connection_for_log}"
       end
 
       def status_diff_for_log(pivotal_status, jira_status)
-        @config[:logger].info "#{@jira_issue_for_log} Status: #{string_diff(pivotal_status, jira_status)} - #{@connection_for_log}"
+        @config[:logger].info "#{@jira_issue_for_log} Status: #{pivotal_status - jira_status} - #{@connection_for_log}"
       end
 
       def jira_pivotal_field

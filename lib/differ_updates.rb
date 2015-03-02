@@ -1,9 +1,8 @@
 require 'differ'
+require 'differ/string'
 
-Differ.module_eval do
-  class << self
-    def diff_from_original?(current, original)
-      Differ.diff_by_line(current, original).to_s != original
-    end
+Differ::StringDiffer.module_eval do
+  def diff?(old)
+    Differ.diff(self, old).to_s != self
   end
 end
