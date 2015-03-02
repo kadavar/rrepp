@@ -9,6 +9,7 @@ jira_project:       JP
 jira_filter:        10800
 
 script_first_start: 5
+script_repeat_time: '5m'
 
 jira_custom_fields:
   pivotal_points:   'Story Points'
