@@ -6,8 +6,9 @@ require 'capistrano_colors'
 # require 'capistrano-unicorn'
 require 'capistrano/sidekiq'
 
-set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
+set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml -r ./lib/sidekiq_script.rb" }
 set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
+set(:sidekiq_log) { File.join(deploy_to, 'tmp', 'logs', 'sidekiq.log') }
 
 server '83.143.200.3:55022', :web, :app, :db, primary: true
 
@@ -43,3 +44,4 @@ set(:shared_path)  { deploy_to }
 #after 'deploy:restart', 'unicorn:reload'    # app IS NOT preloaded
 #after 'deploy:restart', 'unicorn:restart'   # app preloaded
 # after 'deploy:restart', 'unicorn:duplicate' # before_fork hook implemented (zero downtime deployments)
+before 'sidekiq:start', 'script:create_folders'
