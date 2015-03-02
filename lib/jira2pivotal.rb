@@ -20,7 +20,7 @@ require 'sidekiq_script'
 require 'daemons'
 
 require 'airbrake'
-require 'errbit'
+require 'errbit_config'
 
 require 'jira2pivotal/base'
 require 'jira2pivotal/config'
