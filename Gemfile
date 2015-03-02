@@ -9,12 +9,11 @@ gem 'highline'
 gem 'rufus-scheduler'
 gem 'airbrake'
 
-group :development do
-  gem 'rails_dt'
-  gem 'pry'
-  gem 'pry-nav'
-  gem 'pry-stack_explorer'
-end
+gem 'sidekiq'
+gem 'sidekiq-failures'
+gem 'sidekiq-limit_fetch'
+gem 'sinatra', require: false
+gem 'daemons'
 
 group :tools do
   gem 'capistrano', '~> 2.0'
