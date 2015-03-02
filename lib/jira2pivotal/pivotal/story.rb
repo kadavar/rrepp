@@ -46,7 +46,7 @@ module Jira2Pivotal
         attrs =
         {
           'summary'      => story.name,
-          'description'  => description,
+          'description'  => description.to_s,
           'issuetype'    => { 'id' => story_type_to_issue_type },
         }
         attrs['timetracking'] = { 'originalEstimate' => "#{make_estimate_positive}h" } if unstarted?
