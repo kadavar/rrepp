@@ -26,7 +26,6 @@ class Bridge < Thor
       file_name = "#{options[:project].gsub(' ', '_')}.log"
       file = open("tmp/logs/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
       file_name
-      return file_name
     end
 
     def update_config
