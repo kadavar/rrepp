@@ -1,4 +1,5 @@
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__))
+$LOAD_PATH << File.expand_path('../../config/initializers', __FILE__)
 
 require 'active_support/inflector'
 ActiveSupport::Inflector.inflections do |inflector|
@@ -19,6 +20,8 @@ require 'sidekiq_script'
 require 'daemons'
 
 require 'differ_updates'
+require 'airbrake'
+require 'errbit_config'
 
 require 'jira2pivotal/base'
 require 'jira2pivotal/config'
