@@ -1,5 +1,6 @@
 project_configs/
 .idea/
+.ruby-gemset
 .ruby-version
 .ruby-gemset
 .rbenv-gemset

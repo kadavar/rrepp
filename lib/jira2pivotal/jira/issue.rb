@@ -36,7 +36,17 @@ module Jira2Pivotal
       def save!(attrs, config)
         remove_not_saveable_fields(attrs, config)
 
-        issue.save!(attrs)
+        begin
+          issue.save!(attrs)
+        rescue JIRA::HTTPError => e
+          Airbrake.notify_or_ignore(
+           e,
+           parameters: attrs,
+           cgi_data: ENV.to_hash,
+           error_message: "#{e.response.body}"
+          )
+        end
+
       end
 
       def remove_not_saveable_fields(attrs, config)
@@ -133,7 +143,18 @@ module Jira2Pivotal
         # Jira give only several status options to select
         # So if we try to change status that not in list
         # Status would not change
-        set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
+        begin
+          response = set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
+          raise HTTPError.new(response) unless response.kind_of?(Net::HTTPSuccess)
+
+        rescue Jira2Pivotal::Jira::Issue::HTTPError => e
+          Airbrake.notify_or_ignore(
+           e,
+           parameters: args_for_change_status(story),
+           cgi_data: ENV.to_hash,
+           error_message: "#{e.response.body}"
+          )
+        end
       end
 
       def create_notes!(story)
@@ -162,7 +183,7 @@ module Jira2Pivotal
       def set_issue_status!(args)
         http_method = :post
 
-        response = @client.send(http_method, transitions_api_url, args.to_json)
+        @client.send(http_method, transitions_api_url, args.to_json)
       end
 
       # TODO: Refactor this(use gem logic to make request or something else)
