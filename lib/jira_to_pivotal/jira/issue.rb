@@ -56,11 +56,16 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     # And it cause an error while request
     # Also remove issue-type for sub-task because it can't be changed
 
-    if (is_bug? || is_subtask?) && config.present?
+    if (is_bug? || is_subtask?)
       pivotal_story_points = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
       attrs['fields'].except!(pivotal_story_points)
       attrs['fields'].except!('issuetype') if is_subtask?
+      attrs['fields'].except!('timetracking') if original_estimate.present?
     end
+  end
+
+  def original_estimate
+    issue.fields['timetracking'].present? ? issue.fields['timetracking']['originalEstimate'] : nil
   end
 
   def is_bug?

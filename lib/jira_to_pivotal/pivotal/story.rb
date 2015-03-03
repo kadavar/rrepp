@@ -47,7 +47,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
       'description'  => description.to_s,
       'issuetype'    => { 'id' => story_type_to_issue_type },
     }
-    attrs['timetracking'] = { 'originalEstimate' => "#{make_estimate_positive}h" } if unstarted?
+    attrs['timetracking'] = { 'originalEstimate' => "#{make_estimate_positive}h" } if set_original_estimate?
     attrs.merge!(custom_fields_attrs(custom_fields))
   end
 
@@ -121,8 +121,16 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     story.current_state == 'unstarted'
   end
 
+  def started?
+    story.current_state == 'started'
+  end
+
   def is_bug?
     story.story_type == 'bug'
+  end
+
+  def set_original_estimate?
+    unstarted? || started?
   end
 end
 
