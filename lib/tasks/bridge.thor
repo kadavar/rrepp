@@ -12,17 +12,15 @@ class Bridge < Thor
 
     updated_config = update_config.merge('log_file_name' => create_log_file, 'project_name' => options[:project])
 
-    # Daemons.daemonize()
+    Daemons.daemonize()
 
-    # scheduler = Rufus::Scheduler.new
+    scheduler = Rufus::Scheduler.new
 
-    # scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
-    #   SyncWorker.perform_async(updated_config, options[:project])
-    # end
+    scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
+      SyncWorker.perform_async(updated_config)
+    end
 
-    # scheduler.join
-    bridge = ::JiraToPivotal::Bridge.new(updated_config)
-    bridge.sync!
+    scheduler.join
   end
 
   no_commands do
