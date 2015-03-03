@@ -1,4 +1,3 @@
-# require File.expand_path('../../../lib/jira2pivotal.rb', __FILE__)
 require 'thor/rails'
 
 class Bridge < Thor
@@ -11,7 +10,7 @@ class Bridge < Thor
     puts "You supplied the file: " + "#{options[:config]}".yellow
     puts "Project is : " + "#{options[:project]}".yellow
 
-    updated_config = update_config.merge('log_file_name' => create_log_file)
+    updated_config = update_config.merge('log_file_name' => create_log_file, 'project_name' => options[:project])
 
     # Daemons.daemonize()
 
@@ -22,7 +21,8 @@ class Bridge < Thor
     # end
 
     # scheduler.join
-    SyncWorker.perform_async(updated_config, options[:project])
+    bridge = ::JiraToPivotal::Bridge.new(updated_config)
+    bridge.sync!
   end
 
   no_commands do

@@ -10,12 +10,21 @@ require "rails/test_unit/railtie"
 
 Bundler.require(:default, Rails.env)
 
+require 'net/http'
+require 'jira'
+require 'pivotal-tracker'
+require 'open-uri'
+require 'yaml'
+require 'colorize'
+require 'rufus-scheduler'
+require 'highline/import'
+require 'daemons'
+
+
 module J2p
   class Application < Rails::Application
-    config.autoload_paths += %W(#{config.root}/lib)
-    config.autoload_paths += Dir["#{config.root}/lib/**/"]
     config.watchable_dirs['lib'] = [:rb]
-    # config.autoload_paths << Rails.root.join('lib')
+    config.autoload_paths << Rails.root.join('lib')
     config.assets.enabled = true
   end
 end
