@@ -1,6 +1,8 @@
-require File.expand_path('../../../lib/jira2pivotal.rb', __FILE__)
+require 'thor/rails'
 
 class Bridge < Thor
+  include Thor::Rails
+
   desc 'sync', 'sync stories and issues'
   method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_configs/config.yml'
   method_option :project, aliases: '-p', desc: 'Project name from config file', required: true
@@ -8,14 +10,14 @@ class Bridge < Thor
     puts "You supplied the file: " + "#{options[:config]}".yellow
     puts "Project is : " + "#{options[:project]}".yellow
 
-    updated_config = update_config.merge('log_file_name' => create_log_file)
+    updated_config = update_config.merge('log_file_name' => create_log_file, 'project_name' => options[:project])
 
     Daemons.daemonize()
 
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
-      SyncWorker.perform_async(updated_config, options[:project])
+      SyncWorker.perform_async(updated_config)
     end
 
     scheduler.join

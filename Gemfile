@@ -1,9 +1,11 @@
 source 'https://rubygems.org'
 
+gem 'rails', '4.2'
 gem 'jira-ruby'
 gem 'pivotal-tracker'
 gem 'certified'
 gem 'thor'
+gem 'thor-rails'
 gem 'colorize'
 gem 'highline'
 gem 'rufus-scheduler'
@@ -16,6 +18,11 @@ gem 'sinatra', require: false
 gem 'daemons'
 gem 'differ', github: 'emintham/differ'
 
+group :development do
+  gem 'pry'
+  gem 'pry-byebug'
+end
+
 group :tools do
   gem 'capistrano', '~> 2.0'
   gem 'capistrano_colors'
@@ -27,6 +34,6 @@ group :tools do
   gem 'capistrano-colorized-stream'
 end
 
-# group :production do
-#   gem 'unicorn'
-# end
+group :production do
+  gem 'unicorn'
+end
