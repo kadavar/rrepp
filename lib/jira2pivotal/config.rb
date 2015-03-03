@@ -24,7 +24,7 @@ module Jira2Pivotal
     end
 
     def init_logger(config)
-      Jira2Pivotal::Logger.new(config)
+      Jira2Pivotal::Loger.new(config)
     end
   end
 end

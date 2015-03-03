@@ -27,9 +27,9 @@ require 'jira2pivotal/base'
 require 'jira2pivotal/config'
 require 'jira2pivotal/bridge'
 
-require 'jira2pivotal/logger'
-require 'jira2pivotal/logger/base'
-require 'jira2pivotal/logger/jira_logger'
+require 'jira2pivotal/loger'
+require 'jira2pivotal/loggs/base'
+require 'jira2pivotal/loggs/jira_logger'
 
 require 'jira2pivotal/jira/base'
 require 'jira2pivotal/jira/project'

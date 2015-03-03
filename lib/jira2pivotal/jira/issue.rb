@@ -8,6 +8,7 @@ module Jira2Pivotal
         @client  = options[:client]
         @project = options[:project]
         @issue   = options[:issue]
+        @config  = options[:config]
       end
 
       def comments
@@ -22,7 +23,7 @@ module Jira2Pivotal
         # Add comment to the original JIRA issue
         puts 'Adding a comment to the JIRA issue'
         comment = issue.comments.build
-        comment.save( :body => "#{comment_text}: #{story_url}" )
+        comment.save( body: "#{comment_text}: #{story_url}" )
       end
 
       def build_comment
@@ -39,6 +40,9 @@ module Jira2Pivotal
         begin
           issue.save!(attrs)
         rescue JIRA::HTTPError => e
+          @config[:logger].logger.error e.response.body
+          @config[:logger].logger.error e.backtrace.inspect
+
           Airbrake.notify_or_ignore(
            e,
            parameters: attrs,
@@ -145,9 +149,10 @@ module Jira2Pivotal
         # Status would not change
         begin
           response = set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
-          raise HTTPError.new(response) unless response.kind_of?(Net::HTTPSuccess)
+        rescue JIRA::HTTPError => e
+          @config[:logger].error e.response.body
+          @config[:logger].error e.backtrace.inspect
 
-        rescue Jira2Pivotal::Jira::Issue::HTTPError => e
           Airbrake.notify_or_ignore(
            e,
            parameters: args_for_change_status(story),
@@ -165,7 +170,13 @@ module Jira2Pivotal
               comment.save({ 'body' => "#{note.author} added a comment in Pivotal Tracker:: \n\n #{note.text} \n View this Pivotal Tracker story: #{story.url}" })
             end
           rescue Exception => e
-            nil
+            @config[:logger].logger.error e.message
+            @config[:logger].logger.error e.backtrace.inspect
+
+            Airbrake.notify_or_ignore(
+             e,
+             cgi_data: ENV.to_hash,
+            )
           end
         end
       end

@@ -1,5 +1,5 @@
 module Jira2Pivotal
-  class Logger
+  class Loger
     def initialize(config)
       @config = config
 
@@ -12,7 +12,11 @@ module Jira2Pivotal
     end
 
     def jira_logger
-      @jira_logger ||= Jira2Pivotal::Logger::JiraLogger.new(logger, @config)
+      @jira_logger ||= Jira2Pivotal::Loggs::JiraLogger.new(logger, @config)
+    end
+
+    def write_daemon_pin_in_log
+      logger.debug File.open("#{Dir.pwd}/daemons.rb.pid") if File.exists?("#{Dir.pwd}/daemons.rb.pid")
     end
 
     private

@@ -14,12 +14,16 @@ module Jira2Pivotal
     end
 
     def sync!
+        @config[:logger].write_daemon_pin_in_log
         connect_jira_to_pivotal!
         # Right now flow jira -> pivotal is disabled
         # from_jira_to_pivotal!
       begin
         from_pivotal_to_jira!
       rescue Exception => e
+        @config[:logger].logger.error e.message
+        @config[:logger].logger.error e.backtrace.inspect
+
         Airbrake.notify_or_ignore(
           e,
           cgi_data: ENV.to_hash
@@ -46,22 +50,17 @@ module Jira2Pivotal
       puts "Needs to update: #{pivotal.unsynchronized_stories[:to_update].count}".blue
       puts "\nStart uploading to Jira"
 
-      begin
-        update_counter = jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
+      update_counter = jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
 
-        # After update issues and stories grep pivotal stories again
-        # because some of them might be updated
-        stories = pivotal.unsynchronized_stories
+      # After update issues and stories grep pivotal stories again
+      # because some of them might be updated
+      stories = pivotal.unsynchronized_stories
 
-        puts "\nAfter update".light_blue
-        puts "\nNeeds to create: #{stories[:to_create].count}".blue
+      puts "\nAfter update".light_blue
+      puts "\nNeeds to create: #{stories[:to_create].count}".blue
 
-        import_counter = jira.create_sub_task_for_invosed_issues!(stories[:to_create])
-        import_counter += jira.create_tasks!(stories[:to_create])
-      rescue => e
-        @config[:logger].error e.message
-        @config[:logger].error e.backtrace.inspect
-      end
+      import_counter = jira.create_sub_task_for_invosed_issues!(stories[:to_create])
+      import_counter += jira.create_tasks!(stories[:to_create])
 
       puts "\nSuccessfully imported #{import_counter} and updated #{update_counter} stories in Jira".green
     end

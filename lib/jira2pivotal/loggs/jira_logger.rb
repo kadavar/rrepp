@@ -1,32 +1,32 @@
 module Jira2Pivotal
-  module Logger
+  module Loggs
     class JiraLogger < Base
       def initialize(logger, config)
         @logger = logger
         @config = config
       end
 
-      def create_issue_log(story. issue)
-        log_values(story, issue, 'CREATE')
+      def create_issue_log(story_object, issue_object)
+        log_values(story_object, issue_object, 'CREATE')
 
-        @logger.info "#{@jira_issue_for_log} For: #{story.story.id} - #{@connection_for_log}"
+        @logger.info "#{@jira_issue_for_log} For: #{story_object.story.id} - #{@connection_for_log}"
       end
 
       def update_issue_log(story_object, issue_object)
         log_values(story_object, issue_object, 'UPDATE')
         Differ.separator = "\n"
 
-        story, issue = shorcut_for(story_object, issue_object)
+        story, issue = shorcut_for(story_object, issue_object.issue)
 
         title_diff_for_log(story['title'], issue['title'])     if story['title'].diff?(issue['title'])
         description_diff_for_log(story['desc'], issue['desc']) if story['desc'].diff?(issue['desc'])
         status_diff_for_log(story['status'], issue['status'])  if story['status'].diff?(issue['status'])
       end
 
-      def invoced_issue_log
-        log_values(story_object, issue_object, 'INVOICED')
+      def invoced_issue_log(story_object, issue_object, old_issue)
+        log_values(story_object, old_issue, 'INVOICED')
 
-        @logger.info "#{@jira_issue_for_log} Sub Task: #{subtask.key} - #{@connection_for_log}"
+        @logger.info "#{@jira_issue_for_log} Sub Task: #{issue_object.issue.key} - #{@connection_for_log}"
       end
 
       private
@@ -38,15 +38,15 @@ module Jira2Pivotal
       end
 
       def title_diff_for_log(pivotal_title, jira_tittle)
-        logger.info "#{@jira_issue_for_log} Title: #{pivotal_title - jira_tittle} - #{@connection_for_log}"
+        @logger.info "#{@jira_issue_for_log} Title: #{pivotal_title - jira_tittle} - #{@connection_for_log}"
       end
 
       def description_diff_for_log(pivotal_desc, jira_desc)
-        logger.info "#{@jira_issue_for_log} Description: #{pivotal_desc - jira_desc} - #{@connection_for_log}"
+        @logger.info "#{@jira_issue_for_log} Description: #{pivotal_desc - jira_desc} - #{@connection_for_log}"
       end
 
       def status_diff_for_log(pivotal_status, jira_status)
-        logger.info "#{@jira_issue_for_log} Status: #{pivotal_status - jira_status} - #{@connection_for_log}"
+        @logger.info "#{@jira_issue_for_log} Status: #{pivotal_status - jira_status} - #{@connection_for_log}"
       end
 
       def shorcut_for(story, issue)
@@ -66,6 +66,11 @@ module Jira2Pivotal
           'points' => (issue.fields[jira_pivotal_points].to_i.to_s || '')
         }
         return story_short, jira_short
+      end
+
+      def jira_pivotal_points
+        pivotal_points = @config['jira_custom_fields']['pivotal_points']
+        @config[:custom_fields].key(pivotal_points)
       end
     end
   end
