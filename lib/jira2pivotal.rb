@@ -1,11 +1,3 @@
-$LOAD_PATH << File.expand_path(File.dirname(__FILE__))
-$LOAD_PATH << File.expand_path('../../config/initializers', __FILE__)
-
-require 'active_support/inflector'
-ActiveSupport::Inflector.inflections do |inflector|
-  inflector.acronym 'Jira2Pivotal'
-end
-
 require 'net/http'
 require 'open-uri'
 require 'certified'
