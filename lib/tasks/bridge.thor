@@ -15,7 +15,7 @@ class Bridge < Thor
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
-      SyncWorker.perform_async(updated_config, options[:project])
+      SyncWorker.perform_async(updated_config)
     end
 
     scheduler.join

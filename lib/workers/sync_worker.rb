@@ -5,8 +5,8 @@ class SyncWorker
 
   sidekiq_options failures: true, retry: false
 
-  def perform(config, project)
-    bridge = ::Jira2Pivotal::Bridge.new(config, project)
+  def perform(config)
+    bridge = ::Jira2Pivotal::Bridge.new(config)
     bridge.sync!
   end
 end
