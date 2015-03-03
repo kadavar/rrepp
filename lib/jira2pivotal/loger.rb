@@ -19,6 +19,11 @@ module Jira2Pivotal
       logger.debug File.open("#{Dir.pwd}/daemons.rb.pid") if File.exists?("#{Dir.pwd}/daemons.rb.pid")
     end
 
+    def error_log(exception)
+      logger.error e.response.body
+      logger.error e.backtrace.inspect
+    end
+
     private
 
     def formatter

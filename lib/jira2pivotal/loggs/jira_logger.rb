@@ -7,13 +7,13 @@ module Jira2Pivotal
       end
 
       def create_issue_log(story_object, issue_object)
-        log_values(story_object, issue_object, 'CREATE')
+        log_values(story_object.url, issue_object.key, 'CREATE')
 
         @logger.info "#{@jira_issue_for_log} For: #{story_object.story.id} - #{@connection_for_log}"
       end
 
       def update_issue_log(story_object, issue_object)
-        log_values(story_object, issue_object, 'UPDATE')
+        log_values(story_object.url, issue_object.key, 'UPDATE')
         Differ.separator = "\n"
 
         story, issue = shorcut_for(story_object, issue_object.issue)
@@ -24,17 +24,23 @@ module Jira2Pivotal
       end
 
       def invoced_issue_log(story_object, issue_object, old_issue)
-        log_values(story_object, old_issue, 'INVOICED')
+        log_values(story_object.url, old_issue.key, 'INVOICED')
 
         @logger.info "#{@jira_issue_for_log} Sub Task: #{issue_object.issue.key} - #{@connection_for_log}"
       end
 
+      def update_jira_pivotal_connection_log(issue_key, pivotal_url)
+        log_values(pivotal_url, issue_key, 'UPDATE')
+
+        @logger.info "#{@jira_issue_for_log} Create Connection: #{pivotal_url} - #{@connection_for_log}"
+      end
+
       private
 
-      def log_values(story, issue, action)
+      def log_values(story_url, issue_key, action)
         @config.merge!('sync_action' => action)
-        @connection_for_log = jira_pivotal_connection_for_log(story, issue)
-        @jira_issue_for_log = ":: #{issue.key} :: >>"
+        @connection_for_log = jira_pivotal_connection_for_log(story_url, issue_key)
+        @jira_issue_for_log = ":: #{issue_key} :: >>"
       end
 
       def title_diff_for_log(pivotal_title, jira_tittle)

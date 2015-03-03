@@ -14,21 +14,18 @@ module Jira2Pivotal
     end
 
     def sync!
-        @config[:logger].write_daemon_pin_in_log
+        jira.logger.write_daemon_pin_in_log
+
         connect_jira_to_pivotal!
         # Right now flow jira -> pivotal is disabled
         # from_jira_to_pivotal!
       begin
         from_pivotal_to_jira!
       rescue Exception => e
-        @config[:logger].logger.error e.message
-        @config[:logger].logger.error e.backtrace.inspect
+        jira.logger.error_log(e)
+        Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
 
-        Airbrake.notify_or_ignore(
-          e,
-          cgi_data: ENV.to_hash
-        )
-        raise
+        raise e
       end
     end
 
@@ -100,6 +97,8 @@ module Jira2Pivotal
         story = stories.find { |story| story.story.url == value }
 
         story.assign_to_jira_issue(issue.issue.key, jira.url)
+
+        logger.jira_logger.update_jira_pivotal_connection_log(key, value)
       end
     end
 
@@ -110,8 +109,6 @@ module Jira2Pivotal
 
         result[mapped_issues[story.story.url]] = story.story.url if story.jira_issue_id != mapped_issues[story.story.url]
       end
-
-      result.each { |pair| @config[:logger].info "Create connection #{pair}" } unless result.empty?
 
       puts "\nPivotal stories need update: #{result.count}".blue
 

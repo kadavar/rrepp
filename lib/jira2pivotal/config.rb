@@ -2,7 +2,7 @@ module Jira2Pivotal
   class Config < Base
 
     def initialize(config)
-      @config = set_logger(config)
+      @config = config
     end
 
     def [](key)
@@ -15,16 +15,6 @@ module Jira2Pivotal
 
     def merge!(attrs)
       @config.merge!(attrs)
-    end
-
-    private
-
-    def set_logger(config)
-      config.merge!(logger: init_logger(config))
-    end
-
-    def init_logger(config)
-      Jira2Pivotal::Loger.new(config)
     end
   end
 end

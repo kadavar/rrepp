@@ -40,8 +40,7 @@ module Jira2Pivotal
         begin
           issue.save!(attrs)
         rescue JIRA::HTTPError => e
-          @config[:logger].logger.error e.response.body
-          @config[:logger].logger.error e.backtrace.inspect
+          logger.error_log(e)
 
           Airbrake.notify_or_ignore(
            e,
@@ -150,8 +149,7 @@ module Jira2Pivotal
         begin
           response = set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
         rescue JIRA::HTTPError => e
-          @config[:logger].error e.response.body
-          @config[:logger].error e.backtrace.inspect
+          logger.error_log(e)
 
           Airbrake.notify_or_ignore(
            e,
@@ -170,13 +168,8 @@ module Jira2Pivotal
               comment.save({ 'body' => "#{note.author} added a comment in Pivotal Tracker:: \n\n #{note.text} \n View this Pivotal Tracker story: #{story.url}" })
             end
           rescue Exception => e
-            @config[:logger].logger.error e.message
-            @config[:logger].logger.error e.backtrace.inspect
-
-            Airbrake.notify_or_ignore(
-             e,
-             cgi_data: ENV.to_hash,
-            )
+            logger.error_log(e)
+            Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
           end
         end
       end

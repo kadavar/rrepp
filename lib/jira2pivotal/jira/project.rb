@@ -145,7 +145,7 @@ module Jira2Pivotal
 
           story.assign_to_jira_issue(issue.issue.key, url)
 
-          @config[:logger].jira_logger.create_issue_log(story, issue)
+          logger.jira_logger.create_issue_log(story, issue)
 
           counter += 1
         end
@@ -185,7 +185,7 @@ module Jira2Pivotal
           story.assign_to_jira_issue(subtask.key, url)
 
           old_issue, attrs = build_issue({}, issue)
-          @config[:logger].jira_logger.invoced_issue_log(story, subtask, old_issue)
+          logger.jira_logger.invoced_issue_log(story, subtask, old_issue)
 
           stories.delete(story)
           counter += 1
@@ -202,7 +202,7 @@ module Jira2Pivotal
 
         issue, attributes = build_issue(story.to_jira(@config[:custom_fields]), jira_issue)
 
-        @config[:logger].jira_logger.update_issue_log(story, issue)
+        logger.jira_logger.update_issue_log(story, issue)
 
         issue.save!(attributes, @config)
         issue.update_status!(story)

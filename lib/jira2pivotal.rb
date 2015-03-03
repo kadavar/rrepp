@@ -19,7 +19,7 @@ require 'sidekiq'
 require 'sidekiq_script'
 require 'daemons'
 
-require 'differ_updates'
+require 'differ_patch'
 require 'airbrake'
 require 'errbit_config'
 
