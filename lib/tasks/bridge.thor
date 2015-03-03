@@ -8,7 +8,7 @@ class Bridge < Thor
     puts "You supplied the file: " + "#{options[:config]}".yellow
     puts "Project is : " + "#{options[:project]}".yellow
 
-    updated_config = update_config
+    updated_config = update_config.merge('log_file_name' => create_log_file)
 
     Daemons.daemonize()
 
@@ -22,6 +22,13 @@ class Bridge < Thor
   end
 
   no_commands do
+    def create_log_file
+      file_name = "#{options[:project].gsub(' ', '_')}.log"
+      file = open("tmp/logs/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
+
+      file_name
+    end
+
     def update_config
       config_file_path = File.expand_path("../../../#{options[:config]}", __FILE__)
       config_file_exists?(config_file_path)

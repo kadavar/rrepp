@@ -1,12 +1,8 @@
 module Jira2Pivotal
   class Config < Base
 
-    def initialize(config, project_name)
+    def initialize(config)
       @config = config
-      project_options = @config.delete(project_name)
-      @config.merge!(project_options) unless project_options.nil?
-
-      @config
     end
 
     def [](key)

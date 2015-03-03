@@ -1,11 +1,14 @@
 project_configs/
+logs/
 .idea/
 .ruby-gemset
 .ruby-version
 .ruby-gemset
 .rbenv-gemset
 .recap-lock
+
 /cap-recipes
+
 daemons.rb.output
 daemons.rb.pid
 tmp/

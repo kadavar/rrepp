@@ -38,7 +38,7 @@ module Jira2Pivotal
       end
 
       def options_for_issue(issue=nil)
-        { client: build_api_client, project: project, issue: issue }
+        { client: build_api_client, project: project, issue: issue, config: @config }
       end
 
       def build_issue(attributes, issue=nil)
@@ -145,6 +145,8 @@ module Jira2Pivotal
 
           story.assign_to_jira_issue(issue.issue.key, url)
 
+          logger.jira_logger.create_issue_log(story, issue)
+
           counter += 1
         end
 
@@ -182,6 +184,9 @@ module Jira2Pivotal
           subtask = create_sub_task!(issue)
           story.assign_to_jira_issue(subtask.key, url)
 
+          old_issue, attrs = build_issue({}, issue)
+          logger.jira_logger.invoced_issue_log(story, subtask, old_issue)
+
           stories.delete(story)
           counter += 1
         end
@@ -197,12 +202,10 @@ module Jira2Pivotal
 
         issue, attributes = build_issue(story.to_jira(@config[:custom_fields]), jira_issue)
 
+        logger.jira_logger.update_issue_log(story, issue)
+
         issue.save!(attributes, @config)
         issue.update_status!(story)
-      end
-
-      def jira_pivotal_field
-        @config[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
       end
 
       def create_sub_task!(issue)
@@ -281,6 +284,11 @@ module Jira2Pivotal
           project.issues(start_index)
         end
 
+      end
+
+      def jira_pivotal_field
+        pivotal_url = @config['jira_custom_fields']['pivotal_url']
+        @config[:custom_fields].key(pivotal_url)
       end
     end
   end

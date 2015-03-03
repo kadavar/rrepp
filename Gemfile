@@ -14,6 +14,7 @@ gem 'sidekiq-failures'
 gem 'sidekiq-limit_fetch'
 gem 'sinatra', require: false
 gem 'daemons'
+gem 'differ', github: 'emintham/differ'
 
 group :tools do
   gem 'capistrano', '~> 2.0'
