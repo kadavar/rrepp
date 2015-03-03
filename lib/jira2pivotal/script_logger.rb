@@ -1,5 +1,5 @@
 module Jira2Pivotal
-  class Loger
+  class ScriptLogger
     def initialize(config)
       @config = config
 
