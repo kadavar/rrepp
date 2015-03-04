@@ -1,5 +1,3 @@
-require File.expand_path('../../../lib/jira2pivotal.rb', __FILE__)
-
 class SyncWorker
   include Sidekiq::Worker
 

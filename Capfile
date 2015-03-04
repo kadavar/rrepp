@@ -6,7 +6,7 @@ require 'capistrano_colors'
 # require 'capistrano-unicorn'
 require 'capistrano/sidekiq'
 
-set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml -r ./lib/sidekiq_script.rb" }
+set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
 set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
 set(:sidekiq_log) { File.join(deploy_to, 'tmp', 'logs', 'sidekiq.log') }
 

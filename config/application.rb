@@ -20,7 +20,6 @@ require 'rufus-scheduler'
 require 'highline/import'
 require 'daemons'
 
-
 module J2p
   class Application < Rails::Application
     config.watchable_dirs['lib'] = [:rb]
