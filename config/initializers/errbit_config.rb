@@ -3,6 +3,5 @@ Airbrake.configure do |config|
   config.host    = 'errbit.hnd.sm.ua'
   config.port    = 80
   config.secure  = config.port == 443
-  config.development_environments = []
   config.ignore_only  = []
 end
