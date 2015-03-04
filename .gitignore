@@ -11,5 +11,6 @@ logs/
 
 daemons.rb.output
 daemons.rb.pid
+/config/application.yml
 tmp/
 log/

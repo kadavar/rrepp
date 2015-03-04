@@ -2,7 +2,6 @@ require 'recap/recipes/ruby'
 require 'sushi/ssh'
 require 'capistrano_colors'
 # require 'recap_rails'
-
 require 'capistrano-unicorn'
 require 'capistrano/sidekiq'
 
