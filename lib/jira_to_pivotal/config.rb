@@ -15,4 +15,8 @@ class JiraToPivotal::Config < JiraToPivotal::Base
   def merge!(attrs)
     @config.merge!(attrs)
   end
+
+  def delete(attrs)
+    @config.delete(attrs)
+  end
 end

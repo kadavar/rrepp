@@ -8,11 +8,12 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     build_api_client
 
+    @config.delete('jira_password')
     @config.merge!(custom_fields: issue_custom_fields)
   end
 
   def build_api_client
-    @client = JIRA::Client.new({
+    @client ||= JIRA::Client.new({
          username:     config['jira_login'],
          password:     config['jira_password'],
          site:         url,
@@ -28,7 +29,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   rescue JIRA::HTTPError =>  error
     logger.error_log(error)
     Airbrake.notify_or_ignore(
-      e,
+      error,
       parameters: { config: @config },
       cgi_data: ENV.to_hash
       )
@@ -134,6 +135,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       parameters: { jql: jql },
       cgi_data: ENV.to_hash
       )
+    return []
   end
 
   def create_tasks!(stories)
@@ -145,6 +147,9 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       issue, attributes = build_issue story.to_jira(@config[:custom_fields])
 
       issue.save!(attributes, @config)
+
+      logger.jira_logger.create_issue_log(story, issue)
+
       issue.update_status!(story)
       issue.create_notes!(story)
       # issue.add_marker_comment(story.url)
@@ -154,8 +159,6 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       #*********************************************************************************************************#
 
       story.assign_to_jira_issue(issue.issue.key, url)
-
-      logger.jira_logger.create_issue_log(story, issue)
 
       counter += 1
     end
@@ -196,7 +199,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       next unless story.present?
       putc '.'
 
-      subtask = create_sub_task!(issue)
+      subtask = create_sub_task!(issue, story.url)
       story.assign_to_jira_issue(subtask.key, url)
 
       old_issue, attrs = build_issue({}, issue)
@@ -223,7 +226,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     issue.update_status!(story)
   end
 
-  def create_sub_task!(issue)
+  def create_sub_task!(issue, story_url)
     attributes =
       { 'parent' => { 'id' => parent_id_for(issue) },
         'summary' => issue.fields['summary'],
@@ -232,9 +235,13 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
         jira_pivotal_field => issue.send(jira_pivotal_field)
       }
 
-    issue, attrs = build_issue(attributes)
-    issue.save!(attrs, @config)
-    issue
+
+    sub_task, attrs = build_issue(attributes)
+    sub_task.save!(attrs, @config)
+
+    logger.jira_logger.create_sub_task_log(story_url, sub_task.key, issue.key)
+
+    sub_task
   end
 
   def parent_id_for(issue)

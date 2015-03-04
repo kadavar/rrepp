@@ -33,12 +33,18 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
     @logger.info "#{@jira_issue_for_log} Create Connection: #{pivotal_url} - #{@connection_for_log}"
   end
 
+  def create_sub_task_log(story_url, issue_key, old_issue_key)
+    log_values(story_url, old_issue_key, 'CREATE')
+
+    @logger.info "#{@jira_issue_for_log} Sub Task: #{issue_key} - #{@connection_for_log}"
+  end
+
   private
 
   def log_values(story_url, issue_key, action)
     @config.merge!('sync_action' => action)
     @connection_for_log = jira_pivotal_connection_for_log(story_url, issue_key)
-    @jira_issue_for_log = ":: #{issue_key} :: >>"
+    @jira_issue_for_log = ":: #{issue_key} :: >>".blue
   end
 
   def title_diff_for_log(pivotal_title, jira_tittle)
