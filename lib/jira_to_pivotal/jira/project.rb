@@ -29,7 +29,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       e,
-      parameters: { config:@config },
+      parameters: { config: @config },
       cgi_data: ENV.to_hash
       )
 
@@ -180,16 +180,15 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def create_sub_task_for_invosed_issues!(stories)
+    counter = 0
+
     story_urls = stories.map{ |story| story.story.url }
 
-    if story_urls.present?
-      jira_issues = find_issues("project=#{@config['jira_project']} AND 'Pivotal Tracker URL' IN #{map_jira_ids_for_search(story_urls)}")
-    end
+    return counter unless story_urls.present?
 
-    counter = 0
     puts "\nUpdate Invoiced issues - create subtasks"
 
-    return unless jira_issues.present?
+    jira_issues = find_issues("project=#{@config['jira_project']} AND 'Pivotal Tracker URL' IN #{map_jira_ids_for_search(story_urls)}")
 
     jira_issues.each do |issue|
       story = stories.find { |story| story.url == issue.send(jira_pivotal_field) }
