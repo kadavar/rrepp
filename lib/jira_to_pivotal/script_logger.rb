@@ -34,12 +34,12 @@ class JiraToPivotal::ScriptLogger
     proc do |severity, datetime, progname, msg|
       if severity == "INFO" || severity == "WARN"
         if @config['sync_action'] == 'INVOICED'
-          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}] #{@config['sync_action']} -- #{msg}\n"
+          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}] " + "#{@config['sync_action']}".green + " -- #{msg}\n"
         else
-          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}]   #{@config['sync_action']} -- #{msg}\n"
+          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}]   " + "#{@config['sync_action']}".green +  " -- #{msg}\n"
         end
       else
-        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}] #{severity} -- #{msg}\n"
+        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}] " + "#{severity}".red + " -- #{msg}\n"
       end
     end
   end
