@@ -15,7 +15,7 @@ class JiraToPivotal::ScriptLogger
   end
 
   def write_daemon_pin_in_log
-    logger.debug File.open("#{Dir.pwd}/daemons.rb.pid") if File.exists?("#{Dir.pwd}/daemons.rb.pid")
+    logger.debug File.open("#{Dir.pwd}/daemons.rb.pid").first if File.exists?("#{Dir.pwd}/daemons.rb.pid")
   end
 
   def error_log(exception)
