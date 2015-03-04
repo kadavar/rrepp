@@ -76,7 +76,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     pivotal_points_id = custom_fields.key(pivotal_points)
 
     attrs[pivotal_url_id]    = story.url              if pivotal_url.present?
-    attrs[pivotal_points_id] = make_estimate_positive unless is_bug?
+    attrs[pivotal_points_id] = make_estimate_positive unless is_bug? || is_chore?
     attrs
   end
 
@@ -123,6 +123,10 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
   def started?
     story.current_state == 'started'
+  end
+
+  def is_chore?
+    story.story_type == 'chore'
   end
 
   def is_bug?
