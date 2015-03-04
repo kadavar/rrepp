@@ -6,11 +6,22 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
     @config = config
 
     build_project
+    @config.delete('tracker_token')
   end
 
   def build_project
     PivotalTracker::Client.token = config['tracker_token']
     @project = PivotalTracker::Project.find(config['tracker_project_id'])
+
+  rescue => error
+    logger.error_log(error)
+    Airbrake.notify_or_ignore(
+      error,
+      parameters: { config: @config },
+      cgi_data: ENV.to_hash
+      )
+
+    exit 1
   end
 
   def create_story(story_args)
