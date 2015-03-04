@@ -149,18 +149,15 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     # Jira give only several status options to select
     # So if we try to change status that not in list
     # Status would not change
-    begin
-      response = set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
-    rescue JIRA::HTTPError => e
-      logger.error_log(e)
-
-      Airbrake.notify_or_ignore(
-       e,
-       parameters: args_for_change_status(story),
-       cgi_data: ENV.to_hash,
-       error_message: "#{e.response.body}"
-      )
-    end
+    response = set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
+  rescue JIRA::HTTPError => e
+    logger.error_log(e)
+    Airbrake.notify_or_ignore(
+     e,
+     parameters: args_for_change_status(story),
+     cgi_data: ENV.to_hash,
+     error_message: "#{e.response.body}"
+    )
   end
 
   def create_notes!(story)

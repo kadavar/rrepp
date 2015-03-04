@@ -24,11 +24,14 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def project
-    begin
-      @project ||= @client.Project.find(@config['jira_project'])
-    rescue JIRA::HTTPError =>  error
-      raise StandardError.new 'Sorry, but project not found...'
-    end
+    @project ||= @client.Project.find(@config['jira_project'])
+  rescue JIRA::HTTPError =>  error
+    logger.error_log(error)
+    Airbrake.notify_or_ignore(
+      e,
+      parameters: @config
+      cgi_data: ENV.to_hash
+      )
   end
 
   def url
@@ -122,6 +125,13 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def find_issues(jql)
     response = JIRA::Resource::Issue.jql(@client, jql)
+  rescue Jira::HTTPError => e
+    logger.error_log(e)
+    Airbrake.notify_or_ignore(
+      e,
+      parameters: { jql: jql }
+      cgi_data: ENV.to_hash
+      )
   end
 
   def create_tasks!(stories)
@@ -158,9 +168,11 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     incorrect_jira_ids, correct_jira_ids = check_deleted_issues_in_jira(stories.map(&:jira_issue_id))
 
     cleaned_stories_count = remove_jira_id_from_pivotal(incorrect_jira_ids, stories)
-    jira_issues = find_issues("id in #{map_jira_ids_for_search(correct_jira_ids)}")
 
-    stories.each { |story| update_issue!(story, jira_issues); counter += 1 }
+    if correct_jira_ids.present?
+      jira_issues = find_issues("id in #{map_jira_ids_for_search(correct_jira_ids)}")
+      stories.each { |story| update_issue!(story, jira_issues); counter += 1 }
+    end
 
     return counter
   end
@@ -237,7 +249,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   private
 
   def map_jira_ids_for_search(jira_ids)
-    jira_ids.present? ? "(#{jira_ids.map { |s| "'#{s}'" }.join(',')})" : "('')"
+    "(#{jira_ids.map { |s| "'#{s}'" }.join(',')})"
   end
 
   def check_deleted_issues_in_jira(pivotal_jira_ids)

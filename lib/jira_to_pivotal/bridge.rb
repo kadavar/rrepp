@@ -13,19 +13,17 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   def sync!
-      jira.logger.write_daemon_pin_in_log
+    jira.logger.write_daemon_pin_in_log
 
-      connect_jira_to_pivotal!
-      # Right now flow jira -> pivotal is disabled
-      # from_jira_to_pivotal!
-    begin
-      from_pivotal_to_jira!
-    rescue Exception => e
-      jira.logger.error_log(e)
-      Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+    connect_jira_to_pivotal!
+    # Right now flow jira -> pivotal is disabled
+    # from_jira_to_pivotal!
+    from_pivotal_to_jira!
+  rescue Exception => e
+    jira.logger.error_log(e)
+    Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
 
-      raise e
-    end
+    raise e
   end
 
   def connect_jira_to_pivotal!

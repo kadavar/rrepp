@@ -49,13 +49,17 @@ class Bridge < Thor
     end
 
     def config_file_exists?(path)
-      if File.exist?(path)
-        true
-      else
-        puts "Missing config file: #{path}"
-        exit 1
-      end
-    end
+      true if File.open(path)
 
+    rescue Errno::ENOENT => e
+      Airbrake.notify_or_ignore(
+        e,
+        parameters: { config_path: path },
+        cgi_data: ENV.to_hash,
+        )
+
+      puts "Missing config file: #{path}"
+      exit 1
+    end
   end
 end

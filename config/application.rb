@@ -19,6 +19,8 @@ require 'colorize'
 require 'rufus-scheduler'
 require 'highline/import'
 require 'daemons'
+require 'pry'
+require 'pry-byebug'
 
 
 module J2p
