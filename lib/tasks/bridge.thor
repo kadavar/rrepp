@@ -7,17 +7,20 @@ class Bridge < Thor
   method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_configs/config.yml'
   method_option :project, aliases: '-p', desc: 'Project name from config file', required: true
   def sync
+    random_hash = SecureRandom.hex(30)
+
     puts "You supplied the file: " + "#{options[:config]}".yellow
     puts "Project is : " + "#{options[:project]}".yellow
 
     updated_config = update_config.merge('log_file_name' => create_log_file, 'project_name' => options[:project])
+    set_params_to_redis(updated_config, random_hash)
 
     Daemons.daemonize()
 
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
-      SyncWorker.perform_async(updated_config)
+      SyncWorker.perform_async(random_hash)
     end
 
     scheduler.join
@@ -46,6 +49,15 @@ class Bridge < Thor
       config['tracker_token'] = ask('Pivotaltracker API token: ', echo: false)
 
       return config
+    end
+
+    def encrypt_params(params, random_hash)
+      crypt = ActiveSupport::MessageEncryptor.new(random_hash)
+      crypt.encrypt_and_sign(params.to_json)
+    end
+
+    def set_params_to_redis(params, random_hash)
+      Sidekiq.redis { |connection| connection.set(random_hash, encrypt_params(params, random_hash)) }
     end
 
     def config_file_exists?(path)
