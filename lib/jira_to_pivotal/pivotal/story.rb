@@ -76,7 +76,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     pivotal_points_id = custom_fields.key(pivotal_points)
 
     attrs[pivotal_url_id]    = story.url              if pivotal_url.present?
-    attrs[pivotal_points_id] = make_estimate_positive unless is_bug? || is_chore?
+    attrs[pivotal_points_id] = make_estimate_positive unless bug? || chore?
     attrs
   end
 
@@ -114,7 +114,11 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   end
 
   def jira_issue_id
-    story.jira_url.present? ? story.jira_url.split('/').last : nil
+    if story.jira_id.present? || story.jira_url.present?
+      story.jira_id || story.jira_url.split('/').last
+    else
+      nil
+    end
   end
 
   def unstarted?
@@ -125,16 +129,16 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     story.current_state == 'started'
   end
 
-  def is_chore?
+  def chore?
     story.story_type == 'chore'
   end
 
-  def is_bug?
+  def bug?
     story.story_type == 'bug'
   end
 
   def set_original_estimate?
-    unstarted? || started?
+    (unstarted? || started?) && !(bug? || chore?)
   end
 end
 

@@ -148,7 +148,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
       issue.save!(attributes, @config)
 
-      logger.jira_logger.create_issue_log(story, issue)
+      logger.jira_logger.create_issue_log(story, issue, attributes)
 
       issue.update_status!(story)
       issue.create_notes!(story)
@@ -191,7 +191,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     puts "\nUpdate Invoiced issues - create subtasks"
 
-    jira_issues = find_issues("project=#{@config['jira_project']} AND 'Pivotal Tracker URL' IN #{map_jira_ids_for_search(story_urls)}")
+    jira_issues = find_issues("project=#{@config['jira_project']} AND 'Pivotal Tracker URL' IN #{map_jira_ids_for_search(story_urls)} AND status = Invoiced")
 
     jira_issues.each do |issue|
       story = stories.find { |story| story.url == issue.send(jira_pivotal_field) }
@@ -203,7 +203,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       story.assign_to_jira_issue(subtask.key, url)
 
       old_issue, attrs = build_issue({}, issue)
-      logger.jira_logger.invoced_issue_log(story, subtask, old_issue)
+      logger.jira_logger.invoced_issue_log(story: story, issue: subtask, old_issue: old_issue)
 
       stories.delete(story)
       counter += 1
@@ -220,7 +220,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     issue, attributes = build_issue(story.to_jira(@config[:custom_fields]), jira_issue)
 
-    logger.jira_logger.update_issue_log(story, issue)
+    logger.jira_logger.update_issue_log(story, issue, attributes)
 
     issue.save!(attributes, @config)
     issue.update_status!(story)
@@ -239,7 +239,10 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     sub_task, attrs = build_issue(attributes)
     sub_task.save!(attrs, @config)
 
-    logger.jira_logger.create_sub_task_log(story_url, sub_task.key, issue.key)
+    logger.jira_logger.create_sub_task_log(story_url: story_url,
+                                           issue_key: sub_task.key,
+                                           old_issue_key: issue.key,
+                                           attrs: attributes)
 
     sub_task
   end
