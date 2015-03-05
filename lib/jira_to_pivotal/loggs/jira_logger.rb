@@ -4,27 +4,33 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
     @config = config
   end
 
-  def create_issue_log(story_object, issue_object)
+  def create_issue_log(story_object, issue_object, attrs)
     log_values(story_object.url, issue_object.key, 'CREATE')
+    log_attributes_for_save(attrs)
 
     @logger.info "#{@jira_issue_for_log} For: #{story_object.story.id} - #{@connection_for_log}"
   end
 
-  def update_issue_log(story_object, issue_object)
+  def update_issue_log(story_object, issue_object, attrs)
     log_values(story_object.url, issue_object.key, 'UPDATE')
     Differ.separator = "\n"
 
     story, issue = shorcut_for(story_object, issue_object.issue)
 
+    log_attributes_for_save(attrs) if any_diff?(story, issue, attrs)
+
     title_diff_for_log(story['title'], issue['title'])     if story['title'].diff?(issue['title'])
     description_diff_for_log(story['desc'], issue['desc']) if story['desc'].diff?(issue['desc'])
     status_diff_for_log(story['status'], issue['status'])  if story['status'].diff?(issue['status'])
+    # points_diff_for_log
+    # original_estimate_diff_for_log
+    # type_diff_for_log
   end
 
-  def invoced_issue_log(story_object, issue_object, old_issue)
-    log_values(story_object.url, old_issue.key, 'INVOICED')
+  def invoced_issue_log(options)
+    log_values(options[:story].url, options[:old_issue].key, 'INVOICED')
 
-    @logger.info "#{@jira_issue_for_log} Sub Task: #{issue_object.issue.key} - #{@connection_for_log}"
+    @logger.info "#{@jira_issue_for_log} Sub Task: #{options[:issue].issue.key} - #{@connection_for_log}"
   end
 
   def update_jira_pivotal_connection_log(issue_key, pivotal_url)
@@ -33,13 +39,18 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
     @logger.info "#{@jira_issue_for_log} Create Connection: #{pivotal_url} - #{@connection_for_log}"
   end
 
-  def create_sub_task_log(story_url, issue_key, old_issue_key)
-    log_values(story_url, old_issue_key, 'CREATE')
+  def create_sub_task_log(options)
+    log_values(options[:story_url], options[:old_issue_key], 'CREATE')
+    log_attributes_for_save(options[:attrs])
 
-    @logger.info "#{@jira_issue_for_log} Sub Task: #{issue_key} - #{@connection_for_log}"
+    @logger.info "#{@jira_issue_for_log} Sub Task: #{options[:issue_key]} - #{@connection_for_log}"
   end
 
   private
+
+  def any_diff?(story, issue, attrs)
+    story['title'].diff?(issue['title']) || story['desc'].diff?(issue['desc']) || story['status'].diff?(issue['status'])
+  end
 
   def log_values(story_url, issue_key, action)
     @config.merge!('sync_action' => action)
@@ -81,5 +92,9 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
   def jira_pivotal_points
     pivotal_points = @config['jira_custom_fields']['pivotal_points']
     @config[:custom_fields].key(pivotal_points)
+  end
+
+  def log_attributes_for_save(attrs)
+    logger.debug "#{@jira_issue_for_log} Attributes: " + "#{attrs}".yellow + " - #{@connection_for_log}"
   end
 end

@@ -114,7 +114,11 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   end
 
   def jira_issue_id
-    story.jira_url.present? ? story.jira_url.split('/').last : nil
+    if story.jira_id.present? || story.jira_url.present?
+      story.jira_id || story.jira_url.split('/').last
+    else
+      nil
+    end
   end
 
   def unstarted?
@@ -134,7 +138,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   end
 
   def set_original_estimate?
-    unstarted? || started?
+    (unstarted? || started?) && !(is_bug? || is_chore?)
   end
 end
 
