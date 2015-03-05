@@ -22,9 +22,6 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
     title_diff_for_log(story['title'], issue['title'])     if story['title'].diff?(issue['title'])
     description_diff_for_log(story['desc'], issue['desc']) if story['desc'].diff?(issue['desc'])
     status_diff_for_log(story['status'], issue['status'])  if story['status'].diff?(issue['status'])
-    # points_diff_for_log
-    # original_estimate_diff_for_log
-    # type_diff_for_log
   end
 
   def invoced_issue_log(options)
