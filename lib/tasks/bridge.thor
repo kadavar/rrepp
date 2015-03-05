@@ -9,7 +9,7 @@ class Bridge < Thor
   def sync
     random_hash = SecureRandom.hex(30)
 
-    puts "You supplied the file: " + "#{options[:config]}".yellow
+    puts "You provided the file: " + "#{options[:config]}".yellow
     puts "Project is : " + "#{options[:project]}".yellow
 
     updated_config = update_config.merge('log_file_name' => create_log_file, 'project_name' => options[:project])
