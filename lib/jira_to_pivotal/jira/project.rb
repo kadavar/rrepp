@@ -33,8 +33,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       parameters: { config: @config },
       cgi_data: ENV.to_hash
       )
-
-    exit 1
+    raise error
   end
 
   def url

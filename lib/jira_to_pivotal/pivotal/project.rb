@@ -21,7 +21,7 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
       cgi_data: ENV.to_hash
       )
 
-    exit 1
+    raise error
   end
 
   def create_story(story_args)
