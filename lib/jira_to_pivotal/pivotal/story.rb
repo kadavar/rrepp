@@ -43,7 +43,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
     attrs =
     {
-      'summary'      => story.name,
+      'summary'      => story.name.squish,
       'description'  => description.to_s,
       'issuetype'    => { 'id' => story_type_to_issue_type },
     }
@@ -82,9 +82,9 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
   def story_type_to_issue_type
     type_map = {
-        'bug'     => '1',
-        'feature' => '2',
-        'chore'   => '10005'
+        'bug'     => @config['jira_issue_types']['bug'],
+        'feature' => @config['jira_issue_types']['feature'],
+        'chore'   => @config['jira_issue_types']['chore']
     }
 
     type_map[story.story_type]

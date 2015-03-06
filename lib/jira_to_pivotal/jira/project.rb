@@ -19,7 +19,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
          site:         url,
          context_path: '',
          auth_type:    :basic,
-         # use_ssl:      false,
+         use_ssl:      ssl?,
          # ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
      })
   end
@@ -35,6 +35,10 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       )
 
     exit 1
+  end
+
+  def ssl?
+    config['jira_uri_scheme'] == 'https'
   end
 
   def url
@@ -146,7 +150,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       putc '.'
       issue, attributes = build_issue story.to_jira(@config[:custom_fields])
 
-      issue.save!(attributes, @config)
+      next unless issue.save!(attributes, @config)
 
       logger.jira_logger.create_issue_log(story, issue, attributes)
 
@@ -200,6 +204,9 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       putc '.'
 
       subtask = create_sub_task!(issue, story.url)
+
+      next unless subtask
+
       story.assign_to_jira_issue(subtask.key, url)
 
       old_issue, attrs = build_issue({}, issue)
@@ -222,7 +229,8 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     logger.jira_logger.update_issue_log(story, issue, attributes)
 
-    issue.save!(attributes, @config)
+    return false unless issue.save!(attributes, @config)
+
     issue.update_status!(story)
   end
 
@@ -235,9 +243,9 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
         jira_pivotal_field => issue.send(jira_pivotal_field)
       }
 
-
     sub_task, attrs = build_issue(attributes)
-    sub_task.save!(attrs, @config)
+
+    return false unless sub_task.save!(attrs, @config)
 
     logger.jira_logger.create_sub_task_log(story_url: story_url,
                                            issue_key: sub_task.key,
