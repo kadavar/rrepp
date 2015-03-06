@@ -257,7 +257,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def parent_id_for(issue)
     j2p_issue, attrs = build_issue({}, issue)
-    j2p_issue.is_subtask? ? issue.fields['parent']['id'] : issue.id
+    j2p_issue.subtask? ? issue.fields['parent']['id'] : issue.id
   end
 
   def select_task(issues, story)
