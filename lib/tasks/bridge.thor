@@ -28,8 +28,8 @@ class Bridge < Thor
 
   no_commands do
     def create_log_file
-      file_name = "#{options[:project].gsub(' ', '_')}.log"
-      file = open("tmp/logs/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
+      file_name = "#{options[:project].underscore.gsub(' ', '_')}.log"
+      file = open("log/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
 
       file_name
     end
@@ -45,7 +45,7 @@ class Bridge < Thor
       say("Jira User: #{config['jira_login']}")
       config['jira_password'] = ask("Jira Password:  ", echo: false)
 
-      say("Pivotal Requester: #{config['tracker_requester']}")
+      say("\nPivotal Requester: #{config['tracker_requester']}")
       config['tracker_token'] = ask('Pivotaltracker API token: ', echo: false)
 
       return config
