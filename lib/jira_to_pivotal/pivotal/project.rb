@@ -24,6 +24,10 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
     raise error
   end
 
+  def update_config(options)
+    @config.merge!(options)
+  end
+
   def create_story(story_args)
     story = @project.stories.create(story_args)
     if story.errors.empty?
@@ -102,6 +106,10 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
 
   def select_task(stories, issue)
     stories.find { |story| story.jira_url == "#{@config.jira_url}/browse/#{issue.key}" }
+  end
+
+  def map_users_by_email
+    @project.memberships.all.map { |member|  { member.name => member.email } }.reduce Hash.new, :merge
   end
 
   private

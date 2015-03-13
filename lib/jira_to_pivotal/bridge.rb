@@ -12,6 +12,10 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
     @pivotal ||= JiraToPivotal::Pivotal::Project.new(@config)
   end
 
+  def ownership_handler
+    @handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal)
+  end
+
   def sync!
     jira.logger.write_daemon_pin_in_log
 
@@ -36,6 +40,7 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
 
   def from_pivotal_to_jira!
     # Make connection with Jira
+    pivotal.update_config(ownership_handler: ownership_handler)
 
     # Get all stories for the project from Pivotal Tracker
     puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project"
@@ -80,7 +85,7 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
 
   def options
     {
-      custom_fields: jira.issue_custom_fields
+      custom_fields: jira.issue_custom_fields,
     }
   end
 

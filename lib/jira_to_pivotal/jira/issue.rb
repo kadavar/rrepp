@@ -38,6 +38,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     begin
       issue.save!(attrs)
     rescue JIRA::HTTPError => e
+      logger.attrs_log(attrs)
       logger.error_log(e)
 
       Airbrake.notify_or_ignore(

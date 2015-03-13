@@ -18,6 +18,10 @@ class JiraToPivotal::ScriptLogger
     logger.debug File.open("#{Dir.pwd}/daemons.rb.pid").first if File.exists?("#{Dir.pwd}/daemons.rb.pid")
   end
 
+  def attrs_log(attrs, type='Before save')
+    logger.debug "#{type} Attributes: " + "#{attrs}".yellow
+  end
+
   def error_log(exception)
     if exception.instance_of? JIRA::HTTPError
       logger.error exception.response.body

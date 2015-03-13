@@ -36,6 +36,10 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     raise error
   end
 
+  def update_config(options)
+    @config.merge!(options)
+  end
+
   def ssl?
     config['jira_uri_scheme'] == 'https'
   end
@@ -268,6 +272,14 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     @issue.names
   end
 
+  def jira_assignable_users
+    users = project.asignable_users
+
+    by_email        = users.map {|u| {u['emailAddress'] => u['name']} }.reduce Hash.new, :merge
+    by_display_name = users.map {|u| {u['displayName']  => u['name']} }.reduce Hash.new, :merge
+    return { by_email: by_email, by_display_name: by_display_name }
+  end
+
   private
 
   def map_jira_ids_for_search(jira_ids)
@@ -321,35 +333,5 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   def jira_pivotal_field
     pivotal_url = @config['jira_custom_fields']['pivotal_url']
     @config[:custom_fields].key(pivotal_url)
-  end
-end
-
-
-JIRA::Resource::Project.class_eval do
-  # Returns all the issues for this project
-  def issues(start_index=0)
-    response = client.get(client.options[:rest_base_path] + "/search?jql=project%3D'#{key}'&startIndex=#{start_index}")
-    json = self.class.parse_json(response.body)
-    json['issues'].map do |issue|
-      client.Issue.build(issue)
-    end
-  end
-
-  def issues_by_filter(filter_id, start_index=0)
-    response = client.get(client.options[:rest_base_path] + "/filter/#{filter_id}?startIndex=#{start_index}")
-    filter_data = self.class.parse_json(response.body)
-
-    response = client.get(filter_data['searchUrl'])
-    json = self.class.parse_json(response.body)
-
-    json['issues'].map do |issue|
-      client.Issue.build(issue)
-    end
-  end
-
-  def issue_with_name_expand
-    response = client.get(client.options[:rest_base_path] + "/search?jql=project%3D'#{key}'+AND+issuetype+%3D+%22New+Feature%22&maxResults=1&expand=names")
-    json = self.class.parse_json(response.body)
-    client.Issue.build(json)
   end
 end
