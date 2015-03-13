@@ -7,7 +7,7 @@ class JiraToPivotal::ScriptLogger
   end
 
   def logger
-    @logger ||= Logger.new("tmp/logs/#{@config['log_file_name']}")
+    @logger ||= Logger.new("log/#{@config['log_file_name']}")
   end
 
   def jira_logger

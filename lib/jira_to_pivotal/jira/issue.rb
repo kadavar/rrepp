@@ -46,6 +46,8 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
        cgi_data: ENV.to_hash,
        error_message: "#{e.response.body}"
       )
+
+      false
     end
 
   end

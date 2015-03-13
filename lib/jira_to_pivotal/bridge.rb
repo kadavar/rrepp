@@ -1,7 +1,7 @@
 class JiraToPivotal::Bridge < JiraToPivotal::Base
 
-  def initialize(config)
-    @config = JiraToPivotal::Config.new(config)
+  def initialize(hash)
+    @config = JiraToPivotal::Config.new(decrypt_config(hash))
   end
 
   def jira
@@ -85,6 +85,15 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   private
+
+  def decrypt_config(hash)
+    crypt = ActiveSupport::MessageEncryptor.new(hash)
+
+    encrypted_data = Sidekiq.redis {|connection| connection.get(hash) }
+    decrypted_back = crypt.decrypt_and_verify(encrypted_data)
+
+    JSON.parse(decrypted_back)
+  end
 
   def pivotal_jira_connection(issues, stories)
     mapped_issues = map_issues_by_pivotal_url(issues).reduce Hash.new, :merge

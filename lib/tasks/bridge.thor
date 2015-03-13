@@ -7,17 +7,20 @@ class Bridge < Thor
   method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_configs/config.yml'
   method_option :project, aliases: '-p', desc: 'Project name from config file', required: true
   def sync
-    puts "You supplied the file: " + "#{options[:config]}".yellow
+    random_hash = SecureRandom.hex(30)
+
+    puts "You provided the file: " + "#{options[:config]}".yellow
     puts "Project is : " + "#{options[:project]}".yellow
 
     updated_config = update_config.merge('log_file_name' => create_log_file, 'project_name' => options[:project])
+    set_params_to_redis(updated_config, random_hash)
 
     Daemons.daemonize()
 
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
-      SyncWorker.perform_async(updated_config)
+      SyncWorker.perform_async(random_hash)
     end
 
     scheduler.join
@@ -25,8 +28,8 @@ class Bridge < Thor
 
   no_commands do
     def create_log_file
-      file_name = "#{options[:project].gsub(' ', '_')}.log"
-      file = open("tmp/logs/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
+      file_name = "#{options[:project].underscore.gsub(' ', '_')}.log"
+      file = open("log/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
 
       file_name
     end
@@ -42,10 +45,19 @@ class Bridge < Thor
       say("Jira User: #{config['jira_login']}")
       config['jira_password'] = ask("Jira Password:  ", echo: false)
 
-      say("Pivotal Requester: #{config['tracker_requester']}")
+      say("\nPivotal Requester: #{config['tracker_requester']}")
       config['tracker_token'] = ask('Pivotaltracker API token: ', echo: false)
 
       return config
+    end
+
+    def encrypt_params(params, random_hash)
+      crypt = ActiveSupport::MessageEncryptor.new(random_hash)
+      crypt.encrypt_and_sign(params.to_json)
+    end
+
+    def set_params_to_redis(params, random_hash)
+      Sidekiq.redis { |connection| connection.set(random_hash, encrypt_params(params, random_hash)) }
     end
 
     def config_file_exists?(path)

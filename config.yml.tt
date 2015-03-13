@@ -14,3 +14,8 @@ script_repeat_time: '5m'
 jira_custom_fields:
   pivotal_points:   'Story Points'
   pivotal_url:      'Pivotal Tracker URL'
+
+jira_issue_types:
+  bug: 1
+  feature: 2
+  chore: 9

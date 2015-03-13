@@ -9,7 +9,11 @@ class JiraToPivotal::Config < JiraToPivotal::Base
   end
 
   def jira_url
-    "#{@config['jira_uri_scheme']}://#{@config['jira_host']}"
+    "#{@config['jira_uri_scheme']}://#{@config['jira_host']}:#{port}"
+  end
+
+  def port
+    @config['jira_uri_scheme'] == 'https' ? 443 : @config['jira_port']
   end
 
   def merge!(attrs)

@@ -7,7 +7,7 @@ require 'capistrano/sidekiq'
 
 set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
 set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
-set(:sidekiq_log) { File.join(deploy_to, 'tmp', 'logs', 'sidekiq.log') }
+set(:sidekiq_log) { File.join(deploy_to, 'log', 'sidekiq.log') }
 
 server '83.143.200.3:55022', :web, :app, :db, primary: true
 
