@@ -85,7 +85,7 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
 
   def options
     {
-      custom_fields: jira.issue_custom_fields,
+      custom_fields: jira.issue_custom_fields
     }
   end
 
