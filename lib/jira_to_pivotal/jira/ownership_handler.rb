@@ -30,11 +30,11 @@ class JiraToPivotal::Jira::OwnershipHandler < JiraToPivotal::Jira::Base
   end
 
   def jira_assignee_by_email
-    jira_assignee[:by_email]
+    jira_assignee[:by_email].compact_keys
   end
 
   def jira_assignee_by_displayed_name
-    jira_assignee[:by_display_name]
+    jira_assignee[:by_display_name].compact_keys
   end
 
   def jira_assignee_by_email_without_domen
