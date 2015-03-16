@@ -25,7 +25,7 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
     from_pivotal_to_jira!
   rescue Exception => e
     jira.logger.error_log(e)
-    Airbrake.notify_or_ignore(e, parameters: @config, cgi_data: ENV.to_hash)
+    Airbrake.notify_or_ignore(e, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
 
     raise e
   end

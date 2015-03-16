@@ -22,7 +22,7 @@ class JiraToPivotal::Jira::OwnershipHandler < JiraToPivotal::Jira::Base
   end
 
   def pivotal_assignee
-   @piv_assignee ||= @pivotal.map_users_by_email
+   @piv_assignee ||= @pivotal.map_users_by_email.compact
   end
 
   def jira_assignee

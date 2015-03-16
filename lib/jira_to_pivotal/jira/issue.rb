@@ -17,6 +17,10 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     @attachments ||= issue.attachments.map { |attachment| JiraToPivotal::Jira::Attachment.new(project, attachment) }
   end
 
+  def user_permissions
+    @user_permissions ||= JiraToPivotal::Jira::UserPermissions.new(@project)
+  end
+
   def add_marker_comment(story_url)
     # Add comment to the original JIRA issue
     puts 'Adding a comment to the JIRA issue'
@@ -67,6 +71,12 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
       attrs['fields'].except!(pivotal_story_points)
       attrs['fields'].except!('issuetype') if subtask?
     end
+
+    remove_fields_without_permission(attrs)
+  end
+
+  def remove_fields_without_permission(attrs)
+    attrs['fields'].except!('reporter') unless user_permissions.modify_reporter?
   end
 
   def original_estimate

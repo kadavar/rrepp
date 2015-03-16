@@ -30,4 +30,9 @@ JIRA::Resource::Project.class_eval do
     response = client.get(client.options[:rest_base_path] + "/user/assignable/search?project=#{self.key}")
     json = self.class.parse_json(response.body)
   end
+
+  def user_permissions
+    response = client.get(client.options[:rest_base_path] + "/mypermissions?projectKey=#{self.key}")
+    json = self.class.parse_json(response.body)
+  end
 end

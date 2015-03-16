@@ -23,4 +23,10 @@ class JiraToPivotal::Config < JiraToPivotal::Base
   def delete(attrs)
     @config.delete(attrs)
   end
+
+  def for_airbrake
+    @config.delete(:custom_fields)
+    @config.delete(:ownership_handler)
+    @config
+  end
 end
