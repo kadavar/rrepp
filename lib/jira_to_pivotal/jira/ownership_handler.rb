@@ -4,7 +4,7 @@ class JiraToPivotal::Jira::OwnershipHandler < JiraToPivotal::Jira::Base
     @pivotal = pivotal
   end
 
-  def reporter_and_asignee_options(story)
+  def reporter_and_asignee_attrs(story)
     result = Hash.new
     if story.story.owned_by.present? && user_jira_name(story.story.owned_by)
       result.merge!(reporter(story.story.owned_by))

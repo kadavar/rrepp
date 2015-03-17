@@ -43,22 +43,11 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   end
 
   def to_jira(custom_fields)
-    description = replace_image_tag
-
-    attrs =
-    {
-      'summary'      => story.name.squish,
-      'description'  => description.to_s,
-      'issuetype'    => { 'id' => story_type_to_issue_type },
-    }
-    attrs['timetracking'] = { 'originalEstimate' => "#{make_estimate_positive}h" } if set_original_estimate?
-    attrs.merge!(custom_fields_attrs(custom_fields))
-         .merge!(ownership_handler.reporter_and_asignee_options(self))
+    main_attrs.merge!(original_estimate_attrs)
+              .merge!(custom_fields_attrs(custom_fields))
+              .merge!(ownership_handler.reporter_and_asignee_attrs(self))
   end
 
-  def replace_image_tag
-    story.description.gsub(regexp_for_image_tag_replace, '!\1!')
-  end
 
   def regexp_for_image_tag_replace
     #Match ![some_title](http://some.site.com/some_imge.png)
@@ -144,5 +133,21 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
   def set_original_estimate?
     (unstarted? || started?) && !(bug? || chore?)
+  end
+
+  def original_estimate_attrs
+    set_original_estimate? ? { 'timetracking' => { 'originalEstimate' => "#{make_estimate_positive}h" } } : {}
+  end
+
+  def main_attrs
+    {
+      'summary'      => story.name.squish,
+      'description'  => description_with_replaced_image_tag.to_s,
+      'issuetype'    => { 'id' => story_type_to_issue_type },
+    }
+  end
+
+  def description_with_replaced_image_tag
+    story.description.gsub(regexp_for_image_tag_replace, '!\1!')
   end
 end
