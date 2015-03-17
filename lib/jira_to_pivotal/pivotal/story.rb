@@ -53,7 +53,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     }
     attrs['timetracking'] = { 'originalEstimate' => "#{make_estimate_positive}h" } if set_original_estimate?
     attrs.merge!(custom_fields_attrs(custom_fields))
-    attrs.merge!(ownership_handler.reporter_and_asignee_options(self))
+         .merge!(ownership_handler.reporter_and_asignee_options(self))
   end
 
   def replace_image_tag

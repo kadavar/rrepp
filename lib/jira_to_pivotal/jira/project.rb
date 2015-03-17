@@ -273,11 +273,11 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def jira_assignable_users
-    users = project.asignable_users
-
-    by_email        = users.map {|u| {u['emailAddress'] => u['name']} }.reduce Hash.new, :merge
-    by_display_name = users.map {|u| {u['displayName']  => u['name']} }.reduce Hash.new, :merge
-    return { by_email: by_email, by_display_name: by_display_name }
+    result = Hash.new
+    ['emailAddress', 'displayName' ].each do |elem|
+      result.merge!(elem.underscore => project.asignable_users.map {|u| {u[elem] => u['name']} }.reduce(Hash.new, :merge))
+    end
+    result
   end
 
   private

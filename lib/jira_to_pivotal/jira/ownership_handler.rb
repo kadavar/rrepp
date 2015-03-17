@@ -6,19 +6,21 @@ class JiraToPivotal::Jira::OwnershipHandler < JiraToPivotal::Jira::Base
 
   def reporter_and_asignee_options(story)
     result = Hash.new
-    result.merge!(reporter(story.story.owned_by)) if story.story.owned_by.present? && user_jira_name(story.story.owned_by)
-    result.merge!(assignee(story.story.owned_by)) if story.story.owned_by.present? && user_jira_name(story.story.owned_by)
+    if story.story.owned_by.present? && user_jira_name(story.story.owned_by)
+      result.merge!(reporter(story.story.owned_by))
+            .merge!(assignee(story.story.owned_by))
+    end
     result
   end
 
   private
 
   def reporter(requested_by)
-    { "reporter" => { "name" => user_jira_name(requested_by) } }
+    { 'reporter' => { 'name' => user_jira_name(requested_by) } }
   end
 
   def assignee(owned_by)
-    { "assignee" => { "name" => user_jira_name(owned_by) } }
+    { 'assignee' => { 'name' => user_jira_name(owned_by) } }
   end
 
   def pivotal_assignee
@@ -30,11 +32,11 @@ class JiraToPivotal::Jira::OwnershipHandler < JiraToPivotal::Jira::Base
   end
 
   def jira_assignee_by_email
-    jira_assignee[:by_email].compact_keys
+    jira_assignee['email_address'].compact_keys
   end
 
   def jira_assignee_by_displayed_name
-    jira_assignee[:by_display_name].compact_keys
+    jira_assignee['display_name'].compact_keys
   end
 
   def jira_assignee_by_email_without_domen
