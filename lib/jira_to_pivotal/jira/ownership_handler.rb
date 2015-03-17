@@ -67,7 +67,7 @@ class JiraToPivotal::Jira::OwnershipHandler < JiraToPivotal::Jira::Base
   end
 
   def check_name_by_email(full_name)
-    pivotal_name = pivotal_assignee_by_email_without_domen[full_name]
+    pivotal_name = pivotal_assignee_by_email_without_domen[full_name] || 'Not Found'
     result = nil
 
     jira_assignee_by_email_without_domen.each do |key, value|
