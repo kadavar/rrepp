@@ -1,16 +1,11 @@
 class JiraToPivotal::Jira::UserPermissions < JiraToPivotal::Jira::Base
   def initialize(client)
-    @permissions = client.user_permissions
-    # create_methods
-  end
-
-  def modify_reporter?
-    @permissions['permissions']['MODIFY_REPORTER']['havePermission']
+    self.class.create_methods(client.user_permissions)
   end
 
   private
 
-  # Create methods like create_issues? for these permition
+  # Create methods like 'create_issues?' for these permition
   # "VIEW_WORKFLOW_READONLY", "CREATE_ISSUES","VIEW_DEV_TOOLS", "BULK_CHANGE", "CREATE_ATTACHMENT", "DELETE_OWN_COMMENTS",
   # "WORK_ON_ISSUES", "PROJECT_ADMIN", "COMMENT_EDIT_ALL", "ATTACHMENT_DELETE_OWN", "WORKLOG_DELETE_OWN", "CLOSE_ISSUE",
   # "MANAGE_WATCHER_LIST", "VIEW_VOTERS_AND_WATCHERS", "ADD_COMMENTS", "COMMENT_DELETE_ALL", "CREATE_ISSUE", "DELETE_OWN_ATTACHMENTS",
@@ -23,8 +18,11 @@ class JiraToPivotal::Jira::UserPermissions < JiraToPivotal::Jira::Base
   # "ATTACHMENT_DELETE_ALL", "DELETE_ISSUES", "MANAGE_GROUP_FILTER_SUBSCRIPTIONS", "RESOLVE_ISSUE", "ASSIGNABLE_USER",
   # "TRANSITION_ISSUE", "COMMENT_EDIT_OWN", "MOVE_ISSUE", "WORKLOG_EDIT_OWN", "DELETE_ALL_WORKLOGS", "LINK_ISSUES"
 
-  # WIP Not finished yet
-  # def create_methods
-  #   @permissions['permissions']
-  # end
+  def self.create_methods(permissions)
+    permissions['permissions'].each do |permission, options|
+      define_method "#{permission.downcase}?" do
+        options['havePermission']
+      end
+    end
+  end
 end
