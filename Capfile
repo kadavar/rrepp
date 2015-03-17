@@ -4,6 +4,7 @@ require 'capistrano_colors'
 # require 'recap_rails'
 require 'capistrano-unicorn'
 require 'capistrano/sidekiq'
+require 'capistrano/slack'
 
 set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
 set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
@@ -44,3 +45,12 @@ after 'deploy:restart', 'unicorn:reload'    # app IS NOT preloaded
 #after 'deploy:restart', 'unicorn:restart'   # app preloaded
 # after 'deploy:restart', 'unicorn:duplicate' # before_fork hook implemented (zero downtime deployments)
 before 'sidekiq:start', 'script:create_folders'
+
+# Slack
+set :slack_token, '8V61rFAEnqQNlvWFxG9uOEHL' # comes from inbound webhook integration
+set :slack_room, '#j2p'
+set :slack_subdomain, 'jetruby'
+
+set :slack_application, 'Jira2Pivotal'
+set :slack_username, 'CapBot'
+set :slack_emoji, ':beers:'

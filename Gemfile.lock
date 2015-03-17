@@ -63,9 +63,15 @@ GEM
     capistrano-colorized-stream (0.2.3)
       capistrano (~> 2)
       colorize
+    capistrano-log_with_awesome (0.0.2)
+      capistrano (>= 2.5.14)
     capistrano-sidekiq (0.4.0)
       capistrano
       sidekiq
+    capistrano-slack (1.3.1)
+      activesupport (>= 3)
+      capistrano (~> 2.15.5)
+      capistrano-log_with_awesome (~> 0.0.2)
     capistrano-unicorn (0.2.0)
       capistrano (< 3.0)
     capistrano_colors (0.5.5)
@@ -230,6 +236,7 @@ DEPENDENCIES
   capistrano (~> 2.0)
   capistrano-colorized-stream
   capistrano-sidekiq
+  capistrano-slack
   capistrano-unicorn
   capistrano_colors
   certified

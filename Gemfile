@@ -33,6 +33,7 @@ group :tools do
   gem 'capistrano-sidekiq'
   gem 'bundler-audit'
   gem 'capistrano-colorized-stream'
+  gem 'capistrano-slack'
 end
 
 group :production do
