@@ -47,7 +47,7 @@ after 'deploy:restart', 'unicorn:reload'    # app IS NOT preloaded
 before 'sidekiq:start', 'script:create_folders'
 
 # Slack
-set :slack_token, '8V61rFAEnqQNlvWFxG9uOEHL' # comes from inbound webhook integration
+set :slack_token, 'SRxImWhjpPYBcID29xE8cjR5' # comes from inbound webhook integration
 set :slack_room, '#j2p'
 set :slack_subdomain, 'jetruby'
 
