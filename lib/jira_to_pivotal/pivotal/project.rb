@@ -10,10 +10,13 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
   end
 
   def build_project
+    retries ||= 5
     PivotalTracker::Client.token = config['tracker_token']
     @project = PivotalTracker::Project.find(config['tracker_project_id'])
 
   rescue => error
+    retry unless (retries -= 1).zero?
+
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       error,

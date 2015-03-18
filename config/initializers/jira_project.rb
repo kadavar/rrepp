@@ -28,8 +28,11 @@ JIRA::Resource::Project.class_eval do
     get_to("/mypermissions?projectKey=#{self.key}")
   end
 
-  def get_to(path, full_path=false)
+  def get_to(path, full_path=false, retries=5)
     get_path = full_path ? path : client.options[:rest_base_path] + path
     self.class.parse_json(client.get(get_path).body)
+  rescue JIRA::HTTPError => error
+    retry unless (retries -= 1).zero?
+    raise error
   end
 end

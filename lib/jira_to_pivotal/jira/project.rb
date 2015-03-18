@@ -25,8 +25,11 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def project
+    retries ||= 5
     @project ||= @client.Project.find(@config['jira_project'])
   rescue JIRA::HTTPError =>  error
+    retry unless (retries -= 1).zero?
+
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       error,
