@@ -43,7 +43,8 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     story.update(jira_id: key, jira_url: url)
   rescue => error
     sleep(1) && retry unless (retries -= 1).zero?
-    raise error
+    Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
+    false
   end
 
   def to_jira(custom_fields)
