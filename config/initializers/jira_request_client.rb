@@ -1,4 +1,4 @@
-JIRA::RequestClient.class_eval
+JIRA::RequestClient.class_eval do
   # Returns the response if the request was successful (HTTP::2xx) and
   # raises a JIRA::HTTPError if it was not successful, with the response
   # attached.
