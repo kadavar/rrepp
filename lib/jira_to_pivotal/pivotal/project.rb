@@ -112,7 +112,11 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
   end
 
   def map_users_by_email
+    retries ||= 5
     @project.memberships.all.map { |member|  { member.name => member.email } }.reduce Hash.new, :merge
+  rescue => error
+    sleep(1) && retry unless (retries -= 1).zero?
+    raise error
   end
 
   private

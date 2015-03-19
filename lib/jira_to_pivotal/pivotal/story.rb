@@ -39,7 +39,11 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   end
 
   def assign_to_jira_issue(key, url)
+    retries ||= 5
     story.update(jira_id: key, jira_url: url)
+  rescue => error
+    sleep(1) && retry unless (retries -= 1).zero?
+    raise error
   end
 
   def to_jira(custom_fields)
