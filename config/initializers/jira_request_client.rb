@@ -3,8 +3,7 @@ JIRA::RequestClient.class_eval do
   # raises a JIRA::HTTPError if it was not successful, with the response
   # attached.
 
-  def request(*args)
-    retries ||= 5
+  def request(*args, retries=5)
     response = make_request(*args)
     raise HTTPError.new(response) unless response.kind_of?(Net::HTTPSuccess)
     response

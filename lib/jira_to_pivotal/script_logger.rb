@@ -36,7 +36,7 @@ class JiraToPivotal::ScriptLogger
 
   def formatter
     proc do |severity, datetime, progname, msg|
-      if severity == "INFO" || severity == "WARN"
+      if severity == 'INFO' || severity == 'WARN'
         if @config['sync_action'] == 'INVOICED'
           "[#{datetime.utc.strftime('%Y-%m-%d %H:%M:%S.%6N %Z')} ##{Process.pid} P##{@config['project_name']}] " + "#{@config['sync_action']}".green + " -- #{msg}\n"
         else

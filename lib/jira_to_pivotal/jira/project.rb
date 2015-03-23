@@ -25,7 +25,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def project
-    retries ||= 5
+    retries ||= @config['script_repeat_time']
     @project ||= @client.Project.find(@config['jira_project'])
   rescue JIRA::HTTPError =>  error
     retry unless (retries -= 1).zero?
