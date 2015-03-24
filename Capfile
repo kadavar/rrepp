@@ -1,4 +1,5 @@
 require 'recap/recipes/ruby'
+require '~/projects/j2p/config/deploy/recap'
 require 'sushi/ssh'
 require 'capistrano_colors'
 # require 'recap_rails'
