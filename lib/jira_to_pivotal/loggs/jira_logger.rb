@@ -64,7 +64,7 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
   end
 
   def status_diff_for_log(pivotal_status, jira_status)
-    @logger.info "#{@jira_issue_for_log} Status: #{pivotal_status - jira_status} - #{@connection_for_log}"
+    @logger.info "#{@jira_issue_for_log} Status: " + "#{pivotal_status - jira_status}".magenta + " - #{@connection_for_log}"
   end
 
   def shorcut_for(story, issue)

@@ -8,6 +8,8 @@ jira_port:          80
 jira_project:       JP
 jira_filter:        10800
 
+retry_count:        5
+
 script_first_start: 5
 script_repeat_time: '5m'
 

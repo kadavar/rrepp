@@ -18,6 +18,10 @@ class JiraToPivotal::ScriptLogger
     logger.debug File.open("#{Dir.pwd}/daemons.rb.pid").first if File.exists?("#{Dir.pwd}/daemons.rb.pid")
   end
 
+  def attrs_log(attrs, type='Before save')
+    logger.debug "#{type} Attributes: " + "#{attrs}".yellow
+  end
+
   def error_log(exception)
     if exception.instance_of? JIRA::HTTPError
       logger.error exception.response.body
@@ -32,14 +36,14 @@ class JiraToPivotal::ScriptLogger
 
   def formatter
     proc do |severity, datetime, progname, msg|
-      if severity == "INFO" || severity == "WARN"
+      if severity == 'INFO' || severity == 'WARN'
         if @config['sync_action'] == 'INVOICED'
-          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}] " + "#{@config['sync_action']}".green + " -- #{msg}\n"
+          "[#{datetime.utc.strftime('%Y-%m-%d %H:%M:%S.%6N %Z')} ##{Process.pid} P##{@config['project_name']}] " + "#{@config['sync_action']}".green + " -- #{msg}\n"
         else
-          "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}]   " + "#{@config['sync_action']}".green +  " -- #{msg}\n"
+          "[#{datetime.utc.strftime('%Y-%m-%d %H:%M:%S.%6N %Z')} ##{Process.pid} P##{@config['project_name']}]   " + "#{@config['sync_action']}".green +  " -- #{msg}\n"
         end
       else
-        "[#{datetime.strftime('%Y-%m-%d %H:%M:%S.%6N')} ##{Process.pid} P##{@config['project_name']}]    " + "#{severity}".red + " -- #{msg}\n"
+        "[#{datetime.utc.strftime('%Y-%m-%d %H:%M:%S.%6N %Z')} ##{Process.pid} P##{@config['project_name']}]    " + "#{severity}".red + " -- #{msg}\n"
       end
     end
   end

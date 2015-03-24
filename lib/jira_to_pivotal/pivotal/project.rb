@@ -10,10 +10,13 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
   end
 
   def build_project
+    retries ||= @config['script_repeat_time']
     PivotalTracker::Client.token = config['tracker_token']
     @project = PivotalTracker::Project.find(config['tracker_project_id'])
 
   rescue => error
+    retry unless (retries -= 1).zero?
+
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       error,
@@ -22,6 +25,10 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
       )
 
     raise error
+  end
+
+  def update_config(options)
+    @config.merge!(options)
   end
 
   def create_story(story_args)
@@ -102,6 +109,14 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
 
   def select_task(stories, issue)
     stories.find { |story| story.jira_url == "#{@config.jira_url}/browse/#{issue.key}" }
+  end
+
+  def map_users_by_email
+    retries ||= @config['script_repeat_time']
+    @project.memberships.all.map { |member|  { member.name => member.email } }.reduce Hash.new, :merge
+  rescue => error
+    sleep(1) && retry unless (retries -= 1).zero?
+    raise error
   end
 
   private

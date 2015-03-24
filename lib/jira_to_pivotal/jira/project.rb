@@ -25,8 +25,11 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def project
+    retries ||= @config['script_repeat_time']
     @project ||= @client.Project.find(@config['jira_project'])
   rescue JIRA::HTTPError =>  error
+    retry unless (retries -= 1).zero?
+
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       error,
@@ -34,6 +37,10 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       cgi_data: ENV.to_hash
       )
     raise error
+  end
+
+  def update_config(options)
+    @config.merge!(options)
   end
 
   def ssl?
@@ -268,6 +275,14 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     @issue.names
   end
 
+  def jira_assignable_users
+    result = Hash.new
+    ['emailAddress', 'displayName' ].each do |elem|
+      result.merge!(elem.underscore => project.asignable_users.map {|u| {u[elem] => u['name']} }.reduce(Hash.new, :merge))
+    end
+    result
+  end
+
   private
 
   def map_jira_ids_for_search(jira_ids)
@@ -321,35 +336,5 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   def jira_pivotal_field
     pivotal_url = @config['jira_custom_fields']['pivotal_url']
     @config[:custom_fields].key(pivotal_url)
-  end
-end
-
-
-JIRA::Resource::Project.class_eval do
-  # Returns all the issues for this project
-  def issues(start_index=0)
-    response = client.get(client.options[:rest_base_path] + "/search?jql=project%3D'#{key}'&startIndex=#{start_index}")
-    json = self.class.parse_json(response.body)
-    json['issues'].map do |issue|
-      client.Issue.build(issue)
-    end
-  end
-
-  def issues_by_filter(filter_id, start_index=0)
-    response = client.get(client.options[:rest_base_path] + "/filter/#{filter_id}?startIndex=#{start_index}")
-    filter_data = self.class.parse_json(response.body)
-
-    response = client.get(filter_data['searchUrl'])
-    json = self.class.parse_json(response.body)
-
-    json['issues'].map do |issue|
-      client.Issue.build(issue)
-    end
-  end
-
-  def issue_with_name_expand
-    response = client.get(client.options[:rest_base_path] + "/search?jql=project%3D'#{key}'+AND+issuetype+%3D+%22New+Feature%22&maxResults=1&expand=names")
-    json = self.class.parse_json(response.body)
-    client.Issue.build(json)
   end
 end

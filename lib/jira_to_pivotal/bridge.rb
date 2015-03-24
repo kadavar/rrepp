@@ -12,6 +12,10 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
     @pivotal ||= JiraToPivotal::Pivotal::Project.new(@config)
   end
 
+  def ownership_handler
+    @handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal)
+  end
+
   def sync!
     jira.logger.write_daemon_pin_in_log
 
@@ -21,7 +25,7 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
     from_pivotal_to_jira!
   rescue Exception => e
     jira.logger.error_log(e)
-    Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+    Airbrake.notify_or_ignore(e, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
 
     raise e
   end
@@ -36,6 +40,7 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
 
   def from_pivotal_to_jira!
     # Make connection with Jira
+    pivotal.update_config(ownership_handler: ownership_handler)
 
     # Get all stories for the project from Pivotal Tracker
     puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project"
