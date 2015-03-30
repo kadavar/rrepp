@@ -13,7 +13,12 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   end
 
   def notes
-    @note ||= story.notes.all
+    retries ||= @config['script_repeat_time'].to_i
+    @note   ||= story.notes.all
+  rescue => error
+    sleep(1) && retry unless (retries -= 1).zero?
+    Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
+    false
   end
 
   def add_note(args)
