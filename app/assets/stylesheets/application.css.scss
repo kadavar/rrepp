@@ -10,6 +10,24 @@
  * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
  * file per style scope.
  *
+ *= require jquery-ui
  *= require_tree .
  *= require_self
  */
+
+body {
+  margin-top: 60px;
+}
+
+.main_image {
+  background: asset_url('main_image.jpg') no-repeat;
+  background-size: 100%;
+}
+
+.white {
+  color: white;
+}
+
+.main_text {
+  margin-top: 250px;
+}

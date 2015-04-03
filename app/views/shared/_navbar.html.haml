@@ -1,0 +1,22 @@
+%nav.navbar.navbar-default.navbar-fixed-top.navbar-inverse
+  .container
+    .navbar-header
+      %button.navbar-toggle.collapsed{ 'data-target' => '#bs-example-navbar-collapse-1', 'data-toggle' => 'collapse', type: 'button' }
+        %span.sr-only Toggle navigation
+        %span.icon-bar
+        %span.icon-bar
+        %span.icon-bar
+      = link_to 'J2P', '#', class: 'navbar-brand'
+
+    #bs-example-navbar-collapse-1.collapse.navbar-collapse
+      %ul.nav.navbar-nav
+        %li.active
+          = link_to 'Home', root_path
+        %li
+          = link_to 'Projects', projects_path
+        %li
+          = link_to 'Project logs', project_logs_path
+        %li
+          = link_to 'Project configs', project_configs_path
+        %li
+          = link_to 'Sidekiq', sidekiq_web_path

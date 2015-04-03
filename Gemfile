@@ -21,8 +21,15 @@ gem 'differ', github: 'emintham/differ'
 
 gem 'twitter-bootstrap-rails'
 gem 'sass-rails'
-gem 'coffee-rails'
+gem 'less-rails'
+gem 'therubyracer'
 gem 'uglifier'
+
+gem 'coffee-rails'
+gem 'haml-rails'
+
+gem 'jquery-rails'
+gem 'jquery-ui-rails'
 
 group :development do
   gem 'pry'
