@@ -19,6 +19,11 @@ gem 'sinatra', require: false
 gem 'daemons'
 gem 'differ', github: 'emintham/differ'
 
+gem 'twitter-bootstrap-rails'
+gem 'sass-rails'
+gem 'coffee-rails'
+gem 'uglifier'
+
 group :development do
   gem 'pry'
   gem 'pry-byebug'
