@@ -53,4 +53,4 @@ set :slack_subdomain, 'jetruby'
 
 set :slack_application, 'Jira2Pivotal'
 set :slack_username, 'CapBot'
-set :slack_emoji, ':beers:'
+set :slack_emoji, ':rocket:'
