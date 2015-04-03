@@ -1,7 +1,7 @@
 require 'sidekiq/web'
 
 Rails.application.routes.draw do
-  mount Sidekiq::Web => '/'
+  mount Sidekiq::Web => '/sidekiq'
 
   resources :project, only: [:index, :new, :create, :destroy]
   resources :project_log, only: [:index, :show]
