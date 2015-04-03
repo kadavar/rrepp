@@ -10,7 +10,7 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
   end
 
   def build_project
-    retries ||= @config['script_repeat_time']
+    retries ||= @config['script_repeat_time'].to_i
     PivotalTracker::Client.token = config['tracker_token']
     @project = PivotalTracker::Project.find(config['tracker_project_id'])
 
@@ -112,7 +112,7 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
   end
 
   def map_users_by_email
-    retries ||= @config['script_repeat_time']
+    retries ||= @config['script_repeat_time'].to_i
     @project.memberships.all.map { |member|  { member.name => member.email } }.reduce Hash.new, :merge
   rescue => error
     sleep(1) && retry unless (retries -= 1).zero?
