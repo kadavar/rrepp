@@ -5,6 +5,9 @@ require 'capistrano_colors'
 require 'capistrano-unicorn'
 require 'capistrano/sidekiq'
 require 'capistrano/slack'
+require_relative 'config/deploy/recap'
+
+set :default_environment, { 'PATH' => '~/.rbenv/shims:~/.rbenv/bin:$PATH' }
 
 set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/sidekiq.yml" }
 set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
