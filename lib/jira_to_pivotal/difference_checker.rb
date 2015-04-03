@@ -22,38 +22,27 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
   end
 
   def check_task_type_diff(story_attrs, jira_issue)
-    if jira_issue.subtask?
-      false
-    else
-      story_attrs['fields']['issuetype']['id'] != jira_issue.issue.fields['issuetype']['id']
-    end
+    return false if jira_issue.subtask?
+    story_attrs['fields']['issuetype']['id'] != jira_issue.issue.fields['issuetype']['id']
   end
 
   def check_reporter_diff(story_attrs, jira_issue)
-    if @user_permissions.modify_reporter?
-      if story_attrs['fields']['reporter'].present? && jira_issue.fields['reporter'].present?
-        story_attrs['fields']['reporter']['name'] != jira_issue.fields['reporter']['name']
-      elsif story_attrs['fields']['reporter'].present? && !jira_issue.fields['reporter'].present?
-        true
-      else
-        false
-      end
+    return false unless @user_permissions.modify_reporter?
+
+    if story_attrs['fields']['reporter'].present? && jira_issue.fields['reporter'].present?
+      story_attrs['fields']['reporter']['name'] != jira_issue.fields['reporter']['name']
     else
-      false
+      story_attrs['fields']['reporter'].present? && !jira_issue.fields['reporter'].present?
     end
   end
 
   def check_asignee_diff(story_attrs, jira_issue)
-    if @user_permissions.assign_issue?
-      if story_attrs['fields']['assignee'].present? && jira_issue.fields['assignee'].present?
-        story_attrs['fields']['assignee']['name'] != jira_issue.fields['assignee']['name']
-      elsif story_attrs['fields']['assignee'].present? && !jira_issue.fields['assignee'].present?
-        true
-      else
-        false
-      end
+    return false unless @user_permissions.assign_issue?
+
+    if story_attrs['fields']['assignee'].present? && jira_issue.fields['assignee'].present?
+      story_attrs['fields']['assignee']['name'] != jira_issue.fields['assignee']['name']
     else
-      false
+      story_attrs['fields']['assignee'].present? && !jira_issue.fields['assignee'].present?
     end
   end
 
