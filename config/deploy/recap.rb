@@ -1,7 +1,6 @@
 Recap::Support::CapistranoExtensions.module_eval do
   def exit_code_as_app(command, pwd = deploy_to)
-    # capture(%|sudo -p 'sudo password: ' su - #{application_user} -c 'cd #{pwd} && #{command} > /dev/null 2>&1'; echo $?|).strip
-    '0'
+    capture(%|cd #{pwd} && #{command} > /dev/null; echo $?|).strip
   end
 
   def as_app(command, pwd = deploy_to)
