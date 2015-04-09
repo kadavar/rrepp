@@ -34,6 +34,8 @@ gem 'jquery-rails'
 gem 'jquery-ui-rails'
 
 group :development do
+  gem 'better_errors'
+  gem 'binding_of_caller'
   gem 'pry'
   gem 'pry-byebug'
 end
