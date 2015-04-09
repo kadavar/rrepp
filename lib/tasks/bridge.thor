@@ -14,11 +14,10 @@ class Bridge < Thor
 
     updated_config = ThorHelpers::Config.new(project: options[:project], config: options[:config]).update_config
 
-    ThorHelpers::Redis.new.insert_config(updated_config, random_hash)
-
     Daemons.daemonize()
 
-    update_project_information
+    ThorHelpers::Redis.insert_config(updated_config, random_hash)
+    ThorHelpers::Redis.update_project(options[:project])
 
     scheduler = Rufus::Scheduler.new
 
