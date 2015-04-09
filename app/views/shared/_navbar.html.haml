@@ -6,17 +6,11 @@
         %span.icon-bar
         %span.icon-bar
         %span.icon-bar
-      = link_to 'J2P', '#', class: 'navbar-brand'
+      = link_to 'J2P', root_path, class: 'navbar-brand'
 
     #bs-example-navbar-collapse-1.collapse.navbar-collapse
       %ul.nav.navbar-nav
-        %li.active
-          = link_to 'Home', root_path
-        %li
-          = link_to 'Projects', projects_path
-        %li
-          = link_to 'Project logs', project_logs_path
-        %li
-          = link_to 'Project configs', project_configs_path
-        %li
-          = link_to 'Sidekiq', sidekiq_web_path
+        = link_to_menu 'Projects', projects_path
+        = link_to_menu 'Project logs', project_logs_path
+        = link_to_menu 'Project configs', project_configs_path
+        = link_to_menu 'Sidekiq', sidekiq_web_path
