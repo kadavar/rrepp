@@ -1,1 +1,22 @@
-%h1 Hello! It's projects page
+.container.white
+  %h1.text-center Projects
+
+  %table.table.project-table
+    %thead
+      %tr
+        %th Id
+        %th Name
+        %th Pid
+        %th Last Update
+        %th Status
+        %th Actions
+    %tbody
+      - @projects.each_with_index do |project, index|
+        %tr
+          %td= index + 1
+          %td= project.name
+          %td= project.pid
+          %td= project.last_update
+          %td
+            = project_label(project.online)
+

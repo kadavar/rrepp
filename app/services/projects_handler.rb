@@ -3,6 +3,7 @@ class ProjectsHandler
     def perform
       update_redis_projects
       create_or_update_projects
+      update_project_params
     end
 
     private
@@ -36,6 +37,15 @@ class ProjectsHandler
       end
     end
 
+    def update_project_params
+      Project.transaction do
+        Project.all.each do |project|
+          project.update_attributes(online: process_exists?(project.pid))
+          project.update_attributes(pid: nil) unless process_exists?(project.pid)
+        end
+      end
+    end
+
     def process_exists?(pid)
       begin
         Process.kill(0, pid)
@@ -44,6 +54,8 @@ class ProjectsHandler
       rescue Errno::EPERM # "Operation not permitted"
         # at least the process exists
         return true
+      rescue TypeError # If nil
+        return false
       else
         return true
       end

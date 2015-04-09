@@ -19,7 +19,7 @@ body {
   margin-top: 60px;
 }
 
-.main_image {
+.main-image {
   background: asset_url('main_image.jpg') no-repeat;
   background-size: 100%;
 }
@@ -28,6 +28,10 @@ body {
   color: white;
 }
 
-.main_text {
+.main-text {
   margin-top: 250px;
+}
+
+.project-table {
+  background-color: grey;
 }

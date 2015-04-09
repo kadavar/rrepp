@@ -3,7 +3,7 @@ class CreateProjects < ActiveRecord::Migration
     create_table :projects do |t|
       t.string   :name
       t.integer  :pid
-      t.boolean  :online
+      t.boolean  :online, default: false
       t.datetime :last_update
 
       t.timestamps null: false

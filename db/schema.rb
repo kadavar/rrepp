@@ -19,10 +19,10 @@ ActiveRecord::Schema.define(version: 20150409105826) do
   create_table "projects", force: :cascade do |t|
     t.string   "name"
     t.integer  "pid"
-    t.boolean  "online"
+    t.boolean  "online",      default: false
     t.datetime "last_update"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
   end
 
 end
