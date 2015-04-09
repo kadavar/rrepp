@@ -12,6 +12,8 @@ gem 'rufus-scheduler'
 gem 'airbrake'
 gem 'figaro'
 
+gem 'pg'
+
 gem 'sidekiq'
 gem 'sidekiq-failures'
 gem 'sidekiq-limit_fetch'
