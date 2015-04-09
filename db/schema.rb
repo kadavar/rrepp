@@ -20,8 +20,9 @@ ActiveRecord::Schema.define(version: 20150409105826) do
     t.string   "name"
     t.integer  "pid"
     t.boolean  "online"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "last_update"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
 
 end

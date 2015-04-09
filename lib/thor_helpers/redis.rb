@@ -15,18 +15,18 @@ class ThorHelpers::Redis < ThorHelpers::Base
       projects_to_redis(new_projects)
     end
 
-    private
-
     def projects
       Sidekiq.redis { |connection| connection.get('projects') }
     end
 
-    def params_to_redis(params, random_hash)
-      Sidekiq.redis { |connection| connection.set(random_hash, encrypt_params(params, random_hash)) }
-    end
-
     def projects_to_redis(projects)
       Sidekiq.redis { |connection| connection.set('projects', projects.to_json) }
+    end
+
+    private
+
+    def params_to_redis(params, random_hash)
+      Sidekiq.redis { |connection| connection.set(random_hash, encrypt_params(params, random_hash)) }
     end
 
     def encrypt_params(params, random_hash)
