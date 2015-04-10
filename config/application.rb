@@ -17,6 +17,7 @@ module J2p
   class Application < Rails::Application
     config.watchable_dirs['lib'] = [:rb]
     config.autoload_paths << Rails.root.join('lib')
+    config.autoload_paths += %W(#{config.root}/app/models/project)
     config.assets.enabled = true
   end
 end
