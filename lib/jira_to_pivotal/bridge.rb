@@ -17,7 +17,8 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   def sync!
-    jira.logger.write_daemon_pin_in_log
+    ThorHelpers::Redis.last_update(@config['project_name'], Time.now.utc)
+    # jira.logger.write_daemon_pin_in_log
 
     connect_jira_to_pivotal!
     # Right now flow jira -> pivotal is disabled

@@ -13,7 +13,7 @@ class ProjectsHandler
     end
 
     def parsed_projects
-      JSON.parse(redis_projects, {quirks_mode: true})
+      JSON.parse(redis_projects, { quirks_mode: true })
     end
 
     def projects

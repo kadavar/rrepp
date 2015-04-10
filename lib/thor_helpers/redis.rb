@@ -6,13 +6,24 @@ class ThorHelpers::Redis < ThorHelpers::Base
 
     def update_project(project_name)
       new_projects =
-        if projects.present?
+        if parsed_projets.present?
           cleaned_projects(project_name).merge(project_data(project_name))
         else
           project_data(project_name)
         end
 
       projects_to_redis(new_projects)
+    end
+
+    def last_update(project_name, time)
+      if parsed_projets.present?
+        pid = parsed_projets[project_name]['pid']
+        projects = cleaned_projects(project_name).merge(project_data(project_name, pid, time))
+
+        projects_to_redis(projects)
+      else
+        false
+      end
     end
 
     def projects
@@ -34,12 +45,16 @@ class ThorHelpers::Redis < ThorHelpers::Base
       crypt.encrypt_and_sign(params.to_json)
     end
 
-    def project_data(project_name)
-      { project_name => { 'pid' => Process.pid } }
+    def project_data(project_name, pid=Process.pid,  last_update=Time.now.utc)
+      { project_name => { 'pid' => pid, 'last_update' => last_update } }
+    end
+
+    def parsed_projets
+      JSON.parse(projects, { quirks_mode: true })
     end
 
     def cleaned_projects(project_name)
-      JSON.parse(projects).reject { |k,v| k == project_name }
+      parsed_projets.reject { |k,v| k == project_name }
     end
   end
 end
