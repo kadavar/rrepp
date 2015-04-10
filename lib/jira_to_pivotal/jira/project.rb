@@ -304,9 +304,11 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     jira_issues, deleted_jira_ids = find_deleted_jira_issues(pivotal_jira_ids)
 
     invoiced_issues_ids = jira_issues.select { |issue| issue.status.name == 'Invoiced' }.map(&:key)
-    correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
 
-    return deleted_jira_ids, correct_jira_ids
+    correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
+    incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+
+    return incorrect_jira_ids, correct_jira_ids
   end
 
   def find_deleted_jira_issues(pivotal_jira_ids)
