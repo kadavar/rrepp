@@ -143,12 +143,15 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   def find_issues(jql, options={})
     response = JIRA::Resource::Issue.jql(@client, jql, options)
   rescue JIRA::HTTPError => e
-    logger.error_log(e)
-    Airbrake.notify_or_ignore(
-      e,
-      parameters: { jql: jql },
-      cgi_data: ENV.to_hash
-      )
+    unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
+      logger.error_log(e)
+      Airbrake.notify_or_ignore(
+        e,
+        parameters: { jql: jql },
+        cgi_data: ENV.to_hash
+        )
+    end
+
     return []
   end
 

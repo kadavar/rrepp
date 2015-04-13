@@ -7,7 +7,7 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
     @story_attrs = story_attrs
     @jira_issue = jira_issue
 
-    main_attrs_diff(story_attrs, jira_issue)
+    main_attrs_diff
   end
 
   def status_difference?(jira_issue, story)
@@ -45,11 +45,11 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
   end
 
   def summary_diff
-    story_attrs['fields']['summary'] != jira_issue.issue.fields['summary'] ||
+    story_attrs['fields']['summary'] != jira_issue.issue.fields['summary']
   end
 
   def description_diff
-    story_attrs['fields']['description'] != jira_issue.issue.fields['description'].to_s ||
+    story_attrs['fields']['description'] != jira_issue.issue.fields['description'].to_s
   end
 
   def task_type_diff
