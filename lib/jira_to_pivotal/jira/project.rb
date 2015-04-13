@@ -232,7 +232,6 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   def update_issue!(story, jira_issues)
     putc '.'
 
-
     jira_issue = select_task(jira_issues, story)
     return if jira_issue.nil?
 

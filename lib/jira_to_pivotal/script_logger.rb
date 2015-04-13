@@ -14,10 +14,6 @@ class JiraToPivotal::ScriptLogger
     @jira_logger ||= JiraToPivotal::Loggs::JiraLogger.new(logger, @config)
   end
 
-  def write_daemon_pid_in_log
-    logger.debug File.open("#{Dir.pwd}/daemons.rb.pid").first if File.exists?("#{Dir.pwd}/daemons.rb.pid")
-  end
-
   def attrs_log(attrs, type='Before save')
     logger.debug "#{type} Attributes: " + "#{attrs}".yellow
   end

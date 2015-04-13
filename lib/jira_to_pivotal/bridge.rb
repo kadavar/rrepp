@@ -17,8 +17,6 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   def sync!
-    jira.logger.write_daemon_pid_in_log
-
     connect_jira_to_pivotal!
     # Right now flow jira -> pivotal is disabled
     # from_jira_to_pivotal!
