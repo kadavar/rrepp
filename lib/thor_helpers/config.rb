@@ -44,7 +44,7 @@ class ThorHelpers::Config < ThorHelpers::Base
     Airbrake.notify_or_ignore(
       e,
       parameters: { config_path: path },
-      cgi_data: ENV.to_hash,
+      cgi_data: ENV.to_hash
       )
 
     puts "Missing config file: #{path}"

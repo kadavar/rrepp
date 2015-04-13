@@ -5,14 +5,7 @@ class ThorHelpers::Redis < ThorHelpers::Base
     end
 
     def update_project(project_name)
-      new_projects =
-        if parsed_projets.present?
-          cleaned_projects(project_name).merge(project_data(project_name))
-        else
-          project_data(project_name)
-        end
-
-      projects_to_redis(new_projects)
+      projects_to_redis(update_project_data project_name)
     end
 
     def last_update(project_name, time)
@@ -36,6 +29,14 @@ class ThorHelpers::Redis < ThorHelpers::Base
 
     private
 
+    def update_project_data(project_name)
+      if parsed_projets.present?
+        cleaned_projects(project_name).merge(project_data(project_name))
+      else
+        project_data(project_name)
+      end
+    end
+
     def params_to_redis(params, random_hash)
       Sidekiq.redis { |connection| connection.set(random_hash, encrypt_params(params, random_hash)) }
     end
@@ -45,7 +46,7 @@ class ThorHelpers::Redis < ThorHelpers::Base
       crypt.encrypt_and_sign(params.to_json)
     end
 
-    def project_data(project_name, pid=Process.pid,  last_update=Time.now.utc)
+    def project_data(project_name, pid = Process.pid, last_update = Time.now.utc)
       { project_name => { 'pid' => pid, 'last_update' => last_update } }
     end
 

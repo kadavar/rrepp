@@ -38,12 +38,7 @@ class ProjectsHandler
     end
 
     def update_project_params
-      Project.transaction do
-        Project.all.each do |project|
-          project.update_attributes(online: process_exists?(project.pid))
-          project.update_attributes(pid: nil) unless process_exists?(project.pid)
-        end
-      end
+      Project.find_each { |project| project.update_attributes(online: process_exists?(project.pid)) }
     end
 
     def process_exists?(pid)
