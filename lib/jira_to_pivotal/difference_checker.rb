@@ -4,6 +4,9 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
   end
 
   def main_attrs_difference?(story_attrs, jira_issue)
+    @story_attrs = story_attrs
+    @jira_issue = jira_issue
+
     main_attrs_diff(story_attrs, jira_issue)
   end
 
@@ -13,36 +16,64 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
 
   private
 
-  def main_attrs_diff(story_attrs, jira_issue)
+  def main_attrs_diff
+    summary_diff || description_diff || task_type_diff || reporter_diff || asignee_diff
+  end
+
+  def story_attrs
+    @story_attrs
+  end
+
+  def jira_issue
+    @jira_issue
+  end
+
+  def story_reporter
+    @story_attrs['fields']['reporter']
+  end
+
+  def story_assignee
+    @story_attrs['fields']['assignee']
+  end
+
+  def jira_reporter
+    jira_issue.fields['reporter']
+  end
+
+  def jira_assignee
+    jira_issue.fields['assignee']
+  end
+
+  def summary_diff
     story_attrs['fields']['summary'] != jira_issue.issue.fields['summary'] ||
+  end
+
+  def description_diff
     story_attrs['fields']['description'] != jira_issue.issue.fields['description'].to_s ||
-    check_task_type_diff(story_attrs, jira_issue) ||
-    check_reporter_diff(story_attrs, jira_issue.issue) ||
-    check_asignee_diff(story_attrs, jira_issue.issue)
   end
 
-  def check_task_type_diff(story_attrs, jira_issue)
+  def task_type_diff
     return false if jira_issue.subtask?
-    story_attrs['fields']['issuetype']['id'] != jira_issue.issue.fields['issuetype']['id']
+    @story_attrs['fields']['issuetype']['id'] != jira_issue.issue.fields['issuetype']['id']
   end
 
-  def check_reporter_diff(story_attrs, jira_issue)
+  def reporter_diff
     return false unless @user_permissions.modify_reporter?
 
-    if story_attrs['fields']['reporter'].present? && jira_issue.fields['reporter'].present?
-      story_attrs['fields']['reporter']['name'] != jira_issue.fields['reporter']['name']
+    if story_reporter.present? && jira_reporter.present?
+      story_reporter['name'] != jira_reporter['name']
     else
-      story_attrs['fields']['reporter'].present? && !jira_issue.fields['reporter'].present?
+      story_reporter.present? && !jira_reporter.present?
     end
   end
 
-  def check_asignee_diff(story_attrs, jira_issue)
+  def asignee_diff
     return false unless @user_permissions.assign_issue?
 
-    if story_attrs['fields']['assignee'].present? && jira_issue.fields['assignee'].present?
-      story_attrs['fields']['assignee']['name'] != jira_issue.fields['assignee']['name']
+    if story_assignee.present? && story_assignee.present?
+      story_assignee['name'] != story_assignee['name']
     else
-      story_attrs['fields']['assignee'].present? && !jira_issue.fields['assignee'].present?
+      story_assignee.present? && !story_assignee.present?
     end
   end
 
