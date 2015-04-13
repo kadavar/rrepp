@@ -86,9 +86,9 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
   def story_type_to_issue_type
     type_map = {
-        'bug'     => @config['jira_issue_types']['bug'],
-        'feature' => @config['jira_issue_types']['feature'],
-        'chore'   => @config['jira_issue_types']['chore']
+        'bug'     => @config['jira_issue_types']['bug'].to_s,
+        'feature' => @config['jira_issue_types']['feature'].to_s,
+        'chore'   => @config['jira_issue_types']['chore'].to_s
     }
 
     type_map[story.story_type]
@@ -110,6 +110,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     status_map = {
       'started'   => 'Start Progress',
       'unstarted' => 'Stop Progress',
+      'finished'  => 'Do nothing',
       'delivered' => 'Resolve Issue',
       'rejected'  => 'Reopen Issue'
     }

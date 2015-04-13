@@ -33,7 +33,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       error,
-      parameters: { config: @config },
+      parameters: { config: @config.for_airbrake },
       cgi_data: ENV.to_hash
       )
     raise error
@@ -60,6 +60,10 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     issue = issue.present? ? issue : @client.Issue.build(attributes)
     return JiraToPivotal::Jira::Issue.new(options_for_issue(issue)), attributes
+  end
+
+  def difference_checker
+    @difference_checker ||= JiraToPivotal::DifferenceChecker.new(@project)
   end
 
   def next_issues
@@ -136,15 +140,18 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     result
   end
 
-  def find_issues(jql)
-    response = JIRA::Resource::Issue.jql(@client, jql)
+  def find_issues(jql, options={})
+    response = JIRA::Resource::Issue.jql(@client, jql, options)
   rescue JIRA::HTTPError => e
-    logger.error_log(e)
-    Airbrake.notify_or_ignore(
-      e,
-      parameters: { jql: jql },
-      cgi_data: ENV.to_hash
-      )
+    unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
+      logger.error_log(e)
+      Airbrake.notify_or_ignore(
+        e,
+        parameters: { jql: jql },
+        cgi_data: ENV.to_hash
+        )
+    end
+
     return []
   end
 
@@ -233,11 +240,17 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     issue, attributes = build_issue(story.to_jira(@config[:custom_fields]), jira_issue)
 
-    logger.jira_logger.update_issue_log(story, issue, attributes)
+    if difference_checker.main_attrs_difference?(attributes, issue)
+      logger.jira_logger.update_issue_log(story, issue, attributes)
+      return false unless issue.save!(attributes, @config)
+    end
 
-    return false unless issue.save!(attributes, @config)
+    if difference_checker.status_difference?(jira_issue, story)
+      return false unless issue.update_status!(story)
+      logger.jira_logger.update_issue_status_log(story, issue)
+    end
 
-    issue.update_status!(story)
+    true
   end
 
   def create_sub_task!(issue, story_url)
@@ -290,15 +303,29 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def check_deleted_issues_in_jira(pivotal_jira_ids)
-    jira_project   = @config['jira_project']
-    jira_issues = find_issues("project = #{jira_project} AND 'Pivotal Tracker URL' is not EMPTY" )
+    jira_issues = find_exists_jira_issues(pivotal_jira_ids)
 
     invoiced_issues_ids = jira_issues.select { |issue| issue.status.name == 'Invoiced' }.map(&:key)
 
-    correct_jira_ids   = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
+    correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
     incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
 
     return incorrect_jira_ids, correct_jira_ids
+  end
+
+  def find_exists_jira_issues(pivotal_jira_ids)
+    jira_issues = find_issues("key in #{map_jira_ids_for_search(pivotal_jira_ids)}", max_results: 100)
+
+    return jira_issues if jira_issues.present?
+
+    jira_issues = Array.new
+
+    pivotal_jira_ids.each do |key|
+      issue = find_issues("key = #{key}")
+      jira_issues += issue if issue.present?
+    end
+
+    jira_issues
   end
 
   def remove_jira_id_from_pivotal(jira_ids, stories)
