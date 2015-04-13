@@ -301,7 +301,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def check_deleted_issues_in_jira(pivotal_jira_ids)
-    jira_issues, deleted_jira_ids = find_deleted_jira_issues(pivotal_jira_ids)
+    jira_issues = find_exists_jira_issues(pivotal_jira_ids)
 
     invoiced_issues_ids = jira_issues.select { |issue| issue.status.name == 'Invoiced' }.map(&:key)
 
@@ -311,18 +311,19 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     return incorrect_jira_ids, correct_jira_ids
   end
 
-  def find_deleted_jira_issues(pivotal_jira_ids)
+  def find_exists_jira_issues(pivotal_jira_ids)
     jira_issues = find_issues("key in #{map_jira_ids_for_search(pivotal_jira_ids)}", max_results: 100)
-    return jira_issues, [] if jira_issues.present?
 
-    jira_issues, deleted_ids = Array.new, Array.new
+    return jira_issues if jira_issues.present?
+
+    jira_issues = Array.new
 
     pivotal_jira_ids.each do |key|
       issue = find_issues("key = #{key}")
-      issue.present? ? jira_issues += issue : deleted_ids << key
+      jira_issues += issue if issue.present?
     end
 
-    [jira_issues, deleted_ids]
+    jira_issues
   end
 
   def remove_jira_id_from_pivotal(jira_ids, stories)
