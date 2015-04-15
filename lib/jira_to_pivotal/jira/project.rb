@@ -303,12 +303,16 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def check_deleted_issues_in_jira(pivotal_jira_ids)
-    jira_issues = find_exists_jira_issues(pivotal_jira_ids)
+    if pivotal_jira_ids.present?
+      jira_issues = find_exists_jira_issues(pivotal_jira_ids)
 
-    invoiced_issues_ids = jira_issues.select { |issue| issue.status.name == 'Invoiced' }.map(&:key)
+      invoiced_issues_ids = jira_issues.select { |issue| issue.status.name == 'Invoiced' }.map(&:key)
 
-    correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
-    incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+      correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
+      incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+    else
+      incorrect_jira_ids, correct_jira_ids = Array.new, Array.new
+    end
 
     return incorrect_jira_ids, correct_jira_ids
   end
