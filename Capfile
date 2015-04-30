@@ -5,7 +5,7 @@ require 'capistrano_colors'
 require 'capistrano-unicorn'
 require 'capistrano/sidekiq'
 require 'capistrano/slack'
-require_relative 'config/deploy/recap'
+require './config/deploy/recap'
 
 set :default_environment, { 'PATH' => '~/.rbenv/shims:~/.rbenv/bin:$PATH' }
 
