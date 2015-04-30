@@ -13,14 +13,16 @@ class Bridge < Thor
     puts "Project is : " + "#{options[:project]}".yellow
 
     updated_config = update_config.merge('log_file_name' => create_log_file, 'project_name' => options[:project])
-    set_params_to_redis(updated_config, random_hash)
 
-    Daemons.daemonize()
+    Process.daemon()
+
+    updated_config['process_pid'] = Process.pid
+    set_params_to_redis(updated_config, random_hash)
 
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
-      SyncWorker.perform_async(random_hash, { 'project' => options[:project] })
+      SyncWorker.perform_async({ 'project' => options[:project] }, random_hash)
     end
 
     scheduler.join
