@@ -84,7 +84,6 @@ GEM
     connection_pool (2.2.0)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
-    daemons (1.1.9)
     debugger-linecache (1.2.0)
     erubis (2.7.0)
     figaro (1.1.0)
@@ -237,7 +236,6 @@ DEPENDENCIES
   capistrano_colors
   certified
   colorize
-  daemons
   differ!
   figaro
   highline
