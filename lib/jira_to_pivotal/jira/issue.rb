@@ -178,11 +178,11 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     # So if we try to change status that not in list
     # Status would not change
     if can_change_status?(story) && !subtask?
-      response = set_issue_status!(args_for_change_status(story)) 
+      response = set_issue_status!(args_for_change_status(story))
     else
       false
     end
-    # TODO Rewrite this change status logic with state machine gem. 
+    # TODO Rewrite this change status logic with state machine gem.
     # Write results to all posible scenarios
     # For example subtask doen't have In Progress state
   rescue JIRA::HTTPError => e
@@ -196,6 +196,8 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
   end
 
   def create_notes!(story)
+    return false unless story.notes
+
     story.notes.each do |note|
       begin
         comment = build_comment

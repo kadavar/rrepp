@@ -285,6 +285,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def issue_custom_fields
     @issue ||= project.issue_with_name_expand
+    @issue = project.issue_with_name_expand unless @issue.names.present?
     @issue.names
   end
 
