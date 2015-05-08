@@ -17,6 +17,8 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   def sync!
+    pivotal.update_config(ownership_handler: ownership_handler)
+
     connect_jira_to_pivotal!
     # Right now flow jira -> pivotal is disabled
     # from_jira_to_pivotal!
@@ -40,7 +42,6 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
 
   def from_pivotal_to_jira!
     # Make connection with Jira
-    pivotal.update_config(ownership_handler: ownership_handler)
 
     # Get all stories for the project from Pivotal Tracker
     puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project"
