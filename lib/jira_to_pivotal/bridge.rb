@@ -29,6 +29,8 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   def connect_jira_to_pivotal!
+    jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
+
     stories = pivotal.unsynchronized_stories[:to_create]
     issues = jira.unsynchronized_issues[:to_update]
 
