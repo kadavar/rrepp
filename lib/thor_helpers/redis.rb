@@ -20,7 +20,7 @@ class ThorHelpers::Redis < ThorHelpers::Base
     end
 
     def projects
-      Sidekiq.redis { |connection| connection.get('projects') }
+      Sidekiq.redis { |connection| connection.get('projects') } || "{}"
     end
 
     def projects_to_redis(projects)

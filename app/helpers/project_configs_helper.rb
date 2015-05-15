@@ -1,0 +1,2 @@
+module ProjectConfigsHelper
+end
