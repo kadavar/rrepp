@@ -32,6 +32,8 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   def connect_jira_to_pivotal!
+    jira.update_tasks!(pivotal.unsynchronized_stories[:to_update])
+
     stories = pivotal.unsynchronized_stories[:to_create]
     issues = jira.unsynchronized_issues[:to_update]
 
@@ -41,7 +43,6 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
 
   def from_pivotal_to_jira!
     # Make connection with Jira
-    pivotal.update_config(ownership_handler: ownership_handler)
 
     # Get all stories for the project from Pivotal Tracker
     puts "\nGetting all stories from #{@config['tracker_project_id']} Pivotal project"

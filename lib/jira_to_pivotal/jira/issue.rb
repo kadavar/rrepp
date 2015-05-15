@@ -37,6 +37,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
   end
 
   def save!(attrs, config)
+    return false if closed?
     remove_not_saveable_fields(attrs, config)
 
     begin
@@ -93,6 +94,14 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
 
   def chore?
     issue.fields['issuetype']['name'] == 'Chore'
+  end
+
+  def closed?
+    if issue.fields['status'].present?
+      issue.fields['status']['name'] == 'Closed'
+    else
+      false
+    end
   end
 
   def to_pivotal
@@ -168,7 +177,14 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     # Jira give only several status options to select
     # So if we try to change status that not in list
     # Status would not change
-    response = set_issue_status!(args_for_change_status(story)) if can_change_status?(story)
+    if can_change_status?(story) && !subtask?
+      response = set_issue_status!(args_for_change_status(story))
+    else
+      false
+    end
+    # TODO Rewrite this change status logic with state machine gem.
+    # Write results to all posible scenarios
+    # For example subtask doen't have In Progress state
   rescue JIRA::HTTPError => e
     logger.error_log(e)
     Airbrake.notify_or_ignore(
@@ -180,6 +196,8 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
   end
 
   def create_notes!(story)
+    return false unless story.notes
+
     story.notes.each do |note|
       begin
         comment = build_comment

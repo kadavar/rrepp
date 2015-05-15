@@ -14,7 +14,10 @@ class Bridge < Thor
 
     updated_config = ThorHelpers::Config.new(project: options[:project], config: options[:config]).update_config
 
-    Daemons.daemonize()
+    Process.daemon()
+
+    updated_config['process_pid'] = Process.pid
+    set_params_to_redis(updated_config, random_hash)
 
     ThorHelpers::Redis.insert_config(updated_config, random_hash)
     ThorHelpers::Redis.update_project(options[:project])
@@ -22,7 +25,7 @@ class Bridge < Thor
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
-      SyncWorker.perform_async(random_hash)
+      SyncWorker.perform_async({ 'project' => options[:project] }, random_hash)
     end
 
     scheduler.join

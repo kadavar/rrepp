@@ -21,7 +21,6 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
 
     title_diff_for_log(story['title'], issue['title'])     if story['title'].diff?(issue['title'])
     description_diff_for_log(story['desc'], issue['desc']) if story['desc'].diff?(issue['desc'])
-    status_diff_for_log(story['status'], issue['status'])  if story['status'].diff?(issue['status'])
   end
 
   def invoced_issue_log(options)
@@ -41,6 +40,12 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
     log_attributes_for_save(options[:attrs])
 
     @logger.info "#{@jira_issue_for_log} Sub Task: #{options[:issue_key]} - #{@connection_for_log}"
+  end
+
+  def update_issue_status_log(story_object, issue_object)
+    story, issue = shorcut_for(story_object, issue_object.issue)
+
+    status_diff_for_log(story['status'], issue['status'])
   end
 
   private

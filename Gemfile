@@ -18,7 +18,6 @@ gem 'sidekiq'
 gem 'sidekiq-failures'
 gem 'sidekiq-limit_fetch'
 gem 'sinatra', require: false
-gem 'daemons'
 gem 'differ', github: 'emintham/differ'
 
 gem 'twitter-bootstrap-rails'
