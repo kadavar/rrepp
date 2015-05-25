@@ -143,7 +143,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   end
 
   def set_original_estimate?
-    !(bug? || chore?)
+    (unstarted? || started?) && !(bug? || chore?)
   end
 
   def original_estimate_attrs

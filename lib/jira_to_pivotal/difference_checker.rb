@@ -10,7 +10,7 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
     @story_attrs = story_attrs
     @jira_issue = jira_issue
 
-    main_attrs_diff
+    story_issue_diff?
   end
 
   def status_difference?(jira_issue, story)
@@ -19,9 +19,8 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
 
   private
 
-  def main_attrs_diff
-    summary_diff || description_diff || task_type_diff ||
-    reporter_diff || asignee_diff || estimates_diff
+  def story_issue_diff?
+    summary_diff || description_diff || task_type_diff || reporter_diff || asignee_diff || estimates_diff
   end
 
   def story_reporter
@@ -55,7 +54,7 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
 
   def estimates_diff
     return false if jira_issue.bug? || jira_issue.chore?
-    story_attrs['fields'][points_field] != jira_issue.issue.fields[points_field]
+    story_attrs['fields'][points_field_id] != jira_issue.issue.fields[points_field_id]
   end
 
   def reporter_diff
@@ -82,7 +81,7 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
     story.current_story_status_to_issue_status != jira_issue.fields['status']['name']
   end
 
-  def points_field
+  def points_field_id
     points_custom_field ||= config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
   end
 end
