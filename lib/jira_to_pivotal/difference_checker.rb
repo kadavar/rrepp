@@ -32,11 +32,11 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
   end
 
   def jira_reporter
-    jira_issue.fields['reporter']
+    jira_issue.issue.fields['reporter']
   end
 
   def jira_assignee
-    jira_issue.fields['assignee']
+    jira_issue.issue.fields['assignee']
   end
 
   def summary_diff
@@ -53,8 +53,12 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
   end
 
   def estimates_diff
-    return false if jira_issue.bug? || jira_issue.chore?
-    story_attrs['fields'][points_field_id] != jira_issue.issue.fields[points_field_id]
+    return false if jira_issue.bug? || jira_issue.chore? || jira_issue.subtask?
+    story_attrs['fields'][points_field_id] != jira_issue.issue.fields[points_field_id] || empty_estimate?
+  end
+
+  def empty_estimate?
+    jira_issue.issue.fields['timeoriginalestimate'].nil?
   end
 
   def reporter_diff
