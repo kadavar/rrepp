@@ -1,14 +1,15 @@
 class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
-  attr_reader :story_attrs, :jira_issue, :config
+  attr_reader :story_attrs, :jira_issue, :j2p_issue,  :config
 
   def initialize(project, config)
     @user_permissions = JiraToPivotal::Jira::UserPermissions.new(project)
     @config = config
   end
 
-  def main_attrs_difference?(story_attrs, jira_issue)
+  def main_attrs_difference?(story_attrs, j2p_issue)
     @story_attrs = story_attrs
-    @jira_issue = jira_issue
+    @jira_issue  = j2p_issue.issue
+    @j2p_issue   = j2p_issue
 
     story_issue_diff?
   end
@@ -32,33 +33,33 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
   end
 
   def jira_reporter
-    jira_issue.issue.fields['reporter']
+    jira_issue.fields['reporter']
   end
 
   def jira_assignee
-    jira_issue.issue.fields['assignee']
+    jira_issue.fields['assignee']
   end
 
   def summary_diff
-    story_attrs['fields']['summary'] != jira_issue.issue.fields['summary']
+    story_attrs['fields']['summary'] != jira_issue.fields['summary']
   end
 
   def description_diff
-    story_attrs['fields']['description'] != jira_issue.issue.fields['description'].to_s
+    story_attrs['fields']['description'] != jira_issue.fields['description'].to_s
   end
 
   def task_type_diff
-    return false if jira_issue.subtask?
-    story_attrs['fields']['issuetype']['id'] != jira_issue.issue.fields['issuetype']['id']
+    return false if j2p_issue.subtask?
+    story_attrs['fields']['issuetype']['id'] != jira_issue.fields['issuetype']['id']
   end
 
   def estimates_diff
-    return false if jira_issue.bug? || jira_issue.chore? || jira_issue.subtask?
-    story_attrs['fields'][points_field_id] != jira_issue.issue.fields[points_field_id] || empty_estimate?
+    return false if j2p_issue.bug? || j2p_issue.chore? || j2p_issue.subtask?
+    story_attrs['fields'][points_field_id] != jira_issue.fields[points_field_id] || empty_estimate?
   end
 
   def empty_estimate?
-    jira_issue.issue.fields['timeoriginalestimate'].nil?
+    jira_issue.fields['timeoriginalestimate'].nil?
   end
 
   def reporter_diff
