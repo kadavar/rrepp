@@ -11,7 +11,7 @@ class Integration < Thor
     puts "You provided the file: " + "#{options[:config]}".yellow
     puts "Project is : " + "#{options[:project]}".yellow
 
-    updated_config = update_config
+    updated_config = read_config_add_credentials
 
     client = TrackerApi::Client.new(token: updated_config['tracker_token'])
 
@@ -30,34 +30,17 @@ class Integration < Thor
     end
   end
 
-
   no_commands do
-    def update_config
+    def read_config_add_credentials
       config_file_path = File.expand_path("../../../#{options[:config]}", __FILE__)
-      config_file_exists?(config_file_path)
+      raise "Cannot read config file #{config_file_path}" unless File.readable?(config_file_path)
 
-      ask_credentials(YAML.load_file(config_file_path))
-    end
+      config = YAML.load_file(config_file_path)
 
-    def ask_credentials(config)
       say("\nPivotal Requester: #{config['tracker_requester']}")
       config['tracker_token'] = ask('Pivotaltracker API token: ', echo: false)
 
-      return config
-    end
-
-    def config_file_exists?(path)
-      true if File.open(path)
-
-    rescue Errno::ENOENT => e
-      Airbrake.notify_or_ignore(
-        e,
-        parameters: { config_path: path },
-        cgi_data: ENV.to_hash,
-        )
-
-      puts "Missing config file: #{path}"
-      exit 1
+      config
     end
   end
 end
