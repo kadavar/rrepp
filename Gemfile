@@ -11,6 +11,7 @@ gem 'highline'
 gem 'rufus-scheduler'
 gem 'airbrake'
 gem 'figaro'
+gem 'tracker_api', '~> 0.2.9'
 
 gem 'sidekiq'
 gem 'sidekiq-failures'
