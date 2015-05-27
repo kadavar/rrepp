@@ -20,6 +20,9 @@ class Integration < Thor
     base_url = "#{updated_config['jira_uri_scheme']}://#{updated_config['jira_host']}"
 
     project = client.project(updated_config['tracker_project_id'])
+    # TODO
+    # verify if there any possibility to handle filters in other way
+    # if this is impossible, create Filter class to handle those filter strings
     filter = 'story_type:bug,chore,feature state:unstarted,started,finished,delivered,rejected'
 
     puts "\n Start update integration".blue
