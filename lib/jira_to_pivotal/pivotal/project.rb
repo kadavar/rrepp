@@ -1,14 +1,16 @@
 class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
-
   attr_accessor :config
+  attr_reader :v5_project, :client
 
   def initialize(config)
     @config = config
 
     build_project
+    v5_build_project
     @config.delete('tracker_token')
   end
 
+  # TODO: Depricated. Remove after migrate to new gem
   def build_project
     retries ||= @config['script_repeat_time'].to_i
     PivotalTracker::Client.token = config['tracker_token']
@@ -27,10 +29,29 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
     raise error
   end
 
+  def v5_build_project
+    retries ||= @config['script_repeat_time'].to_i
+    @client = TrackerApi::Client.new(token: config['tracker_token'])
+    @v5_project  = client.project(config['tracker_project_id'])
+
+  rescue => error
+    retry unless (retries -= 1).zero?
+
+    logger.error_log(error)
+    Airbrake.notify_or_ignore(
+      error,
+      parameters: { config: @config },
+      cgi_data: ENV.to_hash
+      )
+
+    raise error
+  end
+
   def update_config(options)
     @config.merge!(options)
   end
 
+  # TODO: Rewrite using new gem classes
   def create_story(story_args)
     story = @project.stories.create(story_args)
     if story.errors.empty?
@@ -45,6 +66,7 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
     load_unsynchronized_stories
   end
 
+  # TODO: Rewrite using new gem classes
   def create_tasks!(issues, options)
     @options = options
     counter =  0
@@ -87,6 +109,7 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
     return counter
   end
 
+  # TODO: Rewrite using new gem classes
   def update_tasks!(issues)
     counter =  0
 
@@ -107,10 +130,12 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
     return counter
   end
 
+  # TODO: Rewrite using new gem classes
   def select_task(stories, issue)
     stories.find { |story| story.jira_url == "#{@config.jira_url}/browse/#{issue.key}" }
   end
 
+  # TODO: Rewrite using new gem classes
   def map_users_by_email
     retries ||= @config['script_repeat_time'].to_i
     @project.memberships.all.map { |member|  { member.name => member.email } }.reduce Hash.new, :merge
@@ -121,27 +146,33 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
 
   private
 
+  # TODO: Rewrite using new gem classes
   def load_unsynchronized_stories
     { to_create: load_to_create_stories, to_update: load_to_update_stories }
   end
 
-  # TODO Refactor 2 methods below
+  # TODO: Rewrite using new gem classes
+  # TODO: Refactor 2 methods below
   def load_to_create_stories
-    usefull_stories.select { |story| (story.jira_url.nil? || story_ends_with_nil?(story)) }.map { |story| JiraToPivotal::Pivotal::Story.new(@project, story, @config) }
+    usefull_stories.select { |story| (story.jira_url.nil? || story_ends_with_nil?(story)) }.map { |story| JiraToPivotal::Pivotal::Story.new(@project, story, @config, v5_project) }
   end
 
+  # TODO: Rewrite using new gem classes
   def load_to_update_stories
-    usefull_stories.select { |story| (!story.jira_url.nil? && !story_ends_with_nil?(story)) }.map { |story| JiraToPivotal::Pivotal::Story.new(@project, story, @config) }
+    usefull_stories.select { |story| (!story.jira_url.nil? && !story_ends_with_nil?(story)) }.map { |story| JiraToPivotal::Pivotal::Story.new(@project, story, @config, v5_project) }
   end
 
+  # TODO: Rewrite using new gem classes
   def story_ends_with_nil?(story)
     story.jira_url.present? ? story.jira_url.split('/').last == 'nil' : true
   end
 
+  # TODO: Rewrite using new gem classes
   def usefull_stories
     @project.stories.all(story_type: %w(bug chore feature), state: %w(unstarted started finished delivered rejected))
   end
 
+  # TODO: Rewrite using new gem classes
   def find_stories_by(attrs={})
     @project.stories.all(attrs)
   end

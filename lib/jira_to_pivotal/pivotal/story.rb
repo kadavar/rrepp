@@ -1,17 +1,19 @@
 class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
-  attr_accessor :project, :story
+  attr_accessor :project, :story, :v5_project, :config
 
-  def initialize(project, story=nil, config=nil)
-    @project = project
-    @story = story
-    @config = config
+  def initialize(project, story=nil, config=nil, v5_project=nil)
+    @project    = project
+    @v5_project = v5_project
+    @story      = story
+    @config     = config
   end
 
   def ownership_handler
     @config[:ownership_handler]
   end
 
+  # TODO: Rewrite using new gem classes
   def notes
     retries ||= @config['script_repeat_time'].to_i
     @note   ||= story.notes.all
@@ -21,10 +23,12 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     false
   end
 
+  # TODO: Rewrite using new gem classes
   def add_note(args)
     story.notes.create(args)
   end
 
+  # TODO: Rewrite using new gem classes
   def create_notes!(issue)
     issue.comments.each do |comment|
       begin     #TODO wtf?
@@ -35,23 +39,39 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     end
   end
 
+  # TODO: Rewrite using new gem classes
   def upload_attachment(filepath)
     story.upload_attachment(filepath)
   end
 
+  # Rewrite using new gem classes
   def url
     story.url
   end
 
+  # TODO: Rewrite using new gem classes
+  # Temporary method untill we update all project to use new gem
   def assign_to_jira_issue(key, url)
     retries ||= @config['script_repeat_time'].to_i
-    story.update(jira_id: key, jira_url: url)
+
+    if v5_project
+      integrations = v5_project.client.get("/projects/#{config['tracker_project_id']}/integrations").body
+      integration_id = integrations.select { |int| int['base_url'] == url.split(':80').join }[0]['id']
+
+      v5_story = v5_project.story(story.id)
+      v5_story.integration_id = integration_id
+      v5_story.external_id = key
+      v5_story.save
+    else
+      story.update(jira_id: key, jira_url: url)
+    end
   rescue => error
     sleep(1) && retry unless (retries -= 1).zero?
     Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
     false
   end
 
+  # TODO: Important! Rewrite using new gem classes
   def to_jira(custom_fields)
     main_attrs.merge!(original_estimate_attrs)
               .merge!(custom_fields_attrs(custom_fields))
@@ -64,11 +84,13 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     /\!\[\w*\]\(([\w\p{P}\p{S}]+)\)/u
   end
 
+  # TODO: Rewrite using new gem classes
   def make_estimate_positive
     estimate = story.estimate.to_i
     estimate < 0 ? 0 : estimate
   end
 
+  # TODO: Rewrite using new gem classes
   def custom_fields_attrs(custom_fields)
     attrs = Hash.new
     # Custom fields in Jira
@@ -118,6 +140,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     status_map[story.current_state]
   end
 
+  # TODO: Rewrite using new gem classes
   def jira_issue_id
     if story.jira_id.present? || story.jira_url.present?
       story.jira_id || story.jira_url.split('/').last
@@ -126,22 +149,27 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     end
   end
 
+  # TODO: Rewrite using new gem classes
   def unstarted?
     story.current_state == 'unstarted'
   end
 
+  # TODO: Rewrite using new gem classes
   def started?
     story.current_state == 'started'
   end
 
+  # TODO: Rewrite using new gem classes
   def chore?
     story.story_type == 'chore'
   end
 
+  # TODO: Rewrite using new gem classes
   def bug?
     story.story_type == 'bug'
   end
 
+  # TODO: Rewrite using new gem classes
   def set_original_estimate?
     (unstarted? || started?) && !(bug? || chore?)
   end
@@ -150,6 +178,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     set_original_estimate? ? { 'timetracking' => { 'originalEstimate' => "#{make_estimate_positive}h" } } : {}
   end
 
+  # TODO: Rewrite using new gem classes
   def main_attrs
     {
       'summary'      => story.name.squish,
@@ -158,6 +187,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     }
   end
 
+  # TODO: Rewrite using new gem classes
   def description_with_replaced_image_tag
     story.description.gsub(regexp_for_image_tag_replace, '!\1!')
   end
