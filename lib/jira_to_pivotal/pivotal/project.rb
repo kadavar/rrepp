@@ -10,7 +10,7 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
     @config.delete('tracker_token')
   end
 
-  # TODO: Depricated. Remove after migrate to new gem
+  # TODO: Deprecated. Remove after migrate to new gem
   def build_project
     retries ||= @config['script_repeat_time'].to_i
     PivotalTracker::Client.token = config['tracker_token']
