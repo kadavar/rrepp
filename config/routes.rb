@@ -12,7 +12,11 @@ Rails.application.routes.draw do
   end
 
   resources :project_logs, only: [:index, :show]
-  resources :project_configs
+  resources :project_configs do
+    collection do
+      get :synchronize
+    end
+  end
 
   get 'sidekiq_web', to: 'landing#sidekiq', as: 'sidekiq'
   root to: 'landing#index'
