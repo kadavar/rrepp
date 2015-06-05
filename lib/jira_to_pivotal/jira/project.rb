@@ -1,5 +1,4 @@
 class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
-
   attr_accessor :config
 
   def initialize(config)
@@ -63,7 +62,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def difference_checker
-    @difference_checker ||= JiraToPivotal::DifferenceChecker.new(@project)
+    @difference_checker ||= JiraToPivotal::DifferenceChecker.new(@project, @config)
   end
 
   def next_issues

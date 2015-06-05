@@ -1,5 +1,4 @@
 class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
-
   attr_accessor :issue, :project
 
   def initialize(options={})
@@ -63,7 +62,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     # Becouse issues with Bug and Sub-task type doesn't have this field
     # And it cause an error while request
     # Also remove issue-type for sub-task because it can't be changed
-    if original_estimate.present? || ((bug? || subtask? || chore?) && attrs['fields']['timetracking'].present?)
+    if original_estimate?(attrs) || ((bug? || subtask? || chore?) && attrs['fields']['timetracking'].present?)
       attrs['fields'].except!('timetracking')
     end
 
@@ -80,8 +79,10 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     attrs['fields'].except!('reporter') unless user_permissions.modify_reporter?
   end
 
-  def original_estimate
-    issue.fields['timetracking'].present? ? issue.fields['timetracking']['originalEstimate'] : nil
+  def original_estimate?(attrs)
+    unless issue.fields == attrs['fields']
+      issue.fields['timetracking'].present? ? issue.fields['timetracking']['originalEstimate'] : nil
+    end
   end
 
   def bug?
