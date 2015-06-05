@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   resources :project_logs, only: [:index, :show]
   resources :project_configs
 
+  get 'sidekiq_web', to: 'landing#sidekiq', as: 'sidekiq'
   root to: 'landing#index'
 end
 
