@@ -51,19 +51,31 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
   # TODO: Rewrite using new gem classes
   # Temporary method untill we update all project to use new gem
-  def assign_to_jira_issue(key, url)
+  def assign_to_jira_issue(key, jira_url)
     retries ||= @config['script_repeat_time'].to_i
 
     if v5_project
-      integrations = v5_project.client.get("/projects/#{config['tracker_project_id']}/integrations").body
-      integration_id = integrations.select { |int| int['base_url'] == url.split(':80').join }[0]['id']
-
       v5_story = v5_project.story(story.id)
-      v5_story.integration_id = integration_id
-      v5_story.external_id = key
+
+      if jira_url.nil?
+        # Make keys like 'ProjectName-0' when delete old integrations
+        v5_story.external_id = key.split('-').first + '-0'
+      else
+        integrations = v5_project.client.get("/projects/#{config['tracker_project_id']}/integrations").body
+        integration_match = integrations.select { |int| int['base_url'] == jira_url.gsub(":#{config.port}",'') }[0]
+
+        if integration_match
+          v5_story.integration_id = integration_match['id']
+          v5_story.external_id = key
+        else
+          logger.attrs_log(integrations, 'integrations')
+          raise RuntimeError, 'something wrong with integrations'
+        end
+      end
+
       v5_story.save
     else
-      story.update(jira_id: key, jira_url: url)
+      story.update(jira_id: key, jira_url: jira_url)
     end
   rescue => error
     sleep(1) && retry unless (retries -= 1).zero?

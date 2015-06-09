@@ -1,5 +1,4 @@
 require 'thor/rails'
-require 'pry'
 
 class Integration < Thor
   include Thor::Rails

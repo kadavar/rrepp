@@ -11,6 +11,17 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     @config.merge!(custom_fields: issue_custom_fields)
   end
 
+  def issue_custom_fields
+    @issue ||= project.issue_with_name_expand
+
+    unless @issue.names.present?
+      logger.attrs_log(@issue.inspect, 'Issue with custom fields')
+      raise RuntimeError, "Can't grep custom fields. Check users permissions of at least one feature"
+    end
+
+    @issue.names
+  end
+
   def build_api_client
     @client ||= JIRA::Client.new({
          username:     config['jira_login'],
@@ -282,11 +293,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     issues.find { |issue| issue.key == story.jira_issue_id }
   end
 
-  def issue_custom_fields
-    @issue ||= project.issue_with_name_expand
-    @issue = project.issue_with_name_expand unless @issue.names.present?
-    @issue.names
-  end
+
 
   def jira_assignable_users
     result = Hash.new
@@ -334,7 +341,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def remove_jira_id_from_pivotal(jira_ids, stories)
     for_clean_stories = stories.select { |s| jira_ids.include?(s.jira_issue_id) }
-    for_clean_stories.each { |story| story.assign_to_jira_issue('nil', 'nil') }
+    for_clean_stories.each { |story| story.assign_to_jira_issue('nil', nil) }
 
     return for_clean_stories.count
   end
