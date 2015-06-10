@@ -23,12 +23,12 @@ class ProjectConfigsHandler
       data = YAML.load(ERB.new(File.read(file_path)).result)
       config_params = data.except('jira_custom_fields', 'jira_issue_types')
 
-      config = Config.where(name: name).first
+      config = Project::Config.where(name: name).first
 
       if config.present?
         config.update_attributes(config_params)
       else
-        config = Config.create(config_params.merge(name: name))
+        config = Project::Config.create(config_params.merge(name: name))
       end
 
       data['jira_custom_fields'].values.each do |custom_field_name|
@@ -48,7 +48,7 @@ class ProjectConfigsHandler
       file_path = Rails.root.join "project_configs/#{name}.yml"
       return true if File.readable?(file_path)
 
-      config = Config.find_by(name: name)
+      config = Project::Config.find_by(name: name)
       config_hash = config.attributes.except('updated_at', 'created_at', 'name', 'id', 'project_id')
 
       jira_custom_fields =

@@ -2,19 +2,19 @@ class ProjectConfigsController < ApplicationController
   before_filter :find_config, only: [:edit, :update, :destroy, :show]
 
   def index
-    @configs = Config.all
+    @configs = Project::Config.all
   end
 
   def new
-    @config = Config.new
+    @config = Project::Config.new
   end
 
   def create
-    Config.create(config_params)
+    Project::Config.create(config_params)
   end
 
   def update
-    Config.update_attributes(config_params)
+    Project::Config.update_attributes(config_params)
   end
 
   def destroy
@@ -30,7 +30,7 @@ class ProjectConfigsController < ApplicationController
   private
 
   def find_config
-    @config = Config.find(params[:id])
+    @config = Project::Config.find(params[:id])
   end
 
   def config_params

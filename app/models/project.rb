@@ -1,3 +1,4 @@
 class Project < ActiveRecord::Base
-  has_one :project_config
+  has_one :config
+  has_one :log
 end

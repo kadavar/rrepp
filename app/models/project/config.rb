@@ -1,4 +1,5 @@
-class Config < ActiveRecord::Base
+class Project::Config < ActiveRecord::Base
+  self.table_name = 'configs'
   has_many :jira_custom_fields, class_name: 'Jira::CustomField'
   has_many :jira_issue_types, class_name: 'Jira::IssueType'
 
