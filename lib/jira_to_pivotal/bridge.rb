@@ -129,7 +129,7 @@ class JiraToPivotal::Bridge < JiraToPivotal::Base
   end
 
   def map_issues_by_pivotal_url(issues)
-    pivotal_url_id = options[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
+    pivotal_url_id = options[:custom_fields].key(@config['jira_custom_fields']['pivotal_tracker_url'])
     issues.map { |issue| { issue.issue.send(pivotal_url_id) => issue.issue.key } }
   end
 end

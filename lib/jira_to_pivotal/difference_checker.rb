@@ -37,7 +37,7 @@ class JiraToPivotal::DifferenceChecker < JiraToPivotal::Base
   def estimates?(params)
     return false if params[:j2p_issue].bug? || params[:j2p_issue].chore? || params[:j2p_issue].subtask?
 
-    points_field_id = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
+    points_field_id = config[:custom_fields].key(config['jira_custom_fields']['story_points'])
     params[:story_attrs]['fields'][points_field_id] != params[:jira_issue].fields[points_field_id] || empty_estimate?(params)
   end
 

@@ -92,7 +92,7 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
   end
 
   def jira_pivotal_points
-    pivotal_points = @config['jira_custom_fields']['pivotal_points']
+    pivotal_points = @config['jira_custom_fields']['story_points']
     @config[:custom_fields].key(pivotal_points)
   end
 

@@ -67,7 +67,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
     end
 
     if (bug? || subtask? || chore?)
-      pivotal_story_points = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
+      pivotal_story_points = config[:custom_fields].key(config['jira_custom_fields']['story_points'])
       attrs['fields'].except!(pivotal_story_points)
       attrs['fields'].except!('issuetype') if subtask?
     end
@@ -213,7 +213,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
   end
 
   def assign_to_pivotal_issue(story_url, config)
-    pivotal_url_id = config[:custom_fields].key(config['jira_custom_fields']['pivotal_url'])
+    pivotal_url_id = config[:custom_fields].key(config['jira_custom_fields']['pivotal_tracker_url'])
     attributes = { 'fields' =>  { pivotal_url_id => story_url } }
 
     save!(attributes, config)

@@ -95,8 +95,8 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     attrs = Hash.new
     # Custom fields in Jira
     # Set Name in config.yml file
-    pivotal_url    = @config['jira_custom_fields']['pivotal_url']
-    pivotal_points = @config['jira_custom_fields']['pivotal_points']
+    pivotal_url    = @config['jira_custom_fields']['pivotal_tracker_url']
+    pivotal_points = @config['jira_custom_fields']['story_points']
 
     pivotal_url_id    = custom_fields.key(pivotal_url)
     pivotal_points_id = custom_fields.key(pivotal_points)
