@@ -4,7 +4,7 @@ class Integration < Thor
   include Thor::Rails
 
   desc 'update', 'update integration for pivotal'
-  method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_configs/config.yml'
+  method_option :config, aliases: '-c', desc: 'Configuration file', default: 'config/integrations/config.yml'
   method_option :project, aliases: '-p', desc: 'Project name from config file', required: true
   def update
     puts "You provided the file: " + "#{options[:config]}".yellow

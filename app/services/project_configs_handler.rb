@@ -18,7 +18,7 @@ class ProjectConfigsHandler
     end
 
     def load_or_create_config(name)
-      file_path = Rails.root.join "project_configs/#{name}.yml"
+      file_path = Rails.root.join "#{default_config_path}/#{name}.yml"
 
       data = YAML.load(ERB.new(File.read(file_path)).result)
       config_params = data.except('jira_custom_fields', 'jira_issue_types')
@@ -45,7 +45,7 @@ class ProjectConfigsHandler
     end
 
     def create_config_file(name)
-      file_path = Rails.root.join "project_configs/#{name}.yml"
+      file_path = Rails.root.join "#{default_config_path}/#{name}.yml"
       return true if File.readable?(file_path)
 
       config = Project::Config.find_by(name: name)
@@ -72,7 +72,11 @@ class ProjectConfigsHandler
     end
 
     def list_of_config_names
-      Find.find(Rails.root.join('project_configs')).select { |p| /.*\.yml$/ =~ p }.map { |path| path.split('/').last.gsub('.yml', '') }
+      Find.find(Rails.root.join(default_config_path)).select { |p| /.*\.yml$/ =~ p }.map { |path| path.split('/').last.gsub('.yml', '') }
+    end
+
+    def default_config_path
+      'config/integrations'
     end
   end
 end

@@ -4,7 +4,7 @@ class Bridge < Thor
   include Thor::Rails
 
   desc 'sync', 'sync stories and issues'
-  method_option :config, aliases: '-c', desc: 'Configuration file', default: 'project_configs/config.yml'
+  method_option :config, aliases: '-c', desc: 'Configuration file', default: 'config/integrations/config.yml'
   method_option :project, aliases: '-p', desc: 'Project name from config file', required: true
   def sync
     random_hash = SecureRandom.hex(30)
