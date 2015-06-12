@@ -261,6 +261,9 @@ GEM
       sidekiq (>= 2.16.0)
     sidekiq-limit_fetch (2.4.2)
       sidekiq (>= 2.6.5, < 4.0)
+    simple_form (3.1.0)
+      actionpack (~> 4.0)
+      activemodel (~> 4.0)
     sinatra (1.4.6)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -351,6 +354,7 @@ DEPENDENCIES
   sidekiq
   sidekiq-failures
   sidekiq-limit_fetch
+  simple_form
   sinatra
   sushi
   therubyracer

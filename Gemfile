@@ -12,6 +12,7 @@ gem 'rufus-scheduler'
 gem 'airbrake'
 gem 'figaro'
 gem 'tracker_api', '~> 0.2.9'
+gem 'simple_form'
 
 gem 'pg'
 
