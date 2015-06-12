@@ -164,7 +164,7 @@ class JiraToPivotal::Pivotal::Project < JiraToPivotal::Pivotal::Base
 
   # TODO: Rewrite using new gem classes
   def story_ends_with_nil?(story)
-    story.jira_url.present? ? story.jira_url.split('/').last == 'nil' : true
+    story.jira_url.present? ? story.jira_url.split('-').last == '0' : true
   end
 
   # TODO: Rewrite using new gem classes

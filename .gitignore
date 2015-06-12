@@ -1,4 +1,4 @@
-project_configs/
+
 logs/
 .idea/
 .ruby-gemset
@@ -12,5 +12,6 @@ logs/
 daemons.rb.output
 daemons.rb.pid
 /config/application.yml
+/config/integrations
 tmp/
 log/
