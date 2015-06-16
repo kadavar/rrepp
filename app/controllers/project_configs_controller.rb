@@ -1,4 +1,5 @@
 class ProjectConfigsController < ApplicationController
+  respond_to :js, :html
   before_filter :find_config, only: [:edit, :update, :destroy, :show]
 
   def index
@@ -11,15 +12,17 @@ class ProjectConfigsController < ApplicationController
 
   def create
     Project::Config.create(config_params)
+    respond_with(@config)
   end
 
   def update
-    Project::Config.update_attributes(config_params)
+    @config.update_attributes(config_params)
+    respond_with(@config)
   end
 
   def destroy
     @config.destroy
-    redirect_to project_configs_path
+    respond_with(@config)
   end
 
   def synchronize
@@ -34,10 +37,10 @@ class ProjectConfigsController < ApplicationController
   end
 
   def config_params
-    params[:config].permit(:tracker_project_id, :jira_login, :jira_host, :jira_host,
-                           :jira_project, :jira_port, :jira_filter, :script_first_start,
-                           :script_repeat_time, :project_id, :name,
-                           jira_issue_types_attributes: [:id, :name, :jira_id, :config_id],
-                           jira_custom_fields_attributes: [:id, :name, :config_id])
+    params[:project_config].permit(:tracker_project_id, :jira_login, :jira_host, :jira_uri_scheme,
+                                   :jira_project, :jira_port, :jira_filter, :script_first_start,
+                                   :script_repeat_time, :project_id, :name, :retry_count,
+                                   jira_issue_types_attributes: [:id, :name, :jira_id, :config_id],
+                                   jira_custom_fields_attributes: [:id, :name, :config_id])
   end
 end

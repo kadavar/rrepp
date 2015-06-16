@@ -7,6 +7,10 @@ class ProjectConfigsHandler
       push_to_config_folder
     end
 
+    def update_config_file(attributes)
+      load_and_update_config(attributes)
+    end
+
     private
 
     def pull_from_config_folder
@@ -18,9 +22,7 @@ class ProjectConfigsHandler
     end
 
     def load_or_create_config(name)
-      file_path = Rails.root.join "#{default_config_path}/#{name}.yml"
-
-      data = YAML.load(ERB.new(File.read(file_path)).result)
+      data = YAML.load(ERB.new(File.read(config_path(name))).result)
       config_params = data.except('jira_custom_fields', 'jira_issue_types')
 
       config = Project::Config.where(name: name).first
@@ -45,8 +47,7 @@ class ProjectConfigsHandler
     end
 
     def create_config_file(name)
-      file_path = Rails.root.join "#{default_config_path}/#{name}.yml"
-      return true if File.readable?(file_path)
+      return true if File.readable?(config_path(name))
 
       config = Project::Config.find_by(name: name)
       config_hash = config.attributes.except('updated_at', 'created_at', 'name', 'id', 'project_id')
@@ -64,11 +65,22 @@ class ProjectConfigsHandler
       config_hash.merge!('jira_custom_fields' => jira_custom_fields)
       config_hash.merge!('jira_issue_types' => jira_issue_types)
 
-      File.open(file_path, 'w') { |f| f.write config_hash.to_yaml }
+      File.open(config_path(name), 'w') { |f| f.write config_hash.to_yaml }
 
     rescue
       # TODO: Add errors handler to show them on frontend
       false
+    end
+
+    def load_and_update_config(attributes)
+      data = YAML.load(ERB.new(File.read(config_path(attributes[:old_name]))).result)
+
+      # update config file attributes
+      attributes.except(:old_name, :new_name).each { |key, value| data[key] = value }
+      File.open(config_path(attributes[:old_name]), 'w') { |f| f.write data.to_yaml }
+
+      # rename config file
+      File.rename(config_path(attributes[:old_name]), config_path(attributes[:new_name])) if attributes[:new_name].present?
     end
 
     def list_of_config_names
@@ -77,6 +89,10 @@ class ProjectConfigsHandler
 
     def default_config_path
       'config/integrations'
+    end
+
+    def config_path(name)
+      Rails.root.join "#{default_config_path}/#{name}.yml"
     end
   end
 end

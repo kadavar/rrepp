@@ -18,6 +18,16 @@ class Project::Config < ActiveRecord::Base
   end
 
   def update_config_file
-    # TODO: Write logic
+    return unless changes.except(:updated_at).any?
+
+    attributes = self.attributes.except('updated_at', 'created_at', 'project_id', 'id', 'name')
+
+    if changes.include?(:name)
+      attributes.merge!(old_name: changes[:name].first, new_name: changes[:name].last)
+    else
+      attributes.merge!(old_name: name)
+    end
+
+    ProjectConfigsHandler.update_config_file(attributes)
   end
 end
