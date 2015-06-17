@@ -8,4 +8,6 @@
     = csrf_meta_tags
   %body.main-image
     = render 'shared/navbar'
-    = yield
+    .container
+      = bootstrap_flash
+      = yield

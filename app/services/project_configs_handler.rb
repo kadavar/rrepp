@@ -41,8 +41,9 @@ class ProjectConfigsHandler
         config.jira_issue_types.find_or_create_by(name: name, jira_id: id)
       end
 
-    rescue
+    rescue Exception => e
       # TODO: Add errors handler to show them on frontend
+      Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
       false
     end
 
@@ -67,8 +68,9 @@ class ProjectConfigsHandler
 
       File.open(config_path(name), 'w') { |f| f.write config_hash.to_yaml }
 
-    rescue
+    rescue Exception => e
       # TODO: Add errors handler to show them on frontend
+      Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
       false
     end
 
