@@ -1,6 +1,7 @@
 .container.white
   .pull-right
-    = link_to 'New Config', new_project_config_path, class: 'btn btn-primary btn-large'
+    / TODO: Uncoment when finished
+    / # = link_to 'New Config', new_project_config_path, class: 'btn btn-primary btn-large'
     = link_to 'Synchronize Configs', synchronize_project_configs_path, class: 'btn btn-success btn-large'
 
   %h1.text-center Project Configs
@@ -26,6 +27,7 @@
             %td= config.tracker_project_id
             %td
               = link_to 'Show', project_config_path(config), class: 'btn btn-success btn-xs'
-              = link_to 'Edit', edit_project_config_path(config), class: 'btn btn-warning btn-xs'
+              / TODO: Uncoment when finished
+              / # = link_to 'Edit', edit_project_config_path(config), class: 'btn btn-warning btn-xs'
               = link_to 'Delete', project_config_path(config), class: 'btn btn-danger btn-xs', method: :delete, data: { confirm: 'Are you sure?' }
 

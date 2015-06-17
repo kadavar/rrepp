@@ -4,14 +4,17 @@ class ThorHelpers::Redis < ThorHelpers::Base
       params_to_redis(config, hash)
     end
 
-    def update_project(project_name)
-      projects_to_redis(update_project_data project_name)
+    def update_project(project_name, config_path)
+      projects_to_redis(update_project_data project_name, config_path)
     end
 
     def last_update(project_name, time)
       if parsed_projets.present?
         pid = parsed_projets[project_name]['pid']
-        projects = cleaned_projects(project_name).merge(project_data(project_name, pid, time))
+        config_path = parsed_projets[project_name]['config_path']
+
+        projects =
+          cleaned_projects(project_name).merge(project_data(project_name, pid: pid, time: pid, config_path: config_path))
 
         projects_to_redis(projects)
       else
@@ -29,11 +32,11 @@ class ThorHelpers::Redis < ThorHelpers::Base
 
     private
 
-    def update_project_data(project_name)
+    def update_project_data(project_name, config_path)
       if parsed_projets.present?
-        cleaned_projects(project_name).merge(project_data(project_name))
+        cleaned_projects(project_name).merge(project_data(project_name, config_path: config_path))
       else
-        project_data(project_name)
+        project_data(project_name, config_path: config_path)
       end
     end
 
@@ -46,8 +49,11 @@ class ThorHelpers::Redis < ThorHelpers::Base
       crypt.encrypt_and_sign(params.to_json)
     end
 
-    def project_data(project_name, pid = Process.pid, last_update = Time.now.utc)
-      { project_name => { 'pid' => pid, 'last_update' => last_update } }
+    def project_data(project_name, options={})
+      default_options = { pid: Process.pid, last_update: Time.now.utc }
+      options = options.reverse_merge(default_options)
+
+      { project_name => { 'pid' => options[:pid], 'last_update' => options[:last_update], 'config_path' => options[:config_path] } }
     end
 
     def parsed_projets

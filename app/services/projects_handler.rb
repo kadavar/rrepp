@@ -33,7 +33,9 @@ class ProjectsHandler
     def create_or_update_projects
       projects.each do |project_name, params|
         project = Project.find_or_create_by(name: project_name)
-        project.update_attributes(pid: params['pid'], last_update: params['last_update'])
+        config = Project::Config.find_by(name: params['config_path'].split('/').last.gsub('.yml', ''))
+
+        project.update_attributes(pid: params['pid'], last_update: params['last_update'], config: config)
       end
     end
 
