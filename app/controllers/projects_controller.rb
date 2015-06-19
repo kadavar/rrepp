@@ -2,8 +2,6 @@ class ProjectsController < ApplicationController
   before_filter :find_project, only: [:start, :stop, :force_sync]
 
   def index
-    ProjectsHandler.perform
-
     @projects = Project.all
   end
 
@@ -12,6 +10,16 @@ class ProjectsController < ApplicationController
 
   def stop
     Process.kill('SIGTERM', @project.pid)
+
+    redirect_to projects_path
+  end
+
+  def synchronize
+    if ProjectsHandler.perform
+      flash[:success] = 'Projects was successfully synchronized'
+    else
+      flash[:error] = 'Synchronization failed. Contact to administator'
+    end
 
     redirect_to projects_path
   end

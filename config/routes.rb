@@ -9,6 +9,9 @@ Rails.application.routes.draw do
       get :start
       get :force_sync
     end
+    collection do
+      get :synchronize
+    end
   end
 
   resources :project_logs, only: [:index, :show]

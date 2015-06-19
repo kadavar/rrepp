@@ -2,8 +2,9 @@ class ProjectsHandler
   class << self
     def perform
       update_redis_projects
-      create_or_update_projects
+      return false unless create_or_update_projects
       update_project_params
+      true
     end
 
     private
@@ -37,6 +38,10 @@ class ProjectsHandler
 
         project.update_attributes(pid: params['pid'], last_update: params['last_update'], config: config)
       end
+
+    rescue Exception => e
+      Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+      false
     end
 
     def update_project_params
