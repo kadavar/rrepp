@@ -171,6 +171,8 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     stories.each do |story|
       putc '.'
+      next unless story.to_jira(issue_custom_fields)
+
       issue, attributes = build_issue story.to_jira(issue_custom_fields)
 
       next unless issue.save!(attributes, @config)
@@ -246,7 +248,9 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     putc '.'
 
     jira_issue = select_task(jira_issues, story)
+
     return if jira_issue.nil?
+    return unless story.to_jira(issue_custom_fields)
 
     issue, attributes = build_issue(story.to_jira(issue_custom_fields), jira_issue)
 

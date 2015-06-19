@@ -88,6 +88,9 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     main_attrs.merge!(original_estimate_attrs)
               .merge!(custom_fields_attrs(custom_fields))
               .merge!(ownership_handler.reporter_and_asignee_attrs(self))
+  rescue
+    Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
+    false
   end
 
 
@@ -197,7 +200,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   # TODO: Rewrite using new gem classes
   def main_attrs
     {
-      'summary'      => story.name.squish,
+      'summary'      => story.name.squish.truncate(150, separator: ' '),
       'description'  => description_with_replaced_image_tag.to_s,
       'issuetype'    => { 'id' => story_type_to_issue_type },
     }
