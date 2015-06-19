@@ -171,7 +171,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     stories.each do |story|
       putc '.'
-      issue, attributes = build_issue story.to_jira(@config[:custom_fields])
+      issue, attributes = build_issue story.to_jira(issue_custom_fields)
 
       next unless issue.save!(attributes, @config)
 
@@ -248,7 +248,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     jira_issue = select_task(jira_issues, story)
     return if jira_issue.nil?
 
-    issue, attributes = build_issue(story.to_jira(@config[:custom_fields]), jira_issue)
+    issue, attributes = build_issue(story.to_jira(issue_custom_fields), jira_issue)
 
     if difference_checker.main_attrs_difference?(attributes, issue)
       logger.jira_logger.update_issue_log(story, issue, attributes)
