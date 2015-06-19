@@ -200,7 +200,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
   # TODO: Rewrite using new gem classes
   def main_attrs
     {
-      'summary'      => story.name.squish.truncate(150, separator: ' '),
+      'summary'      => story.name.squish.truncate(255, separator: ' ', omission: ''),
       'description'  => description_with_replaced_image_tag.to_s,
       'issuetype'    => { 'id' => story_type_to_issue_type },
     }
