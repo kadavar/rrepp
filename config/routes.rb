@@ -14,7 +14,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :project_logs, only: [:index, :show]
+  resources :project_logs, only: [:index, :show], param: :name
   resources :project_configs do
     collection do
       get :synchronize

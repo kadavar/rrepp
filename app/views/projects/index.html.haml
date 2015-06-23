@@ -15,6 +15,7 @@
           %th Config Name
           %th Pid
           %th Last Update
+          %th Log
           %th Status
           %th Actions
       %tbody
@@ -25,6 +26,7 @@
             %td= link_to project.config.try(:name), project_config_path(project.config), class: 'white'
             %td= project.pid
             %td= project.last_update
+            %td= link_to project.log_name, project_log_path(project.log_name), class: 'white'
             %td= project_label(project.online)
             %td
               .col-md-7.action-border

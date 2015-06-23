@@ -1,0 +1,8 @@
+.container
+  %h1.text-center.white= "Project Log #{@log_name}"
+
+  %div{style:'padding:20px; background-color: cornsilk' }
+    - @log_text.each do |line|
+      - cache Digest::SHA1.hexdigest(line) do
+        %p= highlight_code(:js, line).html_safe
+    = paginate @log_text

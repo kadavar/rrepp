@@ -17,6 +17,9 @@ gem "responders"
 
 gem 'pg'
 
+gem 'highlight', require: 'simplabs/highlight'
+gem 'kaminari'
+
 gem 'sidekiq'
 gem 'sidekiq-failures'
 gem 'sidekiq-limit_fetch'
