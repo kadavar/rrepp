@@ -97,6 +97,6 @@ class JiraToPivotal::Loggs::JiraLogger < JiraToPivotal::Loggs::Base
   end
 
   def log_attributes_for_save(attrs)
-    logger.debug "#{@jira_issue_for_log} Attributes: " + "#{attrs}".yellow + " - #{@connection_for_log}"
+    logger.debug "#{@jira_issue_for_log} Before Save Attributes: " + "#{attrs}".yellow + " - #{@connection_for_log}"
   end
 end
