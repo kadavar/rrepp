@@ -12,6 +12,9 @@ logs/
 daemons.rb.output
 daemons.rb.pid
 /config/application.yml
+/config/newrelic.yml
 /config/integrations
 tmp/
 log/
+vendor/bundle
+.bundle/
