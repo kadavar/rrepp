@@ -19,6 +19,8 @@ gem 'sidekiq-limit_fetch'
 gem 'sinatra', require: false
 gem 'differ', github: 'emintham/differ'
 
+gem 'newrelic_rpm'
+
 group :development do
   gem 'pry'
   gem 'pry-byebug'
