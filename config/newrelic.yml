@@ -42,3 +42,4 @@ test:
 production:
   <<: *default_settings
   monitor_mode: true
+  attributes.include: job.sidekiq.args.*

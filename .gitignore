@@ -15,3 +15,5 @@ daemons.rb.pid
 /config/integrations
 tmp/
 log/
+vendor/bundle
+.bundle/
