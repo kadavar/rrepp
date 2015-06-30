@@ -43,7 +43,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       error,
-      parameters: { config: @config.for_airbrake },
+      parameters: { config: @config.airbrake_message_parameters },
       cgi_data: ENV.to_hash
       )
     raise error
