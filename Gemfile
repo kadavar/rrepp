@@ -26,6 +26,11 @@ group :development do
   gem 'pry-byebug'
 end
 
+group :development, :test do
+  gem 'rspec-rails'
+  gem 'quiet_assets'
+end
+
 group :tools do
   gem 'capistrano', '~> 2.0'
   gem 'capistrano_colors'
@@ -40,4 +45,23 @@ end
 
 group :production do
   gem 'unicorn'
+end
+
+group :test do
+  # browser level testing
+  gem 'capybara'
+  gem 'poltergeist' # headless js driver for capybara
+
+  gem 'factory_girl'
+
+  # fake redis implemented in ruby
+  gem 'mock_redis'
+
+  # the one true way of mocking and stubbing
+  gem 'mocha', require: false
+
+  # to test sorting, timing
+  gem 'timecop'
+
+  gem 'shoulda-matchers'
 end

@@ -80,9 +80,16 @@ GEM
     capistrano-unicorn (0.2.0)
       capistrano (< 3.0)
     capistrano_colors (0.5.5)
+    capybara (2.4.4)
+      mime-types (>= 1.16)
+      nokogiri (>= 1.3.3)
+      rack (>= 1.0.0)
+      rack-test (>= 0.5.4)
+      xpath (~> 2.0)
     celluloid (0.16.0)
       timers (~> 4.0.0)
     certified (1.0.0)
+    cliver (0.3.2)
     coderay (1.1.0)
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
@@ -94,9 +101,12 @@ GEM
     debugger-linecache (1.2.0)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
+    diff-lcs (1.2.5)
     equalizer (0.0.11)
     erubis (2.7.0)
     excon (0.45.3)
+    factory_girl (4.5.0)
+      activesupport (>= 3.0.0)
     faraday (0.9.1)
       multipart-post (>= 1.2, < 3)
     faraday_middleware (0.9.1)
@@ -121,10 +131,14 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
+    metaclass (0.0.4)
     method_source (0.8.2)
     mime-types (1.25.1)
     mini_portile (0.6.2)
     minitest (5.6.0)
+    mocha (1.1.0)
+      metaclass (~> 0.0.1)
+    mock_redis (0.14.1)
     multi_json (1.11.0)
     multipart-post (2.0.0)
     net-scp (1.2.1)
@@ -151,6 +165,11 @@ GEM
       nokogiri-happymapper (>= 0.5.4)
       rest-client (~> 1.6.0)
       rest-client (~> 1.6.0)
+    poltergeist (1.6.0)
+      capybara (~> 2.1)
+      cliver (~> 0.3.1)
+      multi_json (~> 1.0)
+      websocket-driver (>= 0.2.0)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -158,6 +177,8 @@ GEM
     pry-byebug (3.0.1)
       byebug (~> 3.4)
       pry (~> 0.10)
+    quiet_assets (1.1.0)
+      railties (>= 3.1, < 5.0)
     rack (1.6.0)
     rack-protection (1.5.3)
       rack
@@ -200,9 +221,28 @@ GEM
     rest-client (1.6.8)
       mime-types (~> 1.16)
       rdoc (>= 2.4.2)
+    rspec-core (3.3.1)
+      rspec-support (~> 3.3.0)
+    rspec-expectations (3.3.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.3.0)
+    rspec-mocks (3.3.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.3.0)
+    rspec-rails (3.3.2)
+      actionpack (>= 3.0, < 4.3)
+      activesupport (>= 3.0, < 4.3)
+      railties (>= 3.0, < 4.3)
+      rspec-core (~> 3.3.0)
+      rspec-expectations (~> 3.3.0)
+      rspec-mocks (~> 3.3.0)
+      rspec-support (~> 3.3.0)
+    rspec-support (3.3.0)
     rufus-scheduler (3.0.9)
       tzinfo
     safe_yaml (1.0.4)
+    shoulda-matchers (2.8.0)
+      activesupport (>= 3.0.0)
     sidekiq (3.3.4)
       celluloid (>= 0.16.0)
       connection_pool (>= 2.1.1)
@@ -231,6 +271,7 @@ GEM
       thor
     thread_safe (0.3.5)
     tilt (1.4.1)
+    timecop (0.7.4)
     timers (4.0.1)
       hitimes
     tracker_api (0.2.9)
@@ -252,6 +293,11 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
+    websocket-driver (0.5.4)
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.2)
+    xpath (2.0.0)
+      nokogiri (~> 1.3)
 
 PLATFORMS
   ruby
@@ -265,19 +311,27 @@ DEPENDENCIES
   capistrano-slack
   capistrano-unicorn
   capistrano_colors
+  capybara
   certified
   colorize
   differ!
+  factory_girl
   figaro
   highline
   jira-ruby
+  mocha
+  mock_redis
   newrelic_rpm
   pivotal-tracker
+  poltergeist
   pry
   pry-byebug
+  quiet_assets
   rails (= 4.2)
   recap (~> 1.2)
+  rspec-rails
   rufus-scheduler
+  shoulda-matchers
   sidekiq
   sidekiq-failures
   sidekiq-limit_fetch
@@ -285,5 +339,6 @@ DEPENDENCIES
   sushi
   thor
   thor-rails
+  timecop
   tracker_api (~> 0.2.9)
   unicorn
