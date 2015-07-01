@@ -27,7 +27,7 @@ group :development do
 
   # code linters
   gem 'overcommit'
-  gem 'rubocop'
+  gem 'rubocop', require: false
 
   # more useful exception page, auto open a console at the exception site
   gem 'better_errors'
