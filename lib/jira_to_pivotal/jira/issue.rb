@@ -47,7 +47,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
 
       Airbrake.notify_or_ignore(
        e,
-       parameters: config.for_airbrake.merge(attrs),
+       parameters: config.airbrake_message_parameters.merge(attrs),
        cgi_data: ENV.to_hash,
        error_message: "#{e.response.body}"
       )

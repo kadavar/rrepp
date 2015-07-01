@@ -18,7 +18,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     @note   ||= story.comments
   rescue => error
     sleep(1) && retry unless (retries -= 1).zero?
-    Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
+    Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
     false
   end
 
@@ -52,7 +52,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
   rescue Exception => error
     sleep(1) && retry unless (retries -= 1).zero?
-    Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
+    Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
     false
   end
 
@@ -61,7 +61,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
               .merge!(custom_fields_attrs(custom_fields))
               .merge!(ownership_handler.reporter_and_asignee_attrs(self))
   rescue Exception => error
-    Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
+    Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
     false
   end
 
