@@ -1,0 +1,40 @@
+AllCops:
+  RunRailsCops: true
+
+Style/CyclomaticComplexity:
+  Max: 6
+
+Metrics/AbcSize:
+  Max: 19
+
+Style/SignalException:
+  EnforcedStyle: only_fail
+
+Style/ClassLength:
+  Max: 1000
+
+Style/MethodLength:
+  Max: 100
+
+Style/LineLength:
+  Max: 128
+  AllowURI: true
+
+Style/DotPosition:
+  EnforcedStyle: trailing
+
+# Get rid of $redis global!!!
+Style/GlobalVars:
+  Description: 'Do not introduce global variables.'
+  Enabled: false
+
+# Rails 4 here we come
+Rails/ActionFilter:
+  Description: 'Enforces consistent use of action filter methods.'
+  Enabled: false
+
+Style/GuardClause:
+  MinBodyLength: 0
+
+Style/Documentation:
+  Enabled: false
