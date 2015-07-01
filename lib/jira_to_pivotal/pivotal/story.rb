@@ -50,7 +50,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
 
     v5_story.save
 
-  rescue => error
+  rescue Exception => error
     sleep(1) && retry unless (retries -= 1).zero?
     Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
     false
@@ -60,7 +60,7 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
     main_attrs.merge!(original_estimate_attrs)
               .merge!(custom_fields_attrs(custom_fields))
               .merge!(ownership_handler.reporter_and_asignee_attrs(self))
-  rescue
+  rescue Exception => error
     Airbrake.notify_or_ignore(error, parameters: @config.for_airbrake, cgi_data: ENV.to_hash)
     false
   end

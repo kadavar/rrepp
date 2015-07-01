@@ -377,6 +377,6 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def jira_pivotal_field
     pivotal_url = @config['jira_custom_fields']['pivotal_url']
-    @config[:custom_fields].key(pivotal_url)
+    issue_custom_fields.key(pivotal_url)
   end
 end
