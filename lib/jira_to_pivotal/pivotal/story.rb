@@ -40,15 +40,15 @@ class JiraToPivotal::Pivotal::Story < JiraToPivotal::Pivotal::Base
       integration_match = integrations.select { |int| int['base_url'] == jira_url.gsub(":#{config.port}",'') }[0]
 
       if integration_match
-        v5_story.integration_id = integration_match['id']
-        v5_story.external_id = key
+        story.integration_id = integration_match['id']
+        story.external_id = key
       else
         logger.attrs_log(integrations, 'integrations')
         raise RuntimeError, 'something wrong with integrations'
       end
     end
 
-    v5_story.save
+    story.save
 
   rescue Exception => error
     sleep(1) && retry unless (retries -= 1).zero?
