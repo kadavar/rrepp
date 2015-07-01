@@ -345,7 +345,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def remove_jira_id_from_pivotal(jira_ids, stories)
     for_clean_stories = stories.select { |s| jira_ids.include?(s.jira_issue_id) }
-    for_clean_stories.each { |story| story.assign_to_jira_issue('nil', nil) }
+    for_clean_stories.each { |story| story.assign_to_jira_issue(nil, url) }
 
     return for_clean_stories.count
   end
