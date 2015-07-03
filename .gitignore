@@ -6,6 +6,7 @@ logs/
 .ruby-gemset
 .rbenv-gemset
 .recap-lock
+.rspec
 
 /cap-recipes
 

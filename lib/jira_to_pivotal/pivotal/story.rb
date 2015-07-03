@@ -36,12 +36,14 @@ module JiraToPivotal
             story: story,
             key: key
           }
+
         if integration.present?
           update_integration(options)
         else
           logger.attrs_log(integrations, 'integrations')
           fail 'something wrong with integrations'
         end
+
       rescue Exception => error
         Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
         false
@@ -159,7 +161,7 @@ module JiraToPivotal
       end
 
       def empty_estimate?
-        # When estimate not set, pivotal return -1
+        # When estimate is not set, pivotal returns -1
         story.estimate.to_i == -1
       end
 

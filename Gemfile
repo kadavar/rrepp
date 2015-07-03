@@ -11,7 +11,7 @@ gem 'highline'
 gem 'rufus-scheduler'
 gem 'airbrake'
 gem 'figaro'
-gem 'tracker_api', '~> 0.2.9'
+gem 'tracker_api', github: 'dashofcode/tracker_api'
 
 gem 'sidekiq'
 gem 'sidekiq-failures'
@@ -35,7 +35,6 @@ end
 
 group :development, :test do
   gem 'rspec-rails'
-  gem 'quiet_assets'
 end
 
 group :tools do

@@ -46,12 +46,12 @@ module JiraToPivotal
         jira_assignee['display_name'].compact_keys
       end
 
-      def jira_assignee_by_email_without_domen
-        jira_assignee_by_email.reduce({}) { |hash, (k, v)| hash.merge(k.match(regexp_email_without_domen)[1] => v) }
+      def jira_assignee_by_email_without_domain
+        jira_assignee_by_email.reduce({}) { |hash, (k, v)| hash.merge(k.match(regexp_email_without_domain)[1] => v) }
       end
 
       def pivotal_assignee_by_email_without_domen
-        pivotal_assignee.reduce({}) { |hash, (k, v)| hash.merge(k => v.match(regexp_email_without_domen)[1]) }
+        pivotal_assignee.reduce({}) { |hash, (k, v)| hash.merge(k => v.match(regexp_email_without_domain)[1]) }
       end
 
       def user_jira_name(full_name)
@@ -71,7 +71,7 @@ module JiraToPivotal
         pivotal_name = pivotal_assignee_by_email_without_domen[full_name] || 'Not Found'
         result = nil
 
-        jira_assignee_by_email_without_domen.each do |key, value|
+        jira_assignee_by_email_without_domain.each do |key, value|
           piv_jira_match = pivotal_name =~ /#{key}/
           jira_piv_match = key =~ /#{pivotal_name}/
 
@@ -81,7 +81,7 @@ module JiraToPivotal
         result
       end
 
-      def regexp_email_without_domen
+      def regexp_email_without_domain
         /^(.+)@.+$/
       end
     end
