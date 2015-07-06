@@ -75,7 +75,7 @@ module JiraToPivotal
           piv_jira_match = pivotal_name =~ /#{key}/
           jira_piv_match = key =~ /#{pivotal_name}/
 
-          result = value if piv_jira_match || jira_piv_match
+          result = (piv_jira_match || jira_piv_match) ? value : nil
         end
 
         result

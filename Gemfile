@@ -1,8 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.2'
-gem 'jira-ruby'
-gem 'pivotal-tracker'
 gem 'certified'
 gem 'thor'
 gem 'thor-rails'
@@ -11,15 +9,22 @@ gem 'highline'
 gem 'rufus-scheduler'
 gem 'airbrake'
 gem 'figaro'
-gem 'tracker_api', github: 'dashofcode/tracker_api'
 
+# Background jobber
 gem 'sidekiq'
 gem 'sidekiq-failures'
 gem 'sidekiq-limit_fetch'
+
 gem 'sinatra', require: false
 gem 'differ', github: 'emintham/differ'
 
 gem 'newrelic_rpm'
+
+# Pivotal Tracker Api
+gem 'tracker_api', github: 'dashofcode/tracker_api'
+
+# Jira Api
+gem 'jira-ruby'
 
 group :development do
   gem 'pry'
