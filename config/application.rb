@@ -1,18 +1,17 @@
 require File.expand_path('../boot', __FILE__)
 # require 'rails/all'
-require "active_model/railtie"
-# require "active_record/railtie"
-require "action_controller/railtie"
-require "action_mailer/railtie"
-require "action_view/railtie"
-require "sprockets/railtie"
-require "rails/test_unit/railtie"
+require 'active_model/railtie'
+# require 'active_record/railtie'
+require 'action_controller/railtie'
+require 'action_mailer/railtie'
+require 'action_view/railtie'
+require 'sprockets/railtie'
+require 'rails/test_unit/railtie'
 
 Bundler.require(:default, Rails.env)
 
 require 'net/http'
 require 'jira'
-require 'pivotal-tracker'
 require 'open-uri'
 require 'yaml'
 require 'colorize'
