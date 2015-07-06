@@ -12,7 +12,6 @@ Bundler.require(:default, Rails.env)
 
 require 'net/http'
 require 'jira'
-require 'pivotal-tracker'
 require 'open-uri'
 require 'yaml'
 require 'colorize'
