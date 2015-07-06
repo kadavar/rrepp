@@ -11,6 +11,17 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     @config.merge!(custom_fields: issue_custom_fields)
   end
 
+  def issue_custom_fields
+    @issue ||= project.issue_with_name_expand
+
+    unless @issue.names.present?
+      logger.attrs_log(@issue.inspect, 'Issue with custom fields')
+      fail "Can't grep custom fields. Check users permissions of at least one feature"
+    end
+
+    @issue.names
+  end
+
   def build_api_client
     @client ||= JIRA::Client.new({
          username:     config['jira_login'],
@@ -32,7 +43,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     logger.error_log(error)
     Airbrake.notify_or_ignore(
       error,
-      parameters: { config: @config.for_airbrake },
+      parameters: { config: @config.airbrake_message_parameters },
       cgi_data: ENV.to_hash
       )
     raise error
@@ -160,7 +171,9 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
     stories.each do |story|
       putc '.'
-      issue, attributes = build_issue story.to_jira(@config[:custom_fields])
+      next unless story.to_jira(issue_custom_fields)
+
+      issue, attributes = build_issue story.to_jira(issue_custom_fields)
 
       next unless issue.save!(attributes, @config)
 
@@ -235,9 +248,11 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
     putc '.'
 
     jira_issue = select_task(jira_issues, story)
-    return if jira_issue.nil?
 
-    issue, attributes = build_issue(story.to_jira(@config[:custom_fields]), jira_issue)
+    return if jira_issue.nil?
+    return unless story.to_jira(issue_custom_fields)
+
+    issue, attributes = build_issue(story.to_jira(issue_custom_fields), jira_issue)
 
     if difference_checker.main_attrs_difference?(attributes, issue)
       logger.jira_logger.update_issue_log(story, issue, attributes)
@@ -280,12 +295,6 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def select_task(issues, story)
     issues.find { |issue| issue.key == story.jira_issue_id }
-  end
-
-  def issue_custom_fields
-    @issue ||= project.issue_with_name_expand
-    @issue = project.issue_with_name_expand unless @issue.names.present?
-    @issue.names
   end
 
   def jira_assignable_users
@@ -334,7 +343,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def remove_jira_id_from_pivotal(jira_ids, stories)
     for_clean_stories = stories.select { |s| jira_ids.include?(s.jira_issue_id) }
-    for_clean_stories.each { |story| story.assign_to_jira_issue('nil', 'nil') }
+    for_clean_stories.each { |story| story.assign_to_jira_issue(nil, url) }
 
     return for_clean_stories.count
   end
@@ -366,6 +375,6 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
 
   def jira_pivotal_field
     pivotal_url = @config['jira_custom_fields']['pivotal_tracker_url']
-    @config[:custom_fields].key(pivotal_url)
+    issue_custom_fields.key(pivotal_url)
   end
 end

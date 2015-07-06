@@ -47,7 +47,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
 
       Airbrake.notify_or_ignore(
        e,
-       parameters: attrs,
+       parameters: config.airbrake_message_parameters.merge(attrs),
        cgi_data: ENV.to_hash,
        error_message: "#{e.response.body}"
       )
@@ -203,6 +203,7 @@ class JiraToPivotal::Jira::Issue < JiraToPivotal::Jira::Base
       begin
         comment = build_comment
         if note.text.present? # pivotal add empty note for attachment
+          # TODO: need to grep author here somehow(in new gem we have only person_id attr)
           comment.save({ 'body' => "#{note.author} added a comment in Pivotal Tracker:: \n\n #{note.text} \n View this Pivotal Tracker story: #{story.url}" })
         end
       rescue Exception => e

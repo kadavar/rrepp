@@ -1,7 +1,8 @@
 require 'recap/recipes/ruby'
+require 'recap/recipes/rails'
+require 'recap/tasks/bundler'
 require 'sushi/ssh'
 require 'capistrano_colors'
-# require 'recap_rails'
 require 'capistrano-unicorn'
 require 'capistrano/sidekiq'
 require 'capistrano/slack'
@@ -47,6 +48,8 @@ set :unicorn_workers, 1
 after 'deploy:restart', 'unicorn:reload'    # app IS NOT preloaded
 #after 'deploy:restart', 'unicorn:restart'   # app preloaded
 # after 'deploy:restart', 'unicorn:duplicate' # before_fork hook implemented (zero downtime deployments)
+
+before 'sidekiq:quiet', 'script:run_bundle'
 before 'sidekiq:start', 'script:create_folders'
 
 # Slack

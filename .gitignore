@@ -5,12 +5,16 @@ logs/
 .ruby-gemset
 .rbenv-gemset
 .recap-lock
+.rspec
 
 /cap-recipes
 
 daemons.rb.output
 daemons.rb.pid
 /config/application.yml
-/config/integrations/
+/config/newrelic.yml
+/config/integrations
 tmp/
 log/
+vendor/bundle
+.bundle/
