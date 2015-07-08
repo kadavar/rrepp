@@ -166,7 +166,6 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
   end
 
   def create_tasks!(stories)
-    counter = 0
     puts "\nCreate new issues"
 
     stories.each do |story|
@@ -188,35 +187,25 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       #*********************************************************************************************************#
 
       story.assign_to_jira_issue(issue.issue.key, url)
-
-      counter += 1
     end
-
-    return counter
   end
 
   def update_tasks!(stories)
-    counter = 0
     puts "\nUpdate exists issues"
-
     incorrect_jira_ids, correct_jira_ids = check_deleted_issues_in_jira(stories.map(&:jira_issue_id))
 
     cleaned_stories_count = remove_jira_id_from_pivotal(incorrect_jira_ids, stories)
 
     if correct_jira_ids.present?
       jira_issues = find_issues("id in #{map_jira_ids_for_search(correct_jira_ids)}")
-      stories.each { |story| update_issue!(story, jira_issues); counter += 1 }
+      stories.each { |story| update_issue!(story, jira_issues) }
     end
-
-    return counter
   end
 
   def create_sub_task_for_invosed_issues!(stories)
-    counter = 0
-
     story_urls = stories.map{ |story| story.story.url }
 
-    return counter unless story_urls.present?
+    return unless story_urls.present?
 
     puts "\nUpdate Invoiced issues - create subtasks"
 
@@ -238,10 +227,7 @@ class JiraToPivotal::Jira::Project < JiraToPivotal::Jira::Base
       logger.jira_logger.invoced_issue_log(story: story, issue: subtask, old_issue: old_issue)
 
       stories.delete(story)
-      counter += 1
     end
-
-    counter
   end
 
   def update_issue!(story, jira_issues)
