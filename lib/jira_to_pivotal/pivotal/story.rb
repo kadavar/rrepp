@@ -178,7 +178,7 @@ module JiraToPivotal
       end
 
       def description_with_replaced_image_tag
-        # Gem return nil if description is empty
+        # Gem returns nil if description is empty
         story.description.to_s.gsub(regexp_for_image_tag_replace, '!\1!')
       end
     end
