@@ -38,7 +38,7 @@ module JiraToPivotal
     def estimates?(params)
       return false if incorrect_issue_type?(params)
 
-      points_field_id = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points'])
+      points_field_id = config[:custom_fields].key(config['jira_custom_fields']['pivotal_points']).to_s
       params[:story_attrs]['fields'][points_field_id] != params[:jira_issue].fields[points_field_id] || empty_estimate?(params)
     end
 
