@@ -2,8 +2,9 @@ module JiraToPivotal
   module Pivotal
     class Story < Base
       delegate :url, to: :story
+      delegate :client, to: :story
 
-      attr_accessor :project, :story, :config
+      attr_reader :project, :story, :config
 
       def initialize(project, story = nil, config = nil)
         @project    = project
@@ -12,13 +13,13 @@ module JiraToPivotal
       end
 
       def ownership_handler
-        @config[:ownership_handler]
+        config[:ownership_handler]
       end
 
       # TODO: Rewrite using new gem classes
       def notes
-        retries ||= @config['script_repeat_time'].to_i
-        @note ||= story.comments
+        retries ||= config['script_repeat_time'].to_i
+        @notes ||= story.comments
       rescue => error
         sleep(1) && retry unless (retries -= 1).zero?
         Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
@@ -45,7 +46,7 @@ module JiraToPivotal
         end
 
       rescue Exception => error
-        Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
+        Airbrake.notify_or_ignore(error, parameters: config.airbrake_message_parameters, cgi_data: ENV.to_hash)
         false
       end
 
@@ -90,8 +91,8 @@ module JiraToPivotal
         attrs = {}
         # Custom fields in Jira
         # Set Name in config.yml file
-        pivotal_url    = @config['jira_custom_fields']['pivotal_url']
-        pivotal_points = @config['jira_custom_fields']['pivotal_points']
+        pivotal_url    = config['jira_custom_fields']['pivotal_url']
+        pivotal_points = config['jira_custom_fields']['pivotal_points']
 
         pivotal_url_id    = custom_fields.key(pivotal_url)
         pivotal_points_id = custom_fields.key(pivotal_points)
@@ -104,9 +105,9 @@ module JiraToPivotal
       def story_type_to_issue_type
         type_map =
           {
-            'bug'     => @config['jira_issue_types']['bug'].to_s,
-            'feature' => @config['jira_issue_types']['feature'].to_s,
-            'chore'   => @config['jira_issue_types']['chore'].to_s
+            'bug'     => config['jira_issue_types']['bug'].to_s,
+            'feature' => config['jira_issue_types']['feature'].to_s,
+            'chore'   => config['jira_issue_types']['chore'].to_s
           }
 
         type_map[story.story_type]

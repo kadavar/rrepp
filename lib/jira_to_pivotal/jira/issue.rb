@@ -1,7 +1,7 @@
 module JiraToPivotal
   module Jira
     class Issue < Base
-      attr_accessor :issue, :project
+      attr_accessor :issue, :project, :config
 
       delegate :key, to: :issue
 
@@ -184,14 +184,19 @@ module JiraToPivotal
             comment = build_comment
             if note.text.present? # pivotal add empty note for attachment
               # TODO: need to grep author here somehow(in new gem we have only person_id attr)
+              # TODO: need ability to grep person directly from note
+              # HACK: find pivotal project, then membership and then person by person_id
+              pivotal_project = story.client.project(config['tracker_project_id'])
+              author = pivotal_project.memberships.map(&:person).find { |person| person.id == note.person_id }
+
               comment.save(
-                'body' => "#{note.author} added a comment in Pivotal Tracker::\n\n #{note.text}
+                'body' => "#{author.name} added a comment in Pivotal Tracker::\n\n #{note.text}
                 \n View this Pivotal Tracker story: #{story.url}"
               )
             end
           rescue Exception => e
             logger.error_log(e)
-            Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+            Airbrake.notify_or_ignore(e, parameters: config.airbrake_message_parameters, cgi_data: ENV.to_hash)
           end
         end
       end
