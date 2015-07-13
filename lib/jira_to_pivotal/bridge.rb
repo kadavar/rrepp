@@ -13,7 +13,7 @@ module JiraToPivotal
     end
 
     def ownership_handler
-      @handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal)
+      @ownership_handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal)
     end
 
     def sync!
