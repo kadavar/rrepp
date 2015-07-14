@@ -82,6 +82,10 @@ module JiraToPivotal
         [Issue.new(options_for_issue(issue)), attributes]
       end
 
+      def subtasks_handler
+        @subtasks_handler ||= SubtasksHandler.new(jira_project: self, project_name: project_name)
+      end
+
       def difference_checker
         @difference_checker ||= DifferenceChecker.new(project, config)
       end
@@ -184,34 +188,7 @@ module JiraToPivotal
       end
 
       def create_sub_task_for_invosed_issues!(stories)
-        story_urls = stories.map { |story| story.story.url }
-
-        return unless story_urls.present?
-
-        pivotal_urls = map_jira_ids_for_search(story_urls)
-        jql = "project=#{project_name} AND 'Pivotal Tracker URL' IN #{pivotal_urls} AND status = Invoiced"
-        jira_issues = find_issues(jql)
-
-        jira_issues.each { |issue| prepare_and_create_sub_task!(issue, stories) }
-      end
-
-      def prepare_and_create_sub_task!(issue, stories)
-        story = stories.find { |local_story| local_story.url == issue.send(jira_pivotal_field) }
-
-        return false unless story.present?
-        putc '.'
-
-        subtask = create_sub_task!(issue, story.url)
-
-        return false unless subtask
-
-        story.assign_to_jira_issue(subtask.key, url)
-
-        old_issue, _attrs = build_issue({}, issue)
-        logger.jira_logger.invoced_issue_log(story: story, issue: subtask, old_issue: old_issue)
-
-        stories.delete(story)
-        true
+        subtasks_handler.create_sub_tasks!(stories)
       end
 
       def update_issue!(story, jira_issues)
@@ -236,32 +213,6 @@ module JiraToPivotal
         # end
 
         true
-      end
-
-      def create_sub_task!(issue, story_url)
-        attributes =
-          { 'parent' => { 'id' => parent_id_for(issue) },
-            'summary' => issue.fields['summary'],
-            'issuetype' => { 'id' => '5' },
-            'description' => issue.fields['description'].to_s,
-            jira_pivotal_field => issue.send(jira_pivotal_field)
-          }
-
-        sub_task, attrs = build_issue(attributes)
-
-        return false unless sub_task.save!(attrs, config)
-
-        logger.jira_logger.create_sub_task_log(story_url: story_url,
-                                               issue_key: sub_task.key,
-                                               old_issue_key: issue.key,
-                                               attrs: attributes)
-
-        sub_task
-      end
-
-      def parent_id_for(issue)
-        j2p_issue, _attrs = build_issue({}, issue)
-        j2p_issue.subtask? ? issue.fields['parent']['id'] : issue.id
       end
 
       def select_task(issues, story)
