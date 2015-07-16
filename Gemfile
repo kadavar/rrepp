@@ -21,7 +21,7 @@ gem 'differ', github: 'emintham/differ'
 gem 'newrelic_rpm'
 
 # Pivotal Tracker Api
-gem 'tracker_api', github: 'dashofcode/tracker_api'
+gem 'tracker_api', github: 'dashofcode/tracker_api', branch: 'master'
 
 # Jira Api
 gem 'jira-ruby'
