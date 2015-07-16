@@ -45,7 +45,7 @@ module JiraToPivotal
           fail 'something wrong with integrations'
         end
 
-      rescue Exception => error
+      rescue => error
         Airbrake.notify_or_ignore(error, parameters: config.airbrake_message_parameters, cgi_data: ENV.to_hash)
         false
       end
@@ -77,7 +77,7 @@ module JiraToPivotal
         main_attrs.merge!(original_estimate_attrs).
           merge!(custom_fields_attrs(custom_fields)).
           merge!(ownership_handler.reporter_and_asignee_attrs(story))
-      rescue Exception => error
+      rescue => error
         Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
         logger.error_log(error)
         false

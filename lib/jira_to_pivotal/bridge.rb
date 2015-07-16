@@ -23,7 +23,7 @@ module JiraToPivotal
       # Right now flow jira -> pivotal is disabled
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
-    rescue Exception => e
+    rescue => e
       jira.logger.error_log(e)
       Airbrake.notify_or_ignore(e, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
 

@@ -13,7 +13,6 @@ module JiraToPivotal
           begin
             story.owners
           rescue => e
-            retry
             logger.error_log(e)
             Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
             nil
