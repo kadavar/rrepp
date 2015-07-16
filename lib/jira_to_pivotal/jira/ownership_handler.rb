@@ -6,17 +6,24 @@ module JiraToPivotal
         @pivotal = pivotal
       end
 
-      def reporter_and_asignee_attrs(story, project)
+      def reporter_and_asignee_attrs(story)
         result = {}
 
-        # Temporary, untill gem would be updated
-        # story.owners should return list of owners
-        owners = project.memberships.map(&:person).select { |person| story.owner_ids.include?(person.id) }
+        owners =
+          begin
+            story.owners
+          rescue => e
+            retry
+            logger.error_log(e)
+            Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+            nil
+          end
 
         if owners.any? && user_jira_name(owners.first.name)
           result.merge!(reporter(owners.first.name)).
             merge!(assignee(owners.first.name))
         end
+
         result
       end
 

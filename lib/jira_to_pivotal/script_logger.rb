@@ -19,8 +19,10 @@ class JiraToPivotal::ScriptLogger
   end
 
   def error_log(exception)
-    if exception.instance_of? JIRA::HTTPError
+    if exception.instance_of?(JIRA::HTTPError)
       logger.error exception.response.body
+    elsif exception.instance_of?(TrackerApi::Error)
+      logger.error exception.response
     else
       logger.error exception.message
     end
