@@ -2,34 +2,21 @@ require 'rails_helper'
 
 describe JiraToPivotal::Jira::Project do
   before do
-    allow_any_instance_of(JiraToPivotal::Jira::Project).
-      to receive(:build_api_client).and_return({})
-    allow_any_instance_of(JiraToPivotal::Jira::Project).
-      to receive(:issue_custom_fields).and_return({})
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:build_api_client).and_return({})
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields).and_return({})
   end
 
   let!(:project) { JiraToPivotal::Jira::Project.new({}) }
   let(:story) { double 'story' }
-  let!(:issue) { double 'issue' }
-  let!(:stories) do
-    temp = []
-    (1..10).each do
-      allow(story).to receive(:to_jira) { {} }
-      allow(story).to receive(:assign_to_jira_issue) { {} }
-      temp << story
-    end
-    temp
-  end
+  let(:issue) { double 'issue' }
+  let(:stories) { generate_stories story }
 
   before do
     jira_logger = double create_issue_log: true
     logger = double jira_logger: jira_logger
 
-    allow_any_instance_of(JiraToPivotal::Jira::Project).
-      to receive(:logger).and_return(logger)
-
-    allow_any_instance_of(JiraToPivotal::Jira::Project).
-      to receive(:url).and_return('')
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:url).and_return('')
   end
 
   describe '#create_tasks!' do
@@ -42,13 +29,13 @@ describe JiraToPivotal::Jira::Project do
       allow(project).to receive(:build_issue) { [issue, {}] }
     end
 
-    it 'should create ten issues' do
+    it 'creates ten issues' do
       expect(project).to receive(:logger).exactly(10).times
 
       project.create_tasks!(stories)
     end
 
-    describe 'with jira custom fields error' do
+    context 'with jira custom fields error' do
       before do
         error_story = double 'error_story'
         allow(error_story).to receive(:to_jira) { false }
@@ -57,19 +44,19 @@ describe JiraToPivotal::Jira::Project do
         stories << error_story
       end
 
-      it 'should create only 10 stories' do
+      it 'creates only 10 stories' do
         expect(project).to receive(:logger).exactly(10).times
 
         project.create_tasks!(stories)
       end
     end
 
-    describe 'with issue save error' do
+    context 'with issue save error' do
       before do
         allow(issue).to receive(:save!) { false }
       end
 
-      it 'shouldnt create any stories' do
+      it 'didnt creates stories' do
         expect(project).to receive(:logger).exactly(0).times
 
         project.create_tasks!(stories)
@@ -85,45 +72,51 @@ describe JiraToPivotal::Jira::Project do
       allow(story).to receive(:jira_issue_id) { {} }
     end
 
-    it 'should update all stories if correct ids present' do
-      allow(project).to receive(:check_deleted_issues_in_jira) { [[], ['ID!']] }
+    context 'with correct ids' do
+      before { allow(project).to receive(:check_deleted_issues_in_jira) { [[], ['ID!']] } }
 
-      expect(project).to receive(:update_issue!).exactly(10).times
+      it 'updates 10 issues' do
+        expect(project).to receive(:update_issue!).exactly(10).times
 
-      project.update_tasks!(stories)
+        project.update_tasks!(stories)
+      end
     end
 
-    it 'should not update stories if there is no correct jira ids' do
-      allow(project).to receive(:check_deleted_issues_in_jira) { [[], []] }
+    context 'there is no correct jira ids' do
+      before { allow(project).to receive(:check_deleted_issues_in_jira) { [[], []] } }
 
-      expect(project).to receive(:update_issue!).exactly(0).times
+      it 'doesnt updates issues' do
+        expect(project).to receive(:update_issue!).exactly(0).times
 
-      project.update_tasks!(stories)
+        project.update_tasks!(stories)
+      end
     end
   end
 
   describe '#create_sub_task_for_invosed_issues!' do
     before do
-      story_vith_url = double url: 'url'
+      story_vith_url = double 'url'
+      allow(story_vith_url).to receive(:url) { 'url' }
+
       allow(story).to receive(:story) { story_vith_url }
 
       allow(project).to receive(:find_issues) { [issue] }
     end
 
-    describe 'without story urls' do
+    context 'without story urls' do
       before do
         stories.clear
       end
 
-      it 'should not prepare and create sub task' do
+      it 'doesnt creates subtasks' do
         expect(project).to receive(:prepare_and_create_sub_task!).exactly(0).times
 
         project.create_sub_task_for_invosed_issues!(stories)
       end
     end
 
-    describe 'with story urls' do
-      it 'should prepare and  create sub task' do
+    context 'with story urls and founded jira issue' do
+      it 'creates sub task' do
         expect(project).to receive(:prepare_and_create_sub_task!).exactly(1).times
 
         project.create_sub_task_for_invosed_issues!(stories)
@@ -132,40 +125,41 @@ describe JiraToPivotal::Jira::Project do
   end
 
   describe '#prepare_and_create_sub_task!' do
-    before do
-      invoced_issue_log = double invoced_issue_log: true
-      logger = double jira_logger: invoced_issue_log
+    subject { project.prepare_and_create_sub_task!(issue, stories) }
 
-      allow_any_instance_of(JiraToPivotal::Jira::Project).
-        to receive(:logger).and_return(logger)
+    before do
+      invoced_issue_log = double 'invoced_issue_log'
+      allow(invoced_issue_log).to receive(:invoced_issue_log) { true }
+
+      logger = double 'jira logger'
+      allow(logger).to receive(:jira_logger) { invoced_issue_log }
+
+      allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
 
       allow(project).to receive(:jira_pivotal_field) { 'pivotal_field' }
       allow(issue).to receive(:pivotal_field) { 'field' }
       allow(story).to receive(:url) { 'no' }
     end
 
-    it 'didnt creates subtask if there is no jira field' do
-      expect(project).to receive(:create_sub_task!).exactly(0).times
-
-      project.prepare_and_create_sub_task!(issue, stories)
+    context 'without jira field' do
+      it { is_expected.to be false }
     end
 
-    describe 'with jira field and without subtask' do
+    context 'with jira field' do
       before do
         allow(project).to receive(:create_sub_task!) { false }
         allow(story).to receive(:url) { 'field' }
       end
 
-      it 'didnt assigns to jira issue if subtask wasnt created' do
-        expect(story).to receive(:assign_to_jira_issue).exactly(0).times
-
-        project.prepare_and_create_sub_task!(issue, stories)
-      end
+      it { is_expected.to be false }
     end
 
-    describe 'with jira field and with subtask' do
+    context 'with jira field and subtask' do
       before do
-        allow(project).to receive(:create_sub_task!) { double key: 'key' }
+        key = double 'key'
+        allow(key).to receive(:key) { 'key' }
+
+        allow(project).to receive(:create_sub_task!) { key }
         allow(project).to receive(:build_issue) { [[], []] }
         allow(project).to receive(:url) { '' }
 
@@ -173,23 +167,23 @@ describe JiraToPivotal::Jira::Project do
         allow(story).to receive(:assign_to_jira_issue) { {} }
       end
 
-      it 'should delete created story from stories' do
-        expect(stories).to receive(:delete).exactly(1).times
-
-        project.prepare_and_create_sub_task!(issue, stories)
-      end
+      it { is_expected.to be true }
     end
   end
 
   describe '#update_issue!' do
-    let!(:jira_issues) { double 'jira issues' }
+    subject { project.update_issue!(story, jira_issues) }
+
+    let(:jira_issues) { double 'jira issues' }
 
     before do
-      update_issue_log = double update_issue_log: true
-      logger = double jira_logger: update_issue_log
+      update_issue_log = double 'update_issue_log'
+      allow(update_issue_log).to receive(:update_issue_log) { true }
 
-      allow_any_instance_of(JiraToPivotal::Jira::Project).
-        to receive(:logger).and_return(logger)
+      logger = double 'logger'
+      allow(logger).to receive(:jira_logger) { update_issue_log }
+
+      allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
 
       allow(project).to receive(:select_task) { nil }
       allow(project).to receive(:build_issue) { [issue, []] }
@@ -197,20 +191,14 @@ describe JiraToPivotal::Jira::Project do
       allow(story).to receive(:to_jira) { false }
     end
 
-    it 'should return if there is no jira issue' do
-      expect(project).to receive(:build_issue).exactly(0).times
-
-      project.update_issue!(story, jira_issues)
+    context 'without no jira issue' do
+      it { is_expected.to be nil }
     end
 
-    describe 'with jira issue' do
-      before { allow(project).to receive(:select_task) { double 'jira issue' } }
+    context 'with jira issue' do
+      before { allow(project).to receive(:select_task) { {} } }
 
-      it 'should return if story didnt cnverted to jira' do
-        expect(project).to receive(:build_issue).exactly(0).times
-
-        project.update_issue!(story, jira_issues)
-      end
+      it { is_expected.to be nil }
     end
 
     describe 'with jira issue and converted jira issue' do
@@ -221,82 +209,99 @@ describe JiraToPivotal::Jira::Project do
 
       describe 'with main attributes difference' do
         before do
-          allow(project).to receive(:difference_checker) {
-            double main_attrs_difference?: true
-          }
+          difference_checker = double 'difference_checker'
+          allow(difference_checker).to receive(:main_attrs_difference?) { true }
+
+          allow(project).to receive(:difference_checker) { difference_checker }
         end
 
-        it 'should be false if issue cant save' do
-          allow(issue).to receive(:save!) { false }
+        context 'issue cant save' do
+          before { allow(issue).to receive(:save!) { false } }
 
-          expect(project.update_issue!(story, jira_issues)).to eq(false)
+          it { is_expected.to be false }
         end
 
-        it 'should be true if issue can save' do
-          allow(issue).to receive(:save!) { true }
+        context 'issue can save' do
+          before { allow(issue).to receive(:save!) { true } }
 
-          expect(project.update_issue!(story, jira_issues)).to eq(true)
+          it { is_expected.to be true }
         end
       end
 
       describe 'without main attributes difference' do
         before do
-          allow(project).to receive(:difference_checker) {
-            double main_attrs_difference?: false
-          }
+          difference_checker = double 'difference_checker'
+          allow(difference_checker).to receive(:main_attrs_difference?) { false }
+
+          allow(project).to receive(:difference_checker) { difference_checker }
         end
 
-        it 'should be true' do
-          expect(project.update_issue!(story, jira_issues)).to eq(true)
-        end
+        it { is_expected.to be true }
       end
     end
   end
 
   describe '#check_deleted_issues_in_jira' do
-    let!(:pivotal_jira_ids) { [] }
-    let!(:jira_issues) do
-      issues = []
+    subject(:check) { project.send(:check_deleted_issues_in_jira, pivotal_jira_ids) }
 
-      (1..4).each do |counter|
-        status =
-          if counter.even?
-            double 'status', name: 'Invoiced'
-          else
-            double 'status', name: 'Other'
-          end
+    let(:pivotal_jira_ids) { [] }
+    let(:jira_issues) { generate_jira_issues }
 
-        current_issue = double 'issue', status: status
-
-        allow(current_issue).to receive(:key) { "id#{counter}" }
-
-        issues << current_issue
+    context 'pivotal jira ids empty' do
+      it 'returns two emty collections' do
+        expect(check[0].empty?).to be true
+        expect(check[1].empty?).to be true
       end
-
-      issues
     end
 
-    it 'should return empty array if pivotal jira ids empty' do
-      expect(project.send(:check_deleted_issues_in_jira,
-                          pivotal_jira_ids).present?).to eq(true)
-    end
-
-    describe 'with non empty pivotal jira ids' do
+    context 'non empty pivotal jira ids' do
       before do
-        (1..4).each do |counter|
-          pivotal_jira_ids << "id#{counter}"
-        end
+        fill_pivotal_jira_ids!(pivotal_jira_ids)
 
         allow(project).to receive(:find_exists_jira_issues) { jira_issues }
       end
 
-      it 'should return 2 correct and 2 incorrect ids' do
-        returned_ids = project.send(:check_deleted_issues_in_jira,
-                                    pivotal_jira_ids)
-
-        expect(returned_ids[0].count).to eq(2)
-        expect(returned_ids[1].count).to eq(2)
+      it 'returns 2 correct and 2 incorrect ids' do
+        expect(check[0].count).to be 2
+        expect(check[1].count).to be 2
       end
+    end
+  end
+
+  def generate_stories(story)
+    temp = []
+    (1..10).each do
+      allow(story).to receive(:to_jira) { {} }
+      allow(story).to receive(:assign_to_jira_issue) { {} }
+      temp << story
+    end
+    temp
+  end
+
+  def generate_jira_issues
+    issues = []
+
+    (1..4).each do |counter|
+      status =
+        if counter.even?
+          double 'status', name: 'Invoiced'
+        else
+          double 'status', name: 'Other'
+        end
+
+      current_issue = double 'issue', status: status
+
+      allow(current_issue).to receive(:key) { "id#{counter}" }
+
+      issues << current_issue
+    end
+
+    issues
+  end
+
+  def fill_pivotal_jira_ids!(arr)
+    (1..4).each do |counter|
+      arr << "id#{counter}"
     end
   end
 end

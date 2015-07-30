@@ -1,106 +1,108 @@
 require 'rails_helper'
 
 describe JiraToPivotal::DifferenceChecker do
-  let!(:client) { double 'client', user_permissions: Hash.new { |hsh, key| hsh[key] = {} } }
-  let!(:config) do
+  let(:client) { double 'client' }
+
+  before do
+    allow(client).to receive(:user_permissions) { { 'permissions' => {} } }
+  end
+
+  let(:config) do
     { custom_fields: { 'field_id' => 'Story Points' },
       'jira_custom_fields' => { 'pivotal_points' => 'Story Points' } }
   end
-  let!(:difference_checker) { JiraToPivotal::DifferenceChecker.new(client, config) }
-  let!(:params) { Hash.new }
+
+  let(:difference_checker) { JiraToPivotal::DifferenceChecker.new(client, config) }
+  let(:params) { {} }
 
   describe '#task_type?' do
-    describe 'subtask true' do
-      before { params[:j2p_issue] = double 'j2p_issue', subtask?: true }
+    subject { difference_checker.send(:task_type?, params) }
 
-      it 'must return false' do
-        expect(difference_checker.send(:task_type?, params)).to eq(false)
-      end
+    let(:j2p_issue) { double 'j2p issue' }
+    let(:jira_issue) { double 'jira issue' }
+    let(:story_attrs) { { 'fields' => { 'issuetype' => { 'id' => 2 } } } }
+    let(:params) { { j2p_issue: j2p_issue, jira_issue: jira_issue, story_attrs: story_attrs } }
+
+    context 'subtask true' do
+      before { allow(j2p_issue).to receive(:subtask?) { true } }
+
+      it { is_expected.to be false }
     end
 
     describe 'subtask false' do
-      before { params[:j2p_issue] = double 'j2p_issue', subtask?: false }
+      before { allow(j2p_issue).to receive(:subtask?) { false } }
 
-      describe 'with similar ids' do
-        before do
-          params[:story_attrs] = { 'fields' => { 'issuetype' => { 'id' => 2 } } }
-          params[:jira_issue] = double 'jira_issue',
-                                       fields: { 'issuetype' => { 'id' => 2 } }
-        end
+      context 'with similar ids' do
+        before { allow(jira_issue).to receive(:fields) { { 'issuetype' => { 'id' => 2 } } } }
 
-        it 'must returm false' do
-          expect(difference_checker.send(:task_type?, params)).to eq(false)
-        end
+        it { is_expected.to be false }
       end
 
-      describe 'with different ids' do
-        before do
-          params[:story_attrs] = { 'fields' => { 'issuetype' => { 'id' => 2 } } }
-          params[:jira_issue] = double 'jira_issue',
-                                       fields: { 'issuetype' => { 'id' => 3 } }
-        end
+      context 'with different ids' do
+        before { allow(jira_issue).to receive(:fields) { { 'issuetype' => { 'id' => 3 } } } }
 
-        it 'must return true' do
-          expect(difference_checker.send(:task_type?, params)).to eq(true)
-        end
+        it { is_expected.to be true }
       end
     end
   end
 
   describe '#estimates?' do
-    describe 'with incorrect issue type' do
+    subject { difference_checker.send(:estimates?, params) }
+
+    context 'with incorrect issue type' do
       before { allow(difference_checker).to receive(:incorrect_issue_type?) { true } }
 
-      it 'must return false' do
-        expect(difference_checker.send(:estimates?, params)).to eq(false)
-      end
+      it { is_expected.to be false }
     end
 
     describe 'with correct issue type' do
-      before { allow(difference_checker).to receive(:incorrect_issue_type?) { false } }
+      let(:jira_issue) { double 'jira issue' }
+
+      before do
+        allow(difference_checker).to receive(:incorrect_issue_type?) { false }
+
+        params[:jira_issue] = jira_issue
+        params[:story_attrs] = { 'fields' => { 'field_id' => 4 } }
+      end
 
       describe 'with similar estimates' do
-        before do
-          params[:story_attrs] = { 'fields' => { 'field_id' => 4 } }
-          params[:jira_issue] = double 'jira_issue',
-                                       fields: { 'field_id' => 4 }
+        before { allow(jira_issue). to receive(:fields) { { 'field_id' => 4 } } }
+
+        context 'with non empty estimate' do
+          before { allow(difference_checker).to receive(:empty_estimate?) { false } }
+
+          it { is_expected.to be false }
         end
 
-        it 'must return false with non empty estimate' do
-          allow(difference_checker).to receive(:empty_estimate?) { false }
-          expect(difference_checker.send(:estimates?, params)).to eq(false)
-        end
+        context 'with empty estimates' do
+          before { allow(difference_checker).to receive(:empty_estimate?) { true } }
 
-        it 'must return true with empty estimates' do
-          allow(difference_checker).to receive(:empty_estimate?) { true }
-          expect(difference_checker.send(:estimates?, params)).to eq(true)
+          it { is_expected.to be true }
         end
       end
 
       describe 'with different estimates' do
-        before do
-          params[:story_attrs] = { 'fields' => { 'field_id' => 4 } }
-          params[:jira_issue] = double 'jira_issue',
-                                       fields: { 'field_id' => 2 }
+        before { allow(jira_issue). to receive(:fields) { { 'field_id' => 4 } } }
+
+        context 'with non empty estimate' do
+          before { allow(difference_checker).to receive(:empty_estimate?) { false } }
+
+          it { is_expected.to be false }
         end
 
-        it 'must return true with non empty estimate' do
-          allow(difference_checker).to receive(:empty_estimate?) { false }
+        context 'with empty estimates' do
+          before { allow(difference_checker).to receive(:empty_estimate?) { true } }
 
-          expect(difference_checker.send(:estimates?, params)).to eq(true)
-        end
-
-        it 'must return false with empty estimates' do
-          allow(difference_checker).to receive(:empty_estimate?) { true }
-
-          expect(difference_checker.send(:estimates?, params)).to eq(true)
+          it { is_expected.to be true }
         end
       end
     end
   end
 
   describe '#incorrect_issue_type?' do
-    let!(:j2p_issue) { double 'j2p_issue' }
+    let(:j2p_issue) { double 'j2p_issue' }
+
+    subject { difference_checker.send(:incorrect_issue_type?, params) }
     before do
       allow(j2p_issue).to receive(:bug?) { false }
       allow(j2p_issue).to receive(:chore?) { false }
@@ -108,40 +110,46 @@ describe JiraToPivotal::DifferenceChecker do
       params[:j2p_issue] = j2p_issue
     end
 
-    it 'must return false if all issues false' do
-      expect(difference_checker.send(:incorrect_issue_type?, params)).to eq(false)
+    context 'all issues false' do
+      it { is_expected.to be false }
     end
 
-    it 'must return true if bug incorrect' do
-      allow(j2p_issue).to receive(:bug?) { true }
+    context 'bug incorrect' do
+      before { allow(j2p_issue).to receive(:bug?) { true } }
 
-      expect(difference_checker.send(:incorrect_issue_type?, params)).to eq(true)
+      it { is_expected.to be true }
     end
 
-    it 'must return true if chore incorrect' do
-      allow(j2p_issue).to receive(:chore?) { true }
+    context 'chore incorrect' do
+      before { allow(j2p_issue).to receive(:chore?) { true } }
 
-      expect(difference_checker.send(:incorrect_issue_type?, params)).to eq(true)
+      it { is_expected.to be true }
     end
 
-    it 'must return true if subtask incorrect' do
-      allow(j2p_issue).to receive(:subtask?) { true }
+    context 'subtask incorrect' do
+      before { allow(j2p_issue).to receive(:subtask?) { true } }
 
-      expect(difference_checker.send(:incorrect_issue_type?, params)).to eq(true)
+      it { is_expected.to be true }
     end
   end
 
-  describe 'reporter?' do
-    describe 'without ability to modify reporter' do
-      before { allow(difference_checker).to receive(:user_permissions) { double modify_reporter?: false } }
+  describe '#reporter?' do
+    subject { difference_checker.send(:reporter?, params) }
 
-      it 'must return false' do
-        expect(difference_checker.send(:reporter?, params)).to eq(false)
+    let(:user_permissions) { double 'user permissions' }
+
+    before { allow(difference_checker).to receive(:user_permissions) { user_permissions } }
+
+    describe 'without ability to modify reporter' do
+      before { allow(user_permissions).to receive(:modify_reporter?) { false } }
+
+      it 'returns false' do
+        is_expected.to be false
       end
     end
 
     describe 'with ability to modify reporter' do
-      before { allow(difference_checker).to receive(:user_permissions) { double modify_reporter?: true } }
+      before { allow(user_permissions).to receive(:modify_reporter?) { true } }
 
       describe 'with jira and pivotal reporter exists' do
         before do
@@ -149,14 +157,14 @@ describe JiraToPivotal::DifferenceChecker do
           allow(difference_checker).to receive(:jira_reporter) { { 'name' => 'John' } }
         end
 
-        it 'must return false if names similar' do
-          expect(difference_checker.send(:reporter?, params)).to eq(false)
+        context 'names similar' do
+          it { is_expected.to be false }
         end
 
-        it 'must return true if different names' do
-          allow(difference_checker).to receive(:jira_reporter) { { 'name' => 'Mike' } }
+        context 'different names' do
+          before { allow(difference_checker).to receive(:jira_reporter) { { 'name' => 'Mike' } } }
 
-          expect(difference_checker.send(:reporter?, params)).to eq(true)
+          it { is_expected.to be true }
         end
       end
 
@@ -166,51 +174,57 @@ describe JiraToPivotal::DifferenceChecker do
           allow(difference_checker).to receive(:jira_reporter) { nil }
         end
 
-        it 'should be false without any reporters' do
-          expect(difference_checker.send(:reporter?, params)).to eq(nil)
+        context 'without any reporters' do
+          it { is_expected.to be nil }
         end
 
-        it 'should be true with pivotel and without jira reporter' do
-          allow(difference_checker).to receive(:story_reporter) { { 'name' => 'John' } }
+        context 'without jira reporter' do
+          before { allow(difference_checker).to receive(:story_reporter) { { 'name' => 'John' } } }
 
-          expect(difference_checker.send(:reporter?, params)).to eq(true)
+          it { is_expected.to be true }
         end
 
-        it 'should be false with jira and without pivotal' do
-          allow(difference_checker).to receive(:jira_reporter) { { 'name' => 'John' } }
+        context 'without pivotal' do
+          before { allow(difference_checker).to receive(:jira_reporter) { { 'name' => 'John' } } }
 
-          expect(difference_checker.send(:reporter?, params)).to eq(nil)
+          it { is_expected.to be nil }
         end
       end
     end
   end
 
   describe '#assignee?' do
-    describe 'without ability to assign issue' do
-      before { allow(difference_checker).to receive(:user_permissions) { double assign_issue?: false } }
+    subject { difference_checker.send(:asignee?, params) }
 
-      it 'must return false' do
-        expect(difference_checker.send(:asignee?, params)).to eq(false)
+    let(:user_permissions) { double 'user permissions' }
+
+    before { allow(difference_checker).to receive(:user_permissions) { user_permissions } }
+
+    describe 'without ability to assign issue' do
+      before { allow(user_permissions).to receive(:assign_issue?) { false } }
+
+      it 'returns false' do
+        is_expected.to be false
       end
     end
 
     describe 'with ability to assign issue' do
-      before { allow(difference_checker).to receive(:user_permissions) { double assign_issue?: true } }
+      before { allow(user_permissions).to receive(:assign_issue?) { true } }
 
-      describe 'with story assignee and jira assignee' do
+      describe 'with story and jira assignees' do
         before do
           allow(difference_checker).to receive(:story_assignee) { { 'name' => 'John' } }
           allow(difference_checker).to receive(:jira_assignee) { { 'name' => 'John' } }
         end
 
-        it 'should return false if names are similar' do
-          expect(difference_checker.send(:asignee?, params)).to eq(false)
+        context 'names are similar' do
+          it { is_expected.to be false }
         end
 
-        it 'should be true if names are different' do
-          allow(difference_checker).to receive(:jira_assignee) { { 'name' => 'Mike' } }
+        context 'names are different' do
+          before { allow(difference_checker).to receive(:jira_assignee) { { 'name' => 'Mike' } } }
 
-          expect(difference_checker.send(:asignee?, params)).to eq(true)
+          it { is_expected.to be true }
         end
       end
 
@@ -220,28 +234,30 @@ describe JiraToPivotal::DifferenceChecker do
           allow(difference_checker).to receive(:jira_assignee) { nil }
         end
 
-        it 'should be false without any reporters' do
-          expect(difference_checker.send(:asignee?, params)).to eq(nil)
+        context 'without any reporters' do
+          it { is_expected.to be nil }
         end
 
-        it 'should be true with pivotel and without jira reporter' do
-          allow(difference_checker).to receive(:story_assignee) { { 'name' => 'John' } }
+        context 'with pivotal reporter' do
+          before { allow(difference_checker).to receive(:story_assignee) { { 'name' => 'John' } } }
 
-          expect(difference_checker.send(:asignee?, params)).to eq(true)
+          it { is_expected.to be true }
         end
 
-        it 'should be false with jira and without pivotal' do
-          allow(difference_checker).to receive(:jira_assignee) { { 'name' => 'John' } }
+        context 'with jira reporter' do
+          before { allow(difference_checker).to receive(:jira_assignee) { { 'name' => 'John' } } }
 
-          expect(difference_checker.send(:asignee?, params)).to eq(nil)
+          it { is_expected.to be nil }
         end
       end
     end
   end
 
   describe '#status?' do
-    let!(:story) { double 'story' }
-    let!(:jira_issue) { double 'jira_issue' }
+    subject { difference_checker.send(:status?, jira_issue, story) }
+
+    let(:story) { double 'story' }
+    let(:jira_issue) { double 'jira_issue' }
 
     describe 'with similar statuses' do
       before do
@@ -249,8 +265,8 @@ describe JiraToPivotal::DifferenceChecker do
         allow(jira_issue).to receive(:fields) { { 'status' => { 'name' => 'open' } } }
       end
 
-      it 'should return false' do
-        expect(difference_checker.send(:status?, jira_issue, story)).to eq(false)
+      it 'returns false' do
+        is_expected.to be false
       end
     end
 
@@ -260,13 +276,15 @@ describe JiraToPivotal::DifferenceChecker do
         allow(jira_issue).to receive(:fields) { { 'status' => { 'name' => 'closed' } } }
       end
 
-      it 'should return true' do
-        expect(difference_checker.send(:status?, jira_issue, story)).to eq(true)
+      it 'returs true' do
+        is_expected.to be true
       end
     end
   end
 
   describe '#difference_between_pivotal_jira?' do
+    subject { difference_checker.send(:difference_between_pivotal_jira?, params) }
+
     before do
       allow(difference_checker).to receive(:summary?) { false }
       allow(difference_checker).to receive(:description?) { false }
@@ -276,44 +294,44 @@ describe JiraToPivotal::DifferenceChecker do
       allow(difference_checker).to receive(:estimates?) { false }
     end
 
-    it 'should be false when all checks false' do
-      expect(difference_checker.send(:difference_between_pivotal_jira?, params)).to eq(false)
+    context 'all checks false' do
+      it { is_expected.to be false }
     end
 
-    it 'should be true when summary true' do
-      allow(difference_checker).to receive(:summary?) { true }
+    context 'summary true' do
+      before { allow(difference_checker).to receive(:summary?) { true } }
 
-      expect(difference_checker.send(:difference_between_pivotal_jira?, params)).to eq(true)
+      it { is_expected.to be true }
     end
 
-    it 'should be true when description true' do
-      allow(difference_checker).to receive(:description?) { true }
+    context 'description true' do
+      before { allow(difference_checker).to receive(:description?) { true } }
 
-      expect(difference_checker.send(:difference_between_pivotal_jira?, params)).to eq(true)
+      it { is_expected.to be true }
     end
 
-    it 'should be true when task_type true' do
-      allow(difference_checker).to receive(:task_type?) { true }
+    context 'task_type true' do
+      before { allow(difference_checker).to receive(:task_type?) { true } }
 
-      expect(difference_checker.send(:difference_between_pivotal_jira?, params)).to eq(true)
+      it { is_expected.to be true }
     end
 
-    it 'should be true when reporter true' do
-      allow(difference_checker).to receive(:reporter?) { true }
+    context 'reporter true' do
+      before { allow(difference_checker).to receive(:reporter?) { true } }
 
-      expect(difference_checker.send(:difference_between_pivotal_jira?, params)).to eq(true)
+      it { is_expected.to be true }
     end
 
-    it 'should be true when asignee true' do
-      allow(difference_checker).to receive(:asignee?) { true }
+    context 'asignee true' do
+      before { allow(difference_checker).to receive(:asignee?) { true } }
 
-      expect(difference_checker.send(:difference_between_pivotal_jira?, params)).to eq(true)
+      it { is_expected.to be true }
     end
 
-    it 'should be true when estimates true' do
-      allow(difference_checker).to receive(:estimates?) { true }
+    context 'estimates true' do
+      before { allow(difference_checker).to receive(:estimates?) { true } }
 
-      expect(difference_checker.send(:difference_between_pivotal_jira?, params)).to eq(true)
+      it { is_expected.to be true }
     end
   end
 end
