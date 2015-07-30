@@ -3,9 +3,7 @@ require 'rails_helper'
 describe JiraToPivotal::DifferenceChecker do
   let(:client) { double 'client' }
 
-  before do
-    allow(client).to receive(:user_permissions) { { 'permissions' => {} } }
-  end
+  before { allow(client).to receive(:user_permissions) { { 'permissions' => {} } } }
 
   let(:config) do
     { custom_fields: { 'field_id' => 'Story Points' },
