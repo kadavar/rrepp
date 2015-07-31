@@ -103,7 +103,7 @@ PreCommit:
       - 'Berksfile.lock'
 
   Brakeman:
-    enabled: true
+    enabled: false
     description: 'Checking for security vulnerabilities'
     required_executable: 'brakeman'
     flags: ['--exit-on-warn', '--quiet', '--summary', '--only-files']
@@ -349,7 +349,7 @@ PreCommit:
       - '**/Rakefile'
 
   RubyLint:
-    enabled: true
+    enabled: false
     description: 'Analyzing with ruby-lint'
     required_executable: 'ruby-lint'
     flags: ['--presenter=syntastic', '--levels=error,warning']
