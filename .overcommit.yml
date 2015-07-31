@@ -41,7 +41,7 @@ CommitMsg:
     description: 'Checking for hard tabs'
 
   RussianNovel:
-    enabled: false
+    enabled: true
     description: 'Checking length of commit message'
     quiet: true
 
@@ -50,7 +50,7 @@ CommitMsg:
     description: 'Checking subject line'
 
   SpellCheck:
-    enabled: false
+    enabled: true
     description: 'Checking for misspelled words'
     required_executable: 'hunspell'
     flags: ['-a']
@@ -93,7 +93,7 @@ PreCommit:
     quiet: true
 
   BerksfileCheck:
-    enabled: false
+    enabled: true
     description: 'Checking Berksfile lock'
     required_executable: 'berks'
     flags: ['list', '--quiet']
@@ -103,7 +103,7 @@ PreCommit:
       - 'Berksfile.lock'
 
   Brakeman:
-    enabled: false
+    enabled: true
     description: 'Checking for security vulnerabilities'
     required_executable: 'brakeman'
     flags: ['--exit-on-warn', '--quiet', '--summary', '--only-files']
@@ -143,7 +143,7 @@ PreCommit:
       - 'config/settings/**/*.yml'
 
   CoffeeLint:
-    enabled: false
+    enabled: true
     description: 'Analyzing with coffeelint'
     required_executable: 'coffeelint'
     required_library: 'json'
@@ -160,7 +160,7 @@ PreCommit:
     include: '**/*.css'
 
   EsLint:
-    enabled: false
+    enabled: true
     description: 'Analyzing with ESLint'
     required_executable: 'eslint'
     flags: ['--format=compact']
@@ -183,7 +183,7 @@ PreCommit:
     include: '**/*.go'
 
   HamlLint:
-    enabled: false
+    enabled: true
     description: 'Analyzing with haml-lint'
     required_executable: 'haml-lint'
     install_command: 'gem install haml-lint'
@@ -195,9 +195,10 @@ PreCommit:
     quiet: true
     required_executable: 'grep'
     flags: ['-IHn', "\t"]
+    exclude: '**/*.svg'
 
   HtmlTidy:
-    enabled: false
+    enabled: true
     description: 'Analyzing HTML with tidy'
     required_executable: 'tidy'
     flags: ['-errors', '-quiet', '-utf8']
@@ -223,7 +224,7 @@ PreCommit:
     include: '**/*.java'
 
   Jscs:
-    enabled: true
+    enabled: false
     description: 'Analyzing with JSCS'
     required_executable: 'jscs'
     flags: ['--reporter=inline', '--verbose']
@@ -239,7 +240,7 @@ PreCommit:
     include: '**/*.js'
 
   JsLint:
-    enabled: false
+    enabled: true
     description: 'Analyzing with JSLint'
     required_executable: 'jslint'
     flags: ['--terse']
@@ -254,14 +255,14 @@ PreCommit:
     include: '**/*.js'
 
   JsonSyntax:
-    enabled: false
+    enabled: true
     description: 'Validating JSON syntax'
     required_library: 'json'
     install_command: 'gem install json'
     include: '**/*.json'
 
   LocalPathsInGemfile:
-    enabled: false
+    enabled: true
     description: 'Checking for local paths in Gemfile'
     required_executable: 'grep'
     flags: ['-IHnE', "^[^#]*((\\bpath:)|(:path[ \t]*=>))"]
@@ -314,7 +315,7 @@ PreCommit:
     include: '**/*.py'
 
   RailsSchemaUpToDate:
-    enabled: false
+    enabled: true
     description: 'Checking if database schema is up to date'
     include:
       - 'db/migrate/*.rb'
@@ -322,7 +323,7 @@ PreCommit:
       - 'db/structure.sql'
 
   Reek:
-    enabled: false
+    enabled: true
     description: 'Analyzing with Reek'
     required_executable: 'reek'
     flags: ['--single-line', '--no-color']
@@ -348,7 +349,7 @@ PreCommit:
       - '**/Rakefile'
 
   RubyLint:
-    enabled: false
+    enabled: true
     description: 'Analyzing with ruby-lint'
     required_executable: 'ruby-lint'
     flags: ['--presenter=syntastic', '--levels=error,warning']
@@ -378,7 +379,7 @@ PreCommit:
     include: '**/*.scss'
 
   SemiStandard:
-    enabled: false
+    enabled: true
     description: 'Analyzing with semistandard'
     required_executable: 'semistandard'
     flags: ['--verbose']
@@ -386,7 +387,7 @@ PreCommit:
     include: '**/*.js'
 
   ShellCheck:
-    enabled: false
+    enabled: true
     description: 'Analyzing with ShellCheck'
     required_executable: 'shellcheck'
     flags: ['--format=gcc']
@@ -400,7 +401,7 @@ PreCommit:
     include: '**/*.slim'
 
   Standard:
-    enabled: false
+    enabled: true
     description: 'Analyzing with standard'
     required_executable: 'standard'
     flags: ['--verbose']
@@ -431,7 +432,7 @@ PreCommit:
       - '**/*.vimrc'
 
   W3cCss:
-    enabled: false
+    enabled: true
     description: 'Analyzing with W3C CSS validation service'
     required_library: 'w3c_validators'
     install_command: 'gem install w3c_validators'
@@ -443,7 +444,7 @@ PreCommit:
       - '**/*.css'
 
   W3cHtml:
-    enabled: false
+    enabled: true
     description: 'Analyzing with W3C HTML validation service'
     required_library: 'w3c_validators'
     install_command: 'gem install w3c_validators'
@@ -454,7 +455,7 @@ PreCommit:
       - '**/*.html'
 
   XmlLint:
-    enabled: false
+    enabled: true
     description: 'Analyzing with xmllint'
     required_executable: 'xmllint'
     flags: ['--noout']
@@ -463,7 +464,7 @@ PreCommit:
       - '**/*.svg'
 
   XmlSyntax:
-    enabled: false
+    enabled: true
     description: 'Checking XML syntax'
     required_library: 'rexml/document'
     include:
@@ -471,7 +472,7 @@ PreCommit:
       - '**/*.svg'
 
   YamlSyntax:
-    enabled: false
+    enabled: true
     description: 'Checking YAML syntax'
     required_library: 'yaml'
     include:
@@ -485,13 +486,13 @@ PostCheckout:
     quiet: false
 
   IndexTags:
-    enabled: false
+    enabled: true
     description: 'Generating tags file from source'
     quiet: true
     required_executable: 'ctags'
 
   SubmoduleStatus:
-    enabled: false
+    enabled: true
     description: 'Checking submodule status'
     quiet: true
     recursive: false
@@ -504,7 +505,7 @@ PostCommit:
     quiet: false
 
   GitGuilt:
-    enabled: false
+    enabled: true
     description: 'Calculating changes in blame since last commit'
     requires_files: true
     required_executable: 'git-guilt'
@@ -512,13 +513,13 @@ PostCommit:
     install_command: 'npm install -g git-guilt'
 
   IndexTags:
-    enabled: false
+    enabled: true
     description: 'Generating tags file from source'
     quiet: true
     required_executable: 'ctags'
 
   SubmoduleStatus:
-    enabled: false
+    enabled: true
     description: 'Checking submodule status'
     quiet: true
     recursive: false
@@ -530,13 +531,13 @@ PostMerge:
     quiet: false
 
   IndexTags:
-    enabled: false
+    enabled: true
     description: 'Generating tags file from source'
     quiet: true
     required_executable: 'ctags'
 
   SubmoduleStatus:
-    enabled: false
+    enabled: true
     description: 'Checking submodule status'
     quiet: true
     recursive: false
@@ -548,13 +549,13 @@ PostRewrite:
     quiet: false
 
   IndexTags:
-    enabled: false
+    enabled: true
     description: 'Generating tags file from source'
     quiet: true
     required_executable: 'ctags'
 
   SubmoduleStatus:
-    enabled: false
+    enabled: true
     description: 'Checking submodule status'
     quiet: true
     recursive: false
@@ -568,12 +569,12 @@ PrePush:
     quiet: false
 
   ProtectedBranches:
-    enabled: false
+    enabled: true
     description: 'Checking for illegal pushes to protected branches'
     branches: ['master']
 
   RSpec:
-    enabled: false
+    enabled: true
     description: 'Running RSpec test suite'
     required_executable: 'rspec'
 
@@ -586,6 +587,6 @@ PreRebase:
     quiet: false
 
   MergedCommits:
-    enabled: false
+    enabled: true
     description: 'Checking for commits that have already been merged'
     branches: ['master']

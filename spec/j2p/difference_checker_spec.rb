@@ -141,9 +141,7 @@ describe JiraToPivotal::DifferenceChecker do
     describe 'without ability to modify reporter' do
       before { allow(user_permissions).to receive(:modify_reporter?) { false } }
 
-      it 'returns false' do
-        is_expected.to be false
-      end
+      it { is_expected.to be false }
     end
 
     describe 'with ability to modify reporter' do
@@ -201,9 +199,7 @@ describe JiraToPivotal::DifferenceChecker do
     describe 'without ability to assign issue' do
       before { allow(user_permissions).to receive(:assign_issue?) { false } }
 
-      it 'returns false' do
-        is_expected.to be false
-      end
+      it { is_expected.to be false }
     end
 
     describe 'with ability to assign issue' do
@@ -263,9 +259,7 @@ describe JiraToPivotal::DifferenceChecker do
         allow(jira_issue).to receive(:fields) { { 'status' => { 'name' => 'open' } } }
       end
 
-      it 'returns false' do
-        is_expected.to be false
-      end
+      it { is_expected.to be false }
     end
 
     describe 'with different statuses' do
@@ -274,9 +268,7 @@ describe JiraToPivotal::DifferenceChecker do
         allow(jira_issue).to receive(:fields) { { 'status' => { 'name' => 'closed' } } }
       end
 
-      it 'returs true' do
-        is_expected.to be true
-      end
+      it { is_expected.to be true }
     end
   end
 

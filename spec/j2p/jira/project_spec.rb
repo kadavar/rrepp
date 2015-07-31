@@ -9,7 +9,7 @@ describe JiraToPivotal::Jira::Project do
   let!(:project) { JiraToPivotal::Jira::Project.new({}) }
   let(:story) { double 'story' }
   let(:issue) { double 'issue' }
-  let(:stories) { generate_stories story }
+  let(:stories) { [story] }
 
   before do
     jira_logger = double create_issue_log: true
@@ -17,6 +17,9 @@ describe JiraToPivotal::Jira::Project do
 
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:url).and_return('')
+
+    allow(story).to receive(:to_jira) { {} }
+    allow(story).to receive(:assign_to_jira_issue) { {} }
   end
 
   describe '#create_tasks!' do
@@ -29,8 +32,8 @@ describe JiraToPivotal::Jira::Project do
       allow(project).to receive(:build_issue) { [issue, {}] }
     end
 
-    it 'creates ten issues' do
-      expect(project).to receive(:logger).exactly(10).times
+    it 'creates issue' do
+      expect(project).to receive(:logger).exactly(1).times
 
       project.create_tasks!(stories)
     end
@@ -44,8 +47,8 @@ describe JiraToPivotal::Jira::Project do
         stories << error_story
       end
 
-      it 'creates only 10 stories' do
-        expect(project).to receive(:logger).exactly(10).times
+      it 'creates storie' do
+        expect(project).to receive(:logger).exactly(1).times
 
         project.create_tasks!(stories)
       end
@@ -75,8 +78,8 @@ describe JiraToPivotal::Jira::Project do
     context 'with correct ids' do
       before { allow(project).to receive(:check_deleted_issues_in_jira) { [[], ['ID!']] } }
 
-      it 'updates 10 issues' do
-        expect(project).to receive(:update_issue!).exactly(10).times
+      it 'updates 1 issue' do
+        expect(project).to receive(:update_issue!).exactly(1).times
 
         project.update_tasks!(stories)
       end
@@ -104,9 +107,7 @@ describe JiraToPivotal::Jira::Project do
     end
 
     context 'without story urls' do
-      before do
-        stories.clear
-      end
+      before { stories.clear }
 
       it 'doesnt creates subtasks' do
         expect(project).to receive(:prepare_and_create_sub_task!).exactly(0).times
@@ -244,10 +245,12 @@ describe JiraToPivotal::Jira::Project do
   describe '#check_deleted_issues_in_jira' do
     subject(:check) { project.send(:check_deleted_issues_in_jira, pivotal_jira_ids) }
 
-    let(:pivotal_jira_ids) { [] }
+    let(:pivotal_jira_ids) { %w( id1 id2 ) }
     let(:jira_issues) { generate_jira_issues }
 
     context 'pivotal jira ids empty' do
+      before { pivotal_jira_ids.clear }
+
       it 'returns two emty collections' do
         expect(check[0].empty?).to be true
         expect(check[1].empty?).to be true
@@ -255,39 +258,25 @@ describe JiraToPivotal::Jira::Project do
     end
 
     context 'non empty pivotal jira ids' do
-      before do
-        fill_pivotal_jira_ids!(pivotal_jira_ids)
+      before { allow(project).to receive(:find_exists_jira_issues) { jira_issues } }
 
-        allow(project).to receive(:find_exists_jira_issues) { jira_issues }
-      end
-
-      it 'returns 2 correct and 2 incorrect ids' do
-        expect(check[0].count).to be 2
-        expect(check[1].count).to be 2
+      it 'returns 1 correct and 1 incorrect ids' do
+        expect(check[0].count).to be 1
+        expect(check[1].count).to be 1
       end
     end
-  end
-
-  def generate_stories(story)
-    temp = []
-    (1..10).each do
-      allow(story).to receive(:to_jira) { {} }
-      allow(story).to receive(:assign_to_jira_issue) { {} }
-      temp << story
-    end
-    temp
   end
 
   def generate_jira_issues
     issues = []
 
-    (1..4).each do |counter|
+    (1..2).each do |counter|
       status =
-        if counter.even?
-          double 'status', name: 'Invoiced'
-        else
-          double 'status', name: 'Other'
-        end
+      if counter.even?
+        double 'status', name: 'Invoiced'
+      else
+        double 'status', name: 'Other'
+      end
 
       current_issue = double 'issue', status: status
 
@@ -297,11 +286,5 @@ describe JiraToPivotal::Jira::Project do
     end
 
     issues
-  end
-
-  def fill_pivotal_jira_ids!(arr)
-    (1..4).each do |counter|
-      arr << "id#{counter}"
-    end
   end
 end
