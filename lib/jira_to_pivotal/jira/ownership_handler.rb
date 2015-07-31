@@ -15,7 +15,7 @@ module JiraToPivotal
           rescue TrackerApi::Error => e
             logger.error_log(e)
             Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash) unless e.message.nil?
-            nil
+            []
           end
 
         if owners.any? && user_jira_name(owners.first.name)
