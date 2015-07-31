@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Pivotal
-    class Project < Base
+    class Project < Pivotal::Base
       attr_accessor :config
       attr_reader :project, :client
 
@@ -13,15 +13,28 @@ module JiraToPivotal
 
       def build_project
         retries ||= @config['script_repeat_time'].to_i
-        @client = TrackerApi::Client.new(token: config['tracker_token'])
+
+        # TrackerApi::Client.new(logger: my_logger)
+        @client = TrackerApi::Client.new(token: config['tracker_token'], logger: pivotal_log)
         @project  = client.project(config['tracker_project_id'])
 
-      rescue => error
+      rescue TrackerApi::Error => error
         retry unless (retries -= 1).zero?
 
         logger.error_log(error)
         Airbrake.notify_or_ignore(error, parameters: { config: @config }, cgi_data: ENV.to_hash)
-        fail error
+        @project = nil
+      end
+
+      # Temp pivotal log for finding bugs
+      def pivotal_log
+        name = config['log_file_name'].split('.').first
+        log_name = "#{name}_pivotal.log"
+        file = open("log/#{log_name}", File::WRONLY | File::APPEND | File::CREAT)
+
+        my_logger = ::Logger.new(file)
+        my_logger.level = ::Logger::DEBUG
+        my_logger
       end
 
       def update_config(options)

@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Jira
-    class Issue < Base
+    class Issue < Jira::Base
       attr_accessor :issue, :project, :config
 
       delegate :key, to: :issue
@@ -174,6 +174,7 @@ module JiraToPivotal
           cgi_data: ENV.to_hash,
           error_message: "#{e.response.body}"
         )
+        false
       end
 
       def create_notes!(story)
@@ -194,9 +195,10 @@ module JiraToPivotal
                 \n View this Pivotal Tracker story: #{story.url}"
               )
             end
-          rescue Exception => e
+          rescue => e
             logger.error_log(e)
             Airbrake.notify_or_ignore(e, parameters: config.airbrake_message_parameters, cgi_data: ENV.to_hash)
+            false
           end
         end
       end

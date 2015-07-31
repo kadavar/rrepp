@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Pivotal
-    class Story < Base
+    class Story < Pivotal::Base
       delegate :url, to: :story
       delegate :client, to: :story
 

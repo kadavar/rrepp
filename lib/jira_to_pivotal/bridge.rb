@@ -1,5 +1,7 @@
 module JiraToPivotal
   class Bridge < Base
+    attr_reader :config
+
     def initialize(hash)
       @config = JiraToPivotal::Config.new(decrypt_config(hash))
     end
@@ -17,17 +19,20 @@ module JiraToPivotal
     end
 
     def sync!
+      return unless jira.project || pivotal.project
+
       pivotal.update_config(ownership_handler: ownership_handler)
+      init_logger(config)
 
       connect_jira_to_pivotal!
       # Right now flow jira -> pivotal is disabled
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
     rescue => e
-      jira.logger.error_log(e)
+      logger.error_log(e)
       Airbrake.notify_or_ignore(e, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
 
-      fail e
+      return
     end
 
     def connect_jira_to_pivotal!

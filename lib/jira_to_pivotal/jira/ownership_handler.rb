@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Jira
-    class OwnershipHandler < Base
+    class OwnershipHandler < Jira::Base
       def initialize(jira, pivotal)
         @jira    = jira
         @pivotal = pivotal
@@ -12,9 +12,9 @@ module JiraToPivotal
         owners =
           begin
             story.owners
-          rescue => e
+          rescue TrackerApi::Error => e
             logger.error_log(e)
-            Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+            Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash) unless e.message.nil?
             nil
           end
 

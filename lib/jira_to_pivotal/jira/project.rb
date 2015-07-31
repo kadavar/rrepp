@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Jira
-    class Project < Base
+    class Project < Jira::Base
       attr_accessor :config
       attr_reader :client
 
@@ -41,7 +41,7 @@ module JiraToPivotal
       def project
         retries ||= config['script_repeat_time'].to_i
         @project ||= client.Project.find(config['jira_project'])
-      rescue JIRA::HTTPError =>  error
+      rescue JIRA::HTTPError => error
         retry unless (retries -= 1).zero?
 
         logger.error_log(error)
@@ -50,8 +50,10 @@ module JiraToPivotal
           parameters: { config: config.airbrake_message_parameters },
           cgi_data: ENV.to_hash
         )
-
         fail error
+      rescue Errno::EHOSTUNREACH => error
+        logger.error_log(error)
+        false
       end
 
       def project_name
