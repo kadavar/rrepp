@@ -108,10 +108,21 @@ module JiraToPivotal
 
         while issues.count > 0
           issues.each do |issue|
-            issue.fetch
+            begin
+              retries ||= config['script_repeat_time'].to_i
+              issue.fetch
 
-            # unless already_scheduled?(issue)
-            unsynchronized_issues << Issue.new(options_for_issue(issue))
+              # unless already_scheduled?(issue)
+              unsynchronized_issues << Issue.new(options_for_issue(issue))
+            rescue JIRA::HTTPError => e
+              logger.error_log(e)
+              if (retries -= 1).zero?
+                next
+              else
+                sleep(1)
+                retry
+              end
+            end
           end
 
           issues = issues.count > PER_PAGE ? next_issues : []
@@ -135,17 +146,13 @@ module JiraToPivotal
       end
 
       def find_issues(jql, options = {})
+        retries ||= config['script_repeat_time'].to_i
         JIRA::Resource::Issue.jql(client, jql, options)
       rescue JIRA::HTTPError => e
         unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
           logger.error_log(e)
-          Airbrake.notify_or_ignore(
-            e,
-            parameters: { jql: jql },
-            cgi_data: ENV.to_hash
-          )
+          sleep(1) && retry unless (retries -= 1).zero?
         end
-
         return []
       end
 
