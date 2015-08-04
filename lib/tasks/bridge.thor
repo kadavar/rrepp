@@ -19,6 +19,8 @@ class Bridge < Thor
     updated_config['process_pid'] = Process.pid
     set_params_to_redis(updated_config, random_hash)
 
+    push_monitoring_to_redis(options[:project], options[:emails], Process.pid)
+
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
@@ -60,6 +62,32 @@ class Bridge < Thor
 
     def set_params_to_redis(params, random_hash)
       Sidekiq.redis { |connection| connection.set(random_hash, encrypt_params(params, random_hash)) }
+    end
+
+    def update_monitoring(project)
+      monitoring_hash = get_monitoring
+
+      status = monitoring_hash[project]
+      status[:previous_start] = status[:current_start]
+      status[:current_start] = Time.now
+
+      monitoring_hash[project] = status
+
+      set_params_to_redis(monitoring_hash, :monitoring)
+    end
+
+    def get_monitoring
+      Sidekiq.redis { |connection| connection.get(:monitoring) }
+    end
+
+    def push_monitoring_to_redis(project, emails, pid)
+      monitoring_hash = {}
+      monitoring_hash.merge(get_monitoring)
+
+      status = { start: Time.now, pid: pid, emails: emails }
+      monitoring_hash[project] = status
+
+      set_params_to_redis(monitoring_hash, :monitoring)
     end
 
     def config_file_exists?(path)
