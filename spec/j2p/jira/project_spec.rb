@@ -29,9 +29,9 @@ describe JiraToPivotal::Jira::Project do
       allow(issue).to receive(:update_status!) {}
       allow(issue).to receive(:create_notes!) {}
       allow(issue).to receive(:issue) { double key: 1 }
-
-      allow(project).to receive(:build_issue) { [issue, {}] }
     end
+
+    before { allow(project).to receive(:build_issue) { [issue, {}] } }
 
     it 'creates issue' do
       expect(project).to receive(:logger).exactly(1).times
@@ -57,9 +57,7 @@ describe JiraToPivotal::Jira::Project do
     end
 
     context 'with issue save error' do
-      before do
-        allow(issue).to receive(:save!) { false }
-      end
+      before { allow(issue).to receive(:save!) { false } }
 
       it 'didnt creates stories' do
         expect(project).to receive(:logger).exactly(0).times
@@ -74,8 +72,9 @@ describe JiraToPivotal::Jira::Project do
       allow(project).to receive(:remove_jira_id_from_pivotal) { {} }
       allow(project).to receive(:update_issue!) { {} }
       allow(project).to receive(:find_issues) { {} }
-      allow(story).to receive(:jira_issue_id) { {} }
     end
+
+    before { allow(story).to receive(:jira_issue_id) { {} } }
 
     context 'with correct ids' do
       before { allow(project).to receive(:check_deleted_issues_in_jira) { [[], ['ID!']] } }
@@ -99,19 +98,16 @@ describe JiraToPivotal::Jira::Project do
   end
 
   describe '#create_sub_task_for_invosed_issues!' do
-    before do
-      story_vith_url = double 'url'
-      allow(story_vith_url).to receive(:url) { 'url' }
+    let(:story_vith_url) { double 'url' }
 
-      allow(story).to receive(:story) { story_vith_url }
-
-      allow(project).to receive(:find_issues) { [issue] }
-    end
+    before { allow(story_vith_url).to receive(:url) { 'url' } }
+    before { allow(story).to receive(:story) { story_vith_url } }
+    before { allow(project).to receive(:find_issues) { [issue] } }
 
     context 'without story urls' do
       before { stories.clear }
 
-      it 'doesnt creates subtasks' do
+      it 'does not create subtasks' do
         expect(project).to receive(:prepare_and_create_sub_task!).exactly(0).times
 
         project.create_sub_task_for_invosed_issues!(stories)
@@ -130,19 +126,15 @@ describe JiraToPivotal::Jira::Project do
   describe '#prepare_and_create_sub_task!' do
     subject { project.prepare_and_create_sub_task!(issue, stories) }
 
-    before do
-      invoced_issue_log = double 'invoced_issue_log'
-      allow(invoced_issue_log).to receive(:invoced_issue_log) { true }
+    let(:invoced_issue_log) { double 'invoced_issue_log' }
+    let(:logger) { double 'jira logger' }
 
-      logger = double 'jira logger'
-      allow(logger).to receive(:jira_logger) { invoced_issue_log }
-
-      allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
-
-      allow(project).to receive(:jira_pivotal_field) { 'pivotal_field' }
-      allow(issue).to receive(:pivotal_field) { 'field' }
-      allow(story).to receive(:url) { 'no' }
-    end
+    before { allow(invoced_issue_log).to receive(:invoced_issue_log) { true } }
+    before { allow(logger).to receive(:jira_logger) { invoced_issue_log } }
+    before { allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger) }
+    before { allow(project).to receive(:jira_pivotal_field) { 'pivotal_field' } }
+    before { allow(issue).to receive(:pivotal_field) { 'field' } }
+    before { allow(story).to receive(:url) { 'no' } }
 
     context 'without jira field' do
       it { is_expected.to be false }
@@ -158,14 +150,17 @@ describe JiraToPivotal::Jira::Project do
     end
 
     context 'with jira field and subtask' do
-      before do
-        key = double 'key'
-        allow(key).to receive(:key) { 'key' }
+      let(:key) { double 'key' }
 
+      before { allow(key).to receive(:key) { 'key' } }
+
+      before do
         allow(project).to receive(:create_sub_task!) { key }
         allow(project).to receive(:build_issue) { [[], []] }
         allow(project).to receive(:url) { '' }
+      end
 
+      before do
         allow(story).to receive(:url) { 'field' }
         allow(story).to receive(:assign_to_jira_issue) { {} }
       end
@@ -178,21 +173,19 @@ describe JiraToPivotal::Jira::Project do
     subject { project.update_issue!(story, jira_issues) }
 
     let(:jira_issues) { double 'jira issues' }
+    let(:update_issue_log) { double 'update_issue_log' }
+    let(:logger) { double 'logger' }
+
+    before { allow(update_issue_log).to receive(:update_issue_log) { true } }
+    before { allow(logger).to receive(:jira_logger) { update_issue_log } }
+    before { allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger) }
 
     before do
-      update_issue_log = double 'update_issue_log'
-      allow(update_issue_log).to receive(:update_issue_log) { true }
-
-      logger = double 'logger'
-      allow(logger).to receive(:jira_logger) { update_issue_log }
-
-      allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
-
       allow(project).to receive(:select_task) { nil }
       allow(project).to receive(:build_issue) { [issue, []] }
-
-      allow(story).to receive(:to_jira) { false }
     end
+
+    before { allow(story).to receive(:to_jira) { false } }
 
     context 'without no jira issue' do
       it { is_expected.to be nil }
@@ -205,18 +198,17 @@ describe JiraToPivotal::Jira::Project do
     end
 
     describe 'with jira issue and converted jira issue' do
+      let(:difference_checker) { double 'difference_checker' }
+
+      before { allow(project).to receive(:difference_checker) { difference_checker } }
+
       before do
         allow(project).to receive(:select_task) { double 'jira issue' }
         allow(story).to receive(:to_jira) { double 'story to jira' }
       end
 
       describe 'with main attributes difference' do
-        before do
-          difference_checker = double 'difference_checker'
-          allow(difference_checker).to receive(:main_attrs_difference?) { true }
-
-          allow(project).to receive(:difference_checker) { difference_checker }
-        end
+        before { allow(difference_checker).to receive(:main_attrs_difference?) { true } }
 
         context 'issue cant save' do
           before { allow(issue).to receive(:save!) { false } }
@@ -232,12 +224,7 @@ describe JiraToPivotal::Jira::Project do
       end
 
       describe 'without main attributes difference' do
-        before do
-          difference_checker = double 'difference_checker'
-          allow(difference_checker).to receive(:main_attrs_difference?) { false }
-
-          allow(project).to receive(:difference_checker) { difference_checker }
-        end
+        before { allow(difference_checker).to receive(:main_attrs_difference?) { false } }
 
         it { is_expected.to be true }
       end
