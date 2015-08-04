@@ -27,9 +27,6 @@ gem 'tracker_api', github: 'dashofcode/tracker_api', branch: 'master'
 gem 'jira-ruby'
 
 group :development do
-  gem 'pry'
-  gem 'pry-byebug'
-
   # code linters
   gem 'overcommit'
   gem 'rubocop', require: false
@@ -40,6 +37,8 @@ end
 
 group :development, :test do
   gem 'rspec-rails'
+  gem 'pry'
+  gem 'pry-byebug'
 end
 
 group :tools do
