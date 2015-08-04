@@ -10,14 +10,15 @@ describe JiraToPivotal::Jira::Project do
   let(:story) { double 'story' }
   let(:issue) { double 'issue' }
   let(:stories) { [story] }
+  let(:jira_logger) { double create_issue_log: true }
+  let(:logger) { double jira_logger: jira_logger }
 
   before do
-    jira_logger = double create_issue_log: true
-    logger = double jira_logger: jira_logger
-
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:url).and_return('')
+  end
 
+  before do
     allow(story).to receive(:to_jira) { {} }
     allow(story).to receive(:assign_to_jira_issue) { {} }
   end
@@ -39,13 +40,14 @@ describe JiraToPivotal::Jira::Project do
     end
 
     context 'with jira custom fields error' do
+      let(:error_story) { error_story = double 'error_story' }
+
       before do
-        error_story = double 'error_story'
         allow(error_story).to receive(:to_jira) { false }
         allow(error_story).to receive(:assign_to_jira_issue) { {} }
-
-        stories << error_story
       end
+
+      before { stories << error_story }
 
       it 'creates storie' do
         expect(project).to receive(:logger).exactly(1).times
