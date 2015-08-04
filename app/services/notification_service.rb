@@ -7,7 +7,7 @@ class NotificationService
 
   def check_and_notificate
     monitoring_hash.each do |project, status|
-      send_emails(project, status[:emails]) unless process_exists?(status[:pid])
+      send_emails(project, status['emails']) if process_exists?(status['pid'])
     end
   end
 

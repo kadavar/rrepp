@@ -1,10 +1,10 @@
-tracker_project_id:
+tracker_project_id: 1393994
 
-jira_login:
-jira_host:
+jira_login:         admin
+jira_host:          https://astaro.atlassian.net
 jira_uri_scheme:    https
 jira_port:          80
-jira_project:       JP
+jira_project:       TES
 jira_filter:        10800
 
 retry_count:        5
@@ -12,8 +12,8 @@ retry_count:        5
 script_first_start: 5
 script_repeat_time: '5m'
 
-notification_first_start: 30
-notification_repeat_time: '30m'
+notification_first_start: 0
+notification_repeat_time: '1m'
 
 jira_custom_fields:
   pivotal_points:   'Story Points'

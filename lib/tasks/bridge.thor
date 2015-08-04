@@ -17,9 +17,10 @@ class Bridge < Thor
     Process.daemon()
 
     updated_config['process_pid'] = Process.pid
+
     set_params_to_redis(updated_config, random_hash)
 
-    push_monitoring_to_redis(options[:project], options[:emails], Process.pid)
+    push_monitoring_to_redis(options[:project], updated_config['emails'], Process.pid)
 
     scheduler = Rufus::Scheduler.new
 
@@ -47,10 +48,10 @@ class Bridge < Thor
 
     def ask_credentials(config)
       say("Jira User: #{config['jira_login']}")
-      config['jira_password'] = ask("Jira Password:  ", echo: false)
+      config['jira_password'] = 'sfsils11!!2' #ask("Jira Password:  ", echo: false)
 
       say("\nPivotal Requester: #{config['tracker_requester']}")
-      config['tracker_token'] = ask('Pivotaltracker API token: ', echo: false)
+      config['tracker_token'] = '044c7c8406be38769e0b07447edfbaa4 '#ask('Pivotaltracker API token: ', echo: false)
 
       return config
     end
@@ -64,30 +65,19 @@ class Bridge < Thor
       Sidekiq.redis { |connection| connection.set(random_hash, encrypt_params(params, random_hash)) }
     end
 
-    def update_monitoring(project)
-      monitoring_hash = get_monitoring
-
-      status = monitoring_hash[project]
-      status[:previous_start] = status[:current_start]
-      status[:current_start] = Time.now
-
-      monitoring_hash[project] = status
-
-      set_params_to_redis(monitoring_hash, :monitoring)
-    end
-
-    def get_monitoring
-      Sidekiq.redis { |connection| connection.get(:monitoring) }
+    def monitoring
+      monitoring_hash = Sidekiq.redis { |connection| connection.get('monitoring') }
+      JSON.parse monitoring_hash
     end
 
     def push_monitoring_to_redis(project, emails, pid)
       monitoring_hash = {}
-      monitoring_hash.merge(get_monitoring)
+      monitoring_hash.merge(monitoring) if monitoring.present?
 
-      status = { start: Time.now, pid: pid, emails: emails }
+      status = { 'pid' => pid, 'emails' => emails }
       monitoring_hash[project] = status
 
-      set_params_to_redis(monitoring_hash, :monitoring)
+      Sidekiq.redis { |connection| connection.set('monitoring', monitoring_hash.to_json) }
     end
 
     def config_file_exists?(path)
