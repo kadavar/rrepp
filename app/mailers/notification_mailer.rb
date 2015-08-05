@@ -1,5 +1,5 @@
 class NotificationMailer < ActionMailer::Base
-  default from: 'from@email.com'
+  default from: ENV['default_from']
 
   def notification_email(project, email)
     @project = project
