@@ -48,10 +48,10 @@ class Bridge < Thor
 
     def ask_credentials(config)
       say("Jira User: #{config['jira_login']}")
-      config['jira_password'] = 'sfsils11!!2' #ask("Jira Password:  ", echo: false)
+      config['jira_password'] = ask("Jira Password:  ", echo: false)
 
       say("\nPivotal Requester: #{config['tracker_requester']}")
-      config['tracker_token'] = '044c7c8406be38769e0b07447edfbaa4 '#ask('Pivotaltracker API token: ', echo: false)
+      config['tracker_token'] = ask('Pivotaltracker API token: ', echo: false)
 
       return config
     end
