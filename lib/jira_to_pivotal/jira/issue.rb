@@ -42,16 +42,11 @@ module JiraToPivotal
           issue.save!(attrs)
         rescue JIRA::HTTPError => e
           logger.attrs_log(attrs)
-          logger.error_log(e)
-
-          Airbrake.notify_or_ignore(
+          errors_handler.airbrake_report_and_log(
             e,
             parameters: config.airbrake_message_parameters.merge(attrs),
-            cgi_data: ENV.to_hash,
             error_message: "#{e.response.body}"
           )
-
-          false
         end
       end
 
@@ -167,14 +162,11 @@ module JiraToPivotal
         # Write results to all posible scenarios
         # For example subtask doen't have In Progress state
       rescue JIRA::HTTPError => e
-        logger.error_log(e)
-        Airbrake.notify_or_ignore(
+        errors_handler.airbrake_report_and_log(
           e,
           parameters: args_for_change_status(story),
-          cgi_data: ENV.to_hash,
           error_message: "#{e.response.body}"
         )
-        false
       end
 
       def create_notes!(story)
@@ -196,9 +188,11 @@ module JiraToPivotal
               )
             end
           rescue => e
-            logger.error_log(e)
-            Airbrake.notify_or_ignore(e, parameters: config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-            false
+            errors_handler.airbrake_report_and_log(
+              e,
+              parameters: config.airbrake_message_parameters,
+              error_message: "#{e.response.body}"
+            )
           end
         end
       end

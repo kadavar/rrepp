@@ -16,12 +16,12 @@ module JiraToPivotal
       end
 
       def update_issue_log(story_object, issue_object, attrs)
-        return false unless shorcut_for(story_object, issue_object.issue)
+        return false unless shortcut_for(story_object, issue_object.issue)
 
         log_values(story_object.url, issue_object.key, 'UPDATE')
         Differ.separator = "\n"
 
-        story, issue = shorcut_for(story_object, issue_object.issue)
+        story, issue = shortcut_for(story_object, issue_object.issue)
 
         log_attributes_for_save(attrs) if any_diff?(story, issue)
 
@@ -48,9 +48,9 @@ module JiraToPivotal
       end
 
       def update_issue_status_log(story_object, issue_object)
-        return false unless shorcut_for(story_object, issue_object.issue)
+        return false unless shortcut_for(story_object, issue_object.issue)
 
-        story, issue = shorcut_for(story_object, issue_object.issue)
+        story, issue = shortcut_for(story_object, issue_object.issue)
 
         status_diff_for_log(story['status'], issue['status'])
       end
@@ -84,7 +84,7 @@ module JiraToPivotal
         @logger.info "#{@jira_issue_for_log} Status: " + "#{pivotal_status - jira_status}".magenta + " - #{@connection_for_log}"
       end
 
-      def shorcut_for(story, issue)
+      def shortcut_for(story, issue)
         return false unless story.to_jira(config[:custom_fields])
 
         [story_shortcut(story), issue_shortcut(issue)]

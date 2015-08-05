@@ -34,6 +34,7 @@ module JiraToPivotal
       end
 
       logger.error exception.backtrace.inspect
+      false
     end
 
     private

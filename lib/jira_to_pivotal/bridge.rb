@@ -29,8 +29,10 @@ module JiraToPivotal
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
     rescue => e
-      logger.error_log(e)
-      Airbrake.notify_or_ignore(e, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
+      errors_handler.airbrake_report_and_log(
+        e,
+        parameters: config.airbrake_message_parameters
+      )
 
       return
     end

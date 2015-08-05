@@ -13,8 +13,7 @@ module JiraToPivotal
           begin
             story.owners
           rescue TrackerApi::Error => e
-            logger.error_log(e)
-            Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash) unless e.message.nil?
+            errors_handler.airbrake_report_and_log(e, skip_airbrake: e.message.nil?)
             []
           end
 

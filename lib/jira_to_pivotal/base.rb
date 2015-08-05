@@ -9,5 +9,9 @@ module JiraToPivotal
     def logger
       JiraToPivotal::ScriptLogger.instance
     end
+
+    def errors_handler
+      JiraToPivotal::ErrorsHandler
+    end
   end
 end

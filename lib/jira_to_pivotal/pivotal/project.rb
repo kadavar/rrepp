@@ -21,8 +21,11 @@ module JiraToPivotal
       rescue TrackerApi::Error => error
         retry unless (retries -= 1).zero?
 
-        logger.error_log(error)
-        Airbrake.notify_or_ignore(error, parameters: { config: @config }, cgi_data: ENV.to_hash)
+        errors_handler.airbrake_report_and_log(
+          error,
+          parameters: { config: config },
+        )
+
         @project = nil
       end
 

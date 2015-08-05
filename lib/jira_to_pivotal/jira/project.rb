@@ -44,11 +44,9 @@ module JiraToPivotal
       rescue JIRA::HTTPError => error
         retry unless (retries -= 1).zero?
 
-        logger.error_log(error)
-        Airbrake.notify_or_ignore(
-          error,
+        errors_handler.airbrake_report_and_log(
+          e,
           parameters: { config: config.airbrake_message_parameters },
-          cgi_data: ENV.to_hash
         )
         fail error
       rescue Errno::EHOSTUNREACH => error
@@ -140,11 +138,9 @@ module JiraToPivotal
         JIRA::Resource::Issue.jql(client, jql, options)
       rescue JIRA::HTTPError => e
         unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
-          logger.error_log(e)
-          Airbrake.notify_or_ignore(
+          errors_handler.airbrake_report_and_log(
             e,
             parameters: { jql: jql },
-            cgi_data: ENV.to_hash
           )
         end
 
