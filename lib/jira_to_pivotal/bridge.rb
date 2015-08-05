@@ -17,7 +17,7 @@ module JiraToPivotal
     end
 
     def sync!
-      retryable(can_fail: true, logger: jira.logger) do
+      retryable(can_fail: true, logger: jira.logger, try: 1) do
         pivotal.update_config(ownership_handler: ownership_handler)
 
         connect_jira_to_pivotal!
