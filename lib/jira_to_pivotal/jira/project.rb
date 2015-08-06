@@ -152,6 +152,7 @@ module JiraToPivotal
       def create_tasks!(stories)
         stories.each do |story|
           putc '.'
+
           next unless story.to_jira(issue_custom_fields)
 
           issue, attributes = build_issue story.to_jira(issue_custom_fields)
@@ -211,6 +212,7 @@ module JiraToPivotal
         logger.jira_logger.invoced_issue_log(story: story, issue: subtask, old_issue: old_issue)
 
         stories.delete(story)
+
         true
       end
 
@@ -290,6 +292,7 @@ module JiraToPivotal
 
           correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
           incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+
         else
           incorrect_jira_ids, correct_jira_ids = Array.new(2) { [] }
         end
