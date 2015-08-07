@@ -1,13 +1,13 @@
 module JiraToPivotal
   module Retryable
     def retryable(options = {}, &block)
-      opts = { on: Exception, can_fail: false }.merge(options)
+      opts = { on: Exception, can_fail: false, returns: false }.merge(options)
 
       retry_exception = opts[:on]
       retries = opts[:try].present? ? opts[:try] : config['script_repeat_time'].to_i
       logger = opts[:logger]
       can_fail = opts[:can_fail]
-
+      returns = opts[:returns]
       begin
         yield
 
@@ -19,7 +19,8 @@ module JiraToPivotal
         retry unless (retries -= 1).zero?
 
         fail e if can_fail
-        false
+
+        returns
       end
     end
   end

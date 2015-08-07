@@ -39,19 +39,9 @@ module JiraToPivotal
       end
 
       def project
-        retries ||= config['script_repeat_time'].to_i
-        @project ||= client.Project.find(config['jira_project'])
-      rescue JIRA::HTTPError =>  error
-        retry unless (retries -= 1).zero?
-
-        logger.error_log(error)
-        Airbrake.notify_or_ignore(
-          error,
-          parameters: { config: config.airbrake_message_parameters },
-          cgi_data: ENV.to_hash
-        )
-
-        fail error
+        retryable(logger: logger, can_fail: true) do
+          @project ||= client.Project.find(config['jira_project'])
+        end
       end
 
       def project_name
@@ -108,20 +98,11 @@ module JiraToPivotal
 
         while issues.count > 0
           issues.each do |issue|
-            begin
-              retries ||= config['script_repeat_time'].to_i
+            next unless retryable(logger: logger, on: JIRA::HTTPError) do
               issue.fetch
 
               # unless already_scheduled?(issue)
               unsynchronized_issues << Issue.new(options_for_issue(issue))
-            rescue JIRA::HTTPError => e
-              logger.error_log(e)
-              if (retries -= 1).zero?
-                next
-              else
-                sleep(1)
-                retry
-              end
             end
           end
 
@@ -146,14 +127,9 @@ module JiraToPivotal
       end
 
       def find_issues(jql, options = {})
-        retries ||= config['script_repeat_time'].to_i
-        JIRA::Resource::Issue.jql(client, jql, options)
-      rescue JIRA::HTTPError => e
-        unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
-          logger.error_log(e)
-          sleep(1) && retry unless (retries -= 1).zero?
+        retryable(on: JIRA::HTTPError, lgger: logger, returns: []) do
+          JIRA::Resource::Issue.jql(client, jql, options)
         end
-        return []
       end
 
       def create_tasks!(stories)
