@@ -1,4 +1,3 @@
-tracker_requester:
 tracker_project_id:
 
 jira_login:
@@ -13,6 +12,9 @@ retry_count:        5
 script_first_start: 5
 script_repeat_time: '5m'
 
+notification_first_start: 30
+notification_repeat_time: '30m'
+
 jira_custom_fields:
   pivotal_points:   'Story Points'
   pivotal_url:      'Pivotal Tracker URL'
@@ -21,3 +23,7 @@ jira_issue_types:
   bug: 1
   feature: 2
   chore: 9
+
+emails:
+  - example1@mail.mm
+  - example2@mail.mm
