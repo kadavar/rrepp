@@ -17,17 +17,14 @@ module JiraToPivotal
     end
 
     def sync!
-      pivotal.update_config(ownership_handler: ownership_handler)
+      retryable(can_fail: true, logger: jira.logger, try: 1) do
+        pivotal.update_config(ownership_handler: ownership_handler)
 
-      connect_jira_to_pivotal!
-      # Right now flow jira -> pivotal is disabled
-      # from_jira_to_pivotal!
-      from_pivotal_to_jira!
-    rescue => e
-      jira.logger.error_log(e)
-      Airbrake.notify_or_ignore(e, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-
-      fail e
+        connect_jira_to_pivotal!
+        # Right now flow jira -> pivotal is disabled
+        # from_jira_to_pivotal!
+        from_pivotal_to_jira!
+      end
     end
 
     def connect_jira_to_pivotal!

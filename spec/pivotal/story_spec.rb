@@ -5,13 +5,24 @@ describe JiraToPivotal::Pivotal::Story do
   let!(:pivotal_story) { JiraToPivotal::Pivotal::Story.new(nil) }
   let(:inner_story) { double 'inner story' }
   let(:custom_fields) { { 'points' => 'Story Points', 'url' => 'Pivotal Tracker URL' } }
+  let(:conf) { double 'config' }
+  let(:logger) { double 'logger' }
+
+  before { allow(pivotal_story).to receive(:story) { inner_story } }
+  before { allow(Airbrake).to receive(:notify_or_ignore) {} }
 
   before do
-    allow(pivotal_story).to receive(:story) { inner_story }
+    allow(conf).to receive(:airbrake_message_parameters) {}
+    allow(conf).to receive(:[]) { 2 }
   end
+
+  before { allow(logger).to receive(:error_log) {} }
+  before { allow(pivotal_story).to receive(:logger) { logger } }
+  before { pivotal_story.instance_variable_set(:@config, conf) }
 
   describe '#to_jira' do
     subject { pivotal_story.to_jira(custom_fields) }
+
     before do
       allow(pivotal_story).to receive(:main_attrs) do
         {
@@ -20,6 +31,7 @@ describe JiraToPivotal::Pivotal::Story do
           'issuetype'    => { 'id' => '1' }
         }
       end
+
       allow(pivotal_story).to receive(:original_estimate_attrs) { { 'estimate' => 'estimate' } }
       allow(pivotal_story).to receive(:custom_fields_attrs) { { 'pivotal' => 'pivotal' } }
 
@@ -43,22 +55,13 @@ describe JiraToPivotal::Pivotal::Story do
     end
 
     context 'with error' do
-      before do
-        allow(Airbrake).to receive(:notify_or_ignore) {}
+      before { allow(pivotal_story).to receive(:ownership_handler) { fail } }
 
-        conf = double 'config'
-        allow(conf).to receive(:airbrake_message_parameters) {}
+      specify 'retryes 2 times and false' do
+        expect(pivotal_story).to receive(:main_attrs).exactly(2).times
 
-        logger = double 'logger'
-        allow(logger).to receive(:error_log) {}
-
-        allow(pivotal_story).to receive(:logger) { logger }
-        allow(pivotal_story).to receive(:ownership_handler) { fail }
-
-        pivotal_story.instance_variable_set(:@config, conf)
+        is_expected.to be false
       end
-
-      it { is_expected.to be false }
     end
   end
 
@@ -259,6 +262,18 @@ describe JiraToPivotal::Pivotal::Story do
           expect(fields_attrs['points']).to be 4
           expect(fields_attrs['url']).to eq 'url'
         end
+      end
+    end
+  end
+
+  describe '#notes' do
+    context 'error rises' do
+      before { allow(inner_story).to receive(:comments) { fail } }
+
+      specify 'retryes 2 times and returns false' do
+        expect(inner_story).to receive(:comments).exactly(2).times
+
+        expect(pivotal_story.notes).to be false
       end
     end
   end

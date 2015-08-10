@@ -18,12 +18,9 @@ module JiraToPivotal
 
       # TODO: Rewrite using new gem classes
       def notes
-        retries ||= config['script_repeat_time'].to_i
-        @notes ||= story.comments
-      rescue => error
-        sleep(1) && retry unless (retries -= 1).zero?
-        Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-        false
+        retryable(logger: logger) do
+          @notes ||= story.comments
+        end
       end
 
       # TODO: Temporary method until gem would be updated
@@ -74,13 +71,11 @@ module JiraToPivotal
       end
 
       def to_jira(custom_fields)
-        main_attrs.merge!(original_estimate_attrs).
-          merge!(custom_fields_attrs(custom_fields)).
-          merge!(ownership_handler.reporter_and_asignee_attrs(story))
-      rescue => error
-        Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-        logger.error_log(error)
-        false
+        retryable(logger: logger) do
+          main_attrs.merge!(original_estimate_attrs).
+            merge!(custom_fields_attrs(custom_fields)).
+            merge!(ownership_handler.reporter_and_asignee_attrs(story))
+        end
       end
 
       def regexp_for_image_tag_replace
