@@ -7,6 +7,7 @@ module JiraToPivotal
       retries = opts[:try].present? ? opts[:try] : config['script_repeat_time'].to_i
       logger = opts[:logger]
       can_fail = opts[:can_fail]
+
       begin
         yield
 
