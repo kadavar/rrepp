@@ -125,19 +125,13 @@ describe JiraToPivotal::Pivotal::Story do
     context 'with title' do
       before { allow(description).to receive(:to_s) { '![tinyarrow](https://examp.net/icon_linux.gif "tiny arrow")' } }
 
-      it do
-        pending 'needs fixing of regular expression in pivotal/story.rb:83'
-        is_expected.to eq '!https://examp.net/icon_linux.gif!'
-      end
+      it { is_expected.to eq '!https://examp.net/icon_linux.gif!' }
     end
 
     context 'with whitespace in alt' do
       before { allow(description).to receive(:to_s) { '![tiny arrow](https://examp.net/icon_linux.gif)' } }
 
-      it do
-        pending 'needs fixing of regular expression in pivotal/story.rb:83'
-        is_expected.to eq '!https://examp.net/icon_linux.gif!'
-      end
+      it { is_expected.to eq '!https://examp.net/icon_linux.gif!' }
     end
   end
 

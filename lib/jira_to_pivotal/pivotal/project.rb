@@ -12,7 +12,7 @@ module JiraToPivotal
       end
 
       def build_project
-        retryable(logger: logger, can_fail: true) do
+        retryable(logger: logger, can_fail: true, with_delay: true) do
           @client = TrackerApi::Client.new(token: config['tracker_token'])
           @project  = client.project(config['tracker_project_id'])
         end
@@ -46,7 +46,7 @@ module JiraToPivotal
       end
 
       def map_users_by_email
-        retryable(logger: logger, can_fail: true) do
+        retryable(logger: logger, can_fail: true, with_delay: true) do
           project.memberships.map(&:person).map { |member| { member.name => member.email } }.reduce({}, :merge)
         end
       end

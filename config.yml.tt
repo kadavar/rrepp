@@ -11,6 +11,7 @@ retry_count:        5
 
 script_first_start: 5
 script_repeat_time: '5m'
+script_delay:       2
 
 notification_first_start: 30
 notification_repeat_time: '30m'
