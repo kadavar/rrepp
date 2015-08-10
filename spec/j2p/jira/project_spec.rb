@@ -277,7 +277,7 @@ describe JiraToPivotal::Jira::Project do
     context 'with error' do
       before { allow(client_project).to receive(:find) { fail } }
 
-      it 'retryes 2 times and rises exception' do
+      it 'retries 2 times and raises exception' do
         expect(project).to receive(:client).exactly(2).times
 
         expect { project.project }.to raise_exception
@@ -296,7 +296,7 @@ describe JiraToPivotal::Jira::Project do
 
       before { allow(JIRA::Resource::Issue).to receive(:jql) { fail JIRA::HTTPError.new(error), 'message' } }
 
-      it 'retryes 2 times, and returns empty array' do
+      it 'retries 2 times, and returns empty array' do
         expect(JIRA::Resource::Issue).to receive(:jql).exactly(2).times
 
         expect(project.find_issues({}, [])).to eq []
