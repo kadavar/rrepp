@@ -275,7 +275,14 @@ describe JiraToPivotal::Jira::Project do
     before { allow(client).to receive(:Project) { client_project } }
 
     context 'with error' do
-      before { allow(client_project).to receive(:find) { fail } }
+      let(:error) { double 'error' }
+
+      before do
+        allow(error).to receive(:message) { 'message' }
+        allow(error).to receive(:code) { 'code' }
+      end
+
+      before { allow(client_project).to receive(:find) { fail JIRA::HTTPError.new(error), 'message' } }
 
       it 'retries 2 times and raises exception' do
         expect(project).to receive(:client).exactly(2).times

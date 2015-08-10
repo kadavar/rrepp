@@ -39,7 +39,7 @@ module JiraToPivotal
       end
 
       def project
-        retryable(logger: logger, can_fail: true, with_delay: true) do
+        retryable(logger: logger, can_fail: true, with_delay: true, on: JIRA::HTTPError) do
           @project ||= client.Project.find(config['jira_project'])
         end
       end
