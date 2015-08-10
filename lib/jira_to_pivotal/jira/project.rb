@@ -127,7 +127,7 @@ module JiraToPivotal
       end
 
       def find_issues(jql, options = {})
-        retryable(on: JIRA::HTTPError, lgger: logger, returns: []) do
+        retryable(on: JIRA::HTTPError, logger: logger, returns: []) do
           JIRA::Resource::Issue.jql(client, jql, options)
         end
       end

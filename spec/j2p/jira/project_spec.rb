@@ -11,7 +11,16 @@ describe JiraToPivotal::Jira::Project do
   let(:issue) { double 'issue' }
   let(:stories) { [story] }
   let(:jira_logger) { double create_issue_log: true }
-  let(:logger) { double jira_logger: jira_logger }
+  let(:logger) { double 'logger' }
+  let(:conf) { { 'script_repeat_time' => '2' } }
+  let(:client) { double 'client' }
+
+  before { allow(conf).to receive(:airbrake_message_parameters) {} }
+
+  before do
+    allow(logger).to receive(:jira_logger) { jira_logger }
+    allow(logger).to receive(:error_log) {}
+  end
 
   before do
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger)
@@ -22,6 +31,10 @@ describe JiraToPivotal::Jira::Project do
     allow(story).to receive(:to_jira) { {} }
     allow(story).to receive(:assign_to_jira_issue) { {} }
   end
+
+  before { allow(Airbrake).to receive(:notify_or_ignore) {} }
+  before { project.instance_variable_set(:@config, conf) }
+  before { allow(project).to receive(:client) { client } }
 
   describe '#create_tasks!' do
     before do
@@ -252,6 +265,41 @@ describe JiraToPivotal::Jira::Project do
       it 'returns 1 correct and 1 incorrect ids' do
         expect(check[0].count).to be 1
         expect(check[1].count).to be 1
+      end
+    end
+  end
+
+  describe '#project' do
+    let(:client_project) { double 'client project' }
+
+    before { allow(client).to receive(:Project) { client_project } }
+
+    context 'with error' do
+      before { allow(client_project).to receive(:find) { fail } }
+
+      it 'retryes 2 times and rises exception' do
+        expect(project).to receive(:client).exactly(2).times
+
+        expect { project.project }.to raise_exception
+      end
+    end
+  end
+
+  describe '#find_issues' do
+    context 'with error' do
+      let(:error) { double 'error' }
+
+      before do
+        allow(error).to receive(:message) { 'message' }
+        allow(error).to receive(:code) { 'code' }
+      end
+
+      before { allow(JIRA::Resource::Issue).to receive(:jql) { fail JIRA::HTTPError.new(error), 'message' } }
+
+      it 'retryes 2 times, and returns empty array' do
+        expect(JIRA::Resource::Issue).to receive(:jql).exactly(2).times
+
+        expect(project.find_issues({}, [])).to eq []
       end
     end
   end
