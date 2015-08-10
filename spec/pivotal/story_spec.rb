@@ -110,7 +110,7 @@ describe JiraToPivotal::Pivotal::Story do
     before do
       allow(inner_story).to receive(:description) { description }
 
-      allow(pivotal_story).to receive (:regexp_for_image_tag_replace) { /\!\[\w*\]\(([\w\p{P}\p{S}]+)\)/u }
+      allow(pivotal_story).to receive (:regexp_for_image_tag_replace) { /\!\[\w+ *\w+\]\(([\w\p{P}\p{S}]+) *\"*\w* *\w*\"*\)/u }
     end
 
     context 'without title' do
