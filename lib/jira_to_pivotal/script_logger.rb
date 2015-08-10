@@ -1,3 +1,5 @@
+# TODO: refactor this code while doing
+# https://github.com/hndsm/j2p/issues/58
 module JiraToPivotal
   class ScriptLogger
     include Singleton
@@ -43,7 +45,7 @@ module JiraToPivotal
       proc do |severity, datetime, _progname, msg|
         if severity == 'INFO' || severity == 'WARN'
           if config['sync_action'] == 'INVOICED'
-            invosed_action(datetime, msg)
+            invoiced_action(datetime, msg)
           else
             update_create_action(datetime, msg)
           end
@@ -53,7 +55,7 @@ module JiraToPivotal
       end
     end
 
-    def invosed_action(datetime, msg)
+    def invoiced_action(datetime, msg)
       "[#{datetime.utc.strftime('%Y-%m-%d %H:%M:%S.%6N %Z')} ##{config['process_pid']} P##{config['project_name']}] " +
         "#{config['sync_action']}".green + " -- #{msg}\n"
     end

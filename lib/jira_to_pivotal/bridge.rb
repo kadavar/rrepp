@@ -29,11 +29,7 @@ module JiraToPivotal
       # from_jira_to_pivotal!
       from_pivotal_to_jira!
     rescue => e
-      errors_handler.airbrake_report_and_log(
-        e,
-        parameters: config.airbrake_message_parameters
-      )
-
+      errors_handler.airbrake_report_and_log(e, parameters: config.airbrake_message_parameters)
       return
     end
 

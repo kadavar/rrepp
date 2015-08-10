@@ -21,11 +21,7 @@ module JiraToPivotal
       rescue TrackerApi::Error => error
         retry unless (retries -= 1).zero?
 
-        errors_handler.airbrake_report_and_log(
-          error,
-          parameters: { config: config },
-        )
-
+        errors_handler.airbrake_report_and_log(error, parameters: { config: config })
         @project = nil
       end
 
