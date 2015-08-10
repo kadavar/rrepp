@@ -84,9 +84,9 @@ module JiraToPivotal
       end
 
       def regexp_for_image_tag_replace
-        # Match ![some_title](http://some.site.com/some_imge.png)
-        # Match ![some title](http://some.site.com/some_imge.png)
-        # Match ![some title](http://some.site.com/some_imge.png "some alt")
+        # Matches:
+        # ![some title](http://some.site.com/some_imge.png)
+        # ![some title](http://some.site.com/some_imge.png "some alt")
         /\!\[\w+ *\w+\]\(([\w\p{P}\p{S}]+) *\"*\w* *\w*\"*\)/u
       end
 
