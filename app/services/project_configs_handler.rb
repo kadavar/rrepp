@@ -25,20 +25,17 @@ class ProjectConfigsHandler
       data = YAML.load(ERB.new(File.read(config_path(name))).result)
       config_params = data.except('jira_custom_fields', 'jira_issue_types')
 
-      config = Project::Config.where(name: name).first
-
-      if config.present?
-        config.update_attributes(config_params)
-      else
-        config = Project::Config.create(config_params.merge(name: name))
-      end
+      config = Project::Config.where(name: name).first_or_initialize
+      config.update_attributes(config_params)
 
       data['jira_custom_fields'].values.each do |custom_field_name|
         config.jira_custom_fields.find_or_create_by(name: custom_field_name)
       end
+      config.jira_custom_fields.where.not(name: data['jira_custom_fields'].values).destroy_all
 
       data['jira_issue_types'].each do |name, id|
-        config.jira_issue_types.find_or_create_by(name: name, jira_id: id)
+        issue_type = config.jira_issue_types.find_or_create_by(name: name)
+        issue_type.update_attributes(jira_id: id)
       end
 
     rescue Exception => e
