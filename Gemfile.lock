@@ -365,6 +365,3 @@ DEPENDENCIES
   timecop
   tracker_api!
   unicorn
-
-BUNDLED WITH
-   1.10.5

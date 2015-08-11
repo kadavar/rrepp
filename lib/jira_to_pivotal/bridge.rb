@@ -7,19 +7,19 @@ module JiraToPivotal
     end
 
     def jira
-      @jira ||= JiraToPivotal::Jira::Project.new(@config)
+      @jira ||= JiraToPivotal::Jira::Project.new(config)
     end
 
     def pivotal
-      @pivotal ||= JiraToPivotal::Pivotal::Project.new(@config)
+      @pivotal ||= JiraToPivotal::Pivotal::Project.new(config)
     end
 
     def ownership_handler
-      @ownership_handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal)
+      @ownership_handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal, config)
     end
 
     def sync!
-	  init_logger(config)
+    	init_logger(config)
 
       retryable(can_fail: true, logger: jira.logger, try: 1) do
         pivotal.update_config(ownership_handler: ownership_handler)

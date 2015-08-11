@@ -27,10 +27,10 @@ describe JiraToPivotal::Bridge do
     subject(:sync) { bridge.sync! }
 
     context 'raise error' do
-      before { allow(bridge).to receive(:connect_jira_to_pivotal!) { fail } }
+      before { allow(bridge).to receive(:init_logger).with(any_args) { fail(RuntimeError, 'Bad case') } }
 
       specify 'raises error' do
-        expect { sync }.to raise_exception
+        expect { sync }.to raise_exception(RuntimeError, 'Bad case')
       end
     end
   end

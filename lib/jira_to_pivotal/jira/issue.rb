@@ -42,7 +42,7 @@ module JiraToPivotal
           issue.save!(attrs)
         rescue JIRA::HTTPError => e
           logger.attrs_log(attrs)
-          errors_handler.airbrake_report_and_log(
+          airbrake_report_and_log(
             e,
             parameters: config.airbrake_message_parameters.merge(attrs),
             error_message: "#{e.response.body}"
@@ -162,7 +162,7 @@ module JiraToPivotal
         # Write results to all posible scenarios
         # For example subtask doen't have In Progress state
       rescue JIRA::HTTPError => e
-        errors_handler.airbrake_report_and_log(
+        airbrake_report_and_log(
           e,
           parameters: args_for_change_status(story),
           error_message: "#{e.response.body}"
@@ -188,7 +188,7 @@ module JiraToPivotal
               )
             end
           rescue => e
-            errors_handler.airbrake_report_and_log(
+            airbrake_report_and_log(
               e,
               parameters: config.airbrake_message_parameters,
               error_message: "#{e.response.body}"
