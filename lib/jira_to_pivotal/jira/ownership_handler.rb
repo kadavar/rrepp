@@ -1,22 +1,28 @@
 module JiraToPivotal
   module Jira
-    class OwnershipHandler < Base
-      def initialize(jira, pivotal)
+    class OwnershipHandler < Jira::Base
+      attr_reader :jira, :pivotal, :config
+
+      def initialize(jira, pivotal, config)
         @jira    = jira
         @pivotal = pivotal
+        @config  = config
       end
 
       def reporter_and_asignee_attrs(story)
         result = {}
 
-        owners =
-          begin
-            story.owners
-          rescue => e
-            logger.error_log(e)
-            Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
-            nil
-          end
+        retryable_params = {
+          can_fail: false,
+          with_delay: true,
+          on: TrackerApi::Error,
+          returns: [],
+          skip_airbrake: true
+        }
+
+        owners = retryable(retryable_params) do
+          story.owners
+        end
 
         if owners.any? && user_jira_name(owners.first.name)
           result.merge!(reporter(owners.first.name)).
@@ -37,11 +43,11 @@ module JiraToPivotal
       end
 
       def pivotal_assignee
-        @pivotal_assignee ||= @pivotal.map_users_by_email.compact
+        @pivotal_assignee ||= pivotal.map_users_by_email.compact
       end
 
       def jira_assignee
-        @jira_assignee ||= @jira.jira_assignable_users
+        @jira_assignee ||= jira.jira_assignable_users
       end
 
       def jira_assignee_by_email

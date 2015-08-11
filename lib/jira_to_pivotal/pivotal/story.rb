@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Pivotal
-    class Story < Base
+    class Story < Pivotal::Base
       delegate :url, to: :story
       delegate :client, to: :story
 
@@ -43,8 +43,7 @@ module JiraToPivotal
         end
 
       rescue => error
-        Airbrake.notify_or_ignore(error, parameters: config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-        false
+        airbrake_report_and_log(e, parameters: config.airbrake_message_parameters)
       end
 
       # TODO: Temporary method until gem would be updated

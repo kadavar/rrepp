@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Jira
-    class Project < Base
+    class Project < Jira::Base
       attr_accessor :config
       attr_reader :client
 

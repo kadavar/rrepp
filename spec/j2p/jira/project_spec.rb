@@ -287,7 +287,7 @@ describe JiraToPivotal::Jira::Project do
       it 'retries 2 times and raises exception' do
         expect(project).to receive(:client).exactly(2).times
 
-        expect { project.project }.to raise_exception
+        expect { project.project }.to raise_exception(JIRA::HTTPError, 'message')
       end
     end
   end
