@@ -12,17 +12,10 @@ module JiraToPivotal
       end
 
       def build_project
-        retries ||= @config['script_repeat_time'].to_i
-
-        # TrackerApi::Client.new(logger: my_logger)
-        @client = TrackerApi::Client.new(token: config['tracker_token'], logger: pivotal_log)
-        @project  = client.project(config['tracker_project_id'])
-
-      rescue TrackerApi::Error => error
-        retry unless (retries -= 1).zero?
-
-        errors_handler.airbrake_report_and_log(error, parameters: { config: config })
-        @project = nil
+        retryable(logger: logger, can_fail: true, with_delay: true) do
+          @client = TrackerApi::Client.new(token: config['tracker_token'], logger: pivotal_log)
+          @project  = client.project(config['tracker_project_id'])
+        end
       end
 
       # Temp pivotal log for finding bugs
@@ -64,11 +57,9 @@ module JiraToPivotal
       end
 
       def map_users_by_email
-        retries ||= @config['script_repeat_time'].to_i
-        project.memberships.map(&:person).map { |member| { member.name => member.email } }.reduce({}, :merge)
-      rescue => error
-        sleep(1) && retry unless (retries -= 1).zero?
-        fail error
+        retryable(logger: logger, can_fail: true, with_delay: true) do
+          project.memberships.map(&:person).map { |member| { member.name => member.email } }.reduce({}, :merge)
+        end
       end
 
       private

@@ -18,11 +18,9 @@ module JiraToPivotal
 
       # TODO: Rewrite using new gem classes
       def notes
-        retries ||= config['script_repeat_time'].to_i
-        @notes ||= story.comments
-      rescue => error
-        sleep(1) && retry unless (retries -= 1).zero?
-        errors_handler.airbrake_report_and_log(e, parameters: config.airbrake_message_parameters)
+        retryable(logger: logger) do
+          @notes ||= story.comments
+        end
       end
 
       # TODO: Temporary method until gem would be updated
@@ -72,16 +70,18 @@ module JiraToPivotal
       end
 
       def to_jira(custom_fields)
-        main_attrs.merge!(original_estimate_attrs).
-          merge!(custom_fields_attrs(custom_fields)).
-          merge!(ownership_handler.reporter_and_asignee_attrs(story))
-      rescue => error
-        errors_handler.airbrake_report_and_log(e, parameters: config.airbrake_message_parameters)
+        retryable(logger: logger) do
+          main_attrs.merge!(original_estimate_attrs).
+            merge!(custom_fields_attrs(custom_fields)).
+            merge!(ownership_handler.reporter_and_asignee_attrs(story))
+        end
       end
 
       def regexp_for_image_tag_replace
-        # Match ![some_title](http://some.site.com/some_imge.png)
-        /\!\[\w*\]\(([\w\p{P}\p{S}]+)\)/u
+        # Matches:
+        # ![some title](http://some.site.com/some_imge.png)
+        # ![some title](http://some.site.com/some_imge.png "some alt")
+        /\!\[\w+ *\w+\]\(([\w\p{P}\p{S}]+) *\"*\w* *\w*\"*\)/u
       end
 
       def custom_fields_attrs(custom_fields)

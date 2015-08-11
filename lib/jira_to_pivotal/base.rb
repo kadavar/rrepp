@@ -1,5 +1,7 @@
 module JiraToPivotal
   class Base
+    include Retryable
+
     def init_logger(config)
       logger = JiraToPivotal::ScriptLogger.instance
       logger.config = config

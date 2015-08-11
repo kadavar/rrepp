@@ -39,16 +39,9 @@ module JiraToPivotal
       end
 
       def project
-        retries ||= config['script_repeat_time'].to_i
-        @project ||= client.Project.find(config['jira_project'])
-      rescue JIRA::HTTPError => error
-        retry unless (retries -= 1).zero?
-
-        errors_handler.airbrake_report_and_log(e, parameters: { config: config.airbrake_message_parameters })
-        fail error
-      rescue Errno::EHOSTUNREACH => error
-        logger.error_log(error)
-        false
+        retryable(logger: logger, can_fail: true, with_delay: true, on: JIRA::HTTPError) do
+          @project ||= client.Project.find(config['jira_project'])
+        end
       end
 
       def project_name
@@ -105,10 +98,12 @@ module JiraToPivotal
 
         while issues.count > 0
           issues.each do |issue|
-            issue.fetch
+            next unless retryable(logger: logger, on: JIRA::HTTPError, with_delay: true) do
+              issue.fetch
 
-            # unless already_scheduled?(issue)
-            unsynchronized_issues << Issue.new(options_for_issue(issue))
+              # unless already_scheduled?(issue)
+              unsynchronized_issues << Issue.new(options_for_issue(issue))
+            end
           end
 
           issues = issues.count > PER_PAGE ? next_issues : []
@@ -132,18 +127,15 @@ module JiraToPivotal
       end
 
       def find_issues(jql, options = {})
-        JIRA::Resource::Issue.jql(client, jql, options)
-      rescue JIRA::HTTPError => e
-        unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
-          errors_handler.airbrake_report_and_log(e, parameters: { jql: jql })
+        retryable(on: JIRA::HTTPError, logger: logger, returns: [], with_delay: true) do
+          JIRA::Resource::Issue.jql(client, jql, options)
         end
-
-        return []
       end
 
       def create_tasks!(stories)
         stories.each do |story|
           putc '.'
+
           next unless story.to_jira(issue_custom_fields)
 
           issue, attributes = build_issue story.to_jira(issue_custom_fields)
@@ -203,6 +195,7 @@ module JiraToPivotal
         logger.jira_logger.invoced_issue_log(story: story, issue: subtask, old_issue: old_issue)
 
         stories.delete(story)
+
         true
       end
 
@@ -282,6 +275,7 @@ module JiraToPivotal
 
           correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
           incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+
         else
           incorrect_jira_ids, correct_jira_ids = Array.new(2) { [] }
         end

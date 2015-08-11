@@ -19,18 +19,16 @@ module JiraToPivotal
     end
 
     def sync!
-      return unless jira.project || pivotal.project
+	  init_logger(config)
 
-      pivotal.update_config(ownership_handler: ownership_handler)
-      init_logger(config)
+      retryable(can_fail: true, logger: jira.logger, try: 1) do
+        pivotal.update_config(ownership_handler: ownership_handler)
 
-      connect_jira_to_pivotal!
-      # Right now flow jira -> pivotal is disabled
-      # from_jira_to_pivotal!
-      from_pivotal_to_jira!
-    rescue => e
-      errors_handler.airbrake_report_and_log(e, parameters: config.airbrake_message_parameters)
-      return
+        connect_jira_to_pivotal!
+        # Right now flow jira -> pivotal is disabled
+        # from_jira_to_pivotal!
+        from_pivotal_to_jira!
+      end
     end
 
     def connect_jira_to_pivotal!
