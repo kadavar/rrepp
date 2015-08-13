@@ -14,6 +14,7 @@ describe JiraToPivotal::Jira::Project do
   let(:logger) { double 'logger' }
   let(:conf) { { 'script_repeat_time' => '2' } }
   let(:client) { double 'client' }
+  let(:inner_project) { double 'inner project'}
 
   before { allow(conf).to receive(:airbrake_message_parameters) {} }
 
@@ -34,7 +35,11 @@ describe JiraToPivotal::Jira::Project do
 
   before { allow(Airbrake).to receive(:notify_or_ignore) {} }
   before { project.instance_variable_set(:@config, conf) }
-  before { allow(project).to receive(:client) { client } }
+
+  before do
+    allow(project).to receive(:client) { client }
+    allow(project).to receive(:project) { inner_project }
+  end
 
   describe '#create_tasks!' do
     before do
@@ -270,10 +275,6 @@ describe JiraToPivotal::Jira::Project do
   end
 
   describe '#project' do
-    let(:client_project) { double 'client project' }
-
-    before { allow(client).to receive(:Project) { client_project } }
-
     context 'with error' do
       let(:error) { double 'error' }
 
@@ -282,18 +283,20 @@ describe JiraToPivotal::Jira::Project do
         allow(error).to receive(:code) { 'code' }
       end
 
-      before { allow(client_project).to receive(:find) { fail JIRA::HTTPError.new(error), 'message' } }
+      before { allow(project).to receive(:project).and_call_original }
+
+      before { allow(project).to receive(:client) { fail JIRA::HTTPError.new(error), 'message' } }
 
       it 'retries 2 times and raises exception' do
         expect(project).to receive(:client).exactly(2).times
 
-        expect { project.project }.to raise_exception(JIRA::HTTPError, 'message')
+        expect { project.project }.to raise_exception JIRA::HTTPError
       end
     end
   end
 
   describe '#find_issues' do
-    context 'with error' do
+    context 'with Jira::HTTPError' do
       let(:error) { double 'error' }
 
       before do
@@ -307,6 +310,47 @@ describe JiraToPivotal::Jira::Project do
         expect(JIRA::Resource::Issue).to receive(:jql).exactly(2).times
 
         expect(project.find_issues({}, [])).to eq []
+      end
+    end
+
+    context 'with SocketError' do
+      before { allow(JIRA::Resource::Issue).to receive(:jql) { fail SocketError, 'message' } }
+
+      it 'retries 2 times, and returns empty array' do
+        expect(JIRA::Resource::Issue).to receive(:jql).exactly(2).times
+
+        expect(project.find_issues({}, [])).to eq []
+      end
+    end
+  end
+
+  describe '#issues' do
+    before { conf['jira_filter'] = true }
+
+    context 'with Jira::HTTPError' do
+      let(:error) { double 'error' }
+
+      before do
+        allow(error).to receive(:message) { 'message' }
+        allow(error).to receive(:code) { 'code' }
+      end
+
+      before { allow(inner_project).to receive(:issues_by_filter) { fail JIRA::HTTPError.new(error), 'message' } }
+
+      it 'retries 2 times, and returns nil' do
+        expect(inner_project).to receive(:issues_by_filter).exactly(2).times
+
+        expect(project.send :issues, 1).to eq nil
+      end
+    end
+
+    context 'with SocketError' do
+      before { allow(inner_project).to receive(:issues_by_filter) { fail SocketError, 'message' } }
+
+      it 'retries 2 times, and returns nil' do
+        expect(inner_project).to receive(:issues_by_filter).exactly(2).times
+
+        expect(project.send :issues, 1).to eq nil
       end
     end
   end

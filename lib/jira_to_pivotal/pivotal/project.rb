@@ -12,13 +12,7 @@ module JiraToPivotal
       end
 
       def build_project
-        retryable_params = {
-          can_fail: true,
-          with_delay: true,
-          skip_airbrake: true
-        }
-
-        retryable(retryable_params) do
+        retryable(can_fail: true, with_delay: true, skip_airbrake: true) do
           @client = TrackerApi::Client.new(token: config['tracker_token'], logger: pivotal_log)
           @project  = client.project(config['tracker_project_id'])
         end

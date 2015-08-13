@@ -317,10 +317,12 @@ module JiraToPivotal
       end
 
       def issues(start_index)
-        if config['jira_filter']
-          project.issues_by_filter(config['jira_filter'], start_index)
-        else
-          project.issues(start_index)
+        retryable(with_delay: true, on: JIRA::HTTPError, returns: nil) do
+          if config['jira_filter']
+            project.issues_by_filter(config['jira_filter'], start_index)
+          else
+            project.issues(start_index)
+          end
         end
       end
 
