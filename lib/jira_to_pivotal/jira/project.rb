@@ -39,7 +39,7 @@ module JiraToPivotal
       end
 
       def project
-        retryable(logger: logger, can_fail: true, with_delay: true, on: JIRA::HTTPError) do
+        retryable(can_fail: true, with_delay: true, on: JIRA::HTTPError) do
           @project ||= client.Project.find(config['jira_project'])
         end
       end
@@ -98,7 +98,7 @@ module JiraToPivotal
 
         while issues.count > 0
           issues.each do |issue|
-            next unless retryable(logger: logger, on: JIRA::HTTPError, with_delay: true) do
+            next unless retryable(on: JIRA::HTTPError, with_delay: true) do
               issue.fetch
 
               # unless already_scheduled?(issue)
@@ -127,7 +127,7 @@ module JiraToPivotal
       end
 
       def find_issues(jql, options = {})
-        retryable(on: JIRA::HTTPError, logger: logger, returns: [], with_delay: true) do
+        retryable(on: JIRA::HTTPError, returns: [], with_delay: true) do
           JIRA::Resource::Issue.jql(client, jql, options)
         end
       end

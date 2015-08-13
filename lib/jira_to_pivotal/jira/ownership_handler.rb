@@ -13,7 +13,6 @@ module JiraToPivotal
         result = {}
 
         retryable_params = {
-          can_fail: false,
           with_delay: true,
           on: TrackerApi::Error,
           returns: [],

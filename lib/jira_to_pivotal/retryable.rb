@@ -25,7 +25,7 @@ module JiraToPivotal
           parameters: config.airbrake_message_parameters,
           skip_airbrake: opts[:skip_airbrake])
 
-        sleep delay unless opts[:with_delay]
+        sleep delay if opts[:with_delay]
 
         retry unless (retries -= 1).zero?
 

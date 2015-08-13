@@ -18,7 +18,7 @@ module JiraToPivotal
 
       # TODO: Rewrite using new gem classes
       def notes
-        retryable(logger: logger) do
+        retryable do
           @notes ||= story.comments
         end
       end
@@ -70,7 +70,7 @@ module JiraToPivotal
       end
 
       def to_jira(custom_fields)
-        retryable(logger: logger) do
+        retryable do
           main_attrs.merge!(original_estimate_attrs).
             merge!(custom_fields_attrs(custom_fields)).
             merge!(ownership_handler.reporter_and_asignee_attrs(story))
