@@ -3,12 +3,11 @@ require 'sidekiq/web'
 Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
 
-  get 'force_sync', to: 'projects#force_sync'
-
   resources :projects, only: [:index, :new, :create, :destroy] do
     member do
       get :stop
       get :start
+      get :force_sync
     end
     collection do
       get :synchronize

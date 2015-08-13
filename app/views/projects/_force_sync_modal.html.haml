@@ -5,14 +5,13 @@
         %h3
           Credentials
       .modal-body
-        = form_tag force_sync_path, method: 'get', remote: true do
-          = hidden_field_tag 'id', value = nil, id: 'project-id'
-          .form-group
-            = label_tag :jira_password, 'Jira password'
-            = password_field_tag :jira_password, value = nil, class: 'form-control'
-          .form-group
-            = label_tag :pivotal_token, 'Pivotal token'
-            = password_field_tag :pivotal_token, value = nil, class: 'form-control'
-          .form-group
-            = link_to 'Cancel', '#', class: 'btn btn-default', data: { dismiss: 'modal' }
-            = submit_tag 'Force sync', class: 'btn btn-primary', data: { dismiss: 'modal' }
+        = hidden_field_tag 'id', value = nil, id: 'project-id'
+        .form-group
+          = label_tag :jira_password, 'Jira password'
+          = password_field_tag :jira_password, value = nil, class: 'form-control'
+        .form-group
+          = label_tag :pivotal_token, 'Pivotal token'
+          = password_field_tag :pivotal_token, value = nil, class: 'form-control'
+        .form-group
+          = link_to 'Cancel', '#', class: 'btn btn-default', data: { dismiss: 'modal' }
+          = link_to 'Force sync', '#', id: 'force-button', class: 'btn btn-primary', data: { dismiss: 'modal' }

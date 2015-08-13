@@ -48,8 +48,6 @@ gem 'jira-ruby'
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
-  gem 'pry'
-  gem 'pry-byebug'
 
   # code linters
   gem 'overcommit'
@@ -61,6 +59,8 @@ end
 
 group :development, :test do
   gem 'rspec-rails'
+  gem 'pry'
+  gem 'pry-byebug'
 end
 
 group :tools do
@@ -81,10 +81,11 @@ end
 
 group :test do
   # browser level testing
-  gem 'capybara'
-  gem 'poltergeist' # headless js driver for capybara
+  gem 'poltergeist'
 
-  gem 'factory_girl'
+  gem 'capybara'
+  gem 'launchy'
+  gem 'factory_girl_rails'
 
   # fake redis implemented in ruby
   gem 'mock_redis'
