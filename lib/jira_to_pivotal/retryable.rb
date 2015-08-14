@@ -21,9 +21,11 @@ module JiraToPivotal
 
       # Temp, until logger refactoring
       rescue retry_exception, SocketError => e
+        skip_airbrake = e.class == SocketError ? true : opts[:skip_airbrake]
+
         report_params = {
           parameters: config.airbrake_message_parameters,
-          skip_airbrake: opts[:skip_airbrake]
+          skip_airbrake: skip_airbrake
         }
 
         airbrake_report_and_log e, report_params
