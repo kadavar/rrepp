@@ -12,7 +12,7 @@ module JiraToPivotal
       end
 
       def build_project
-        retryable(logger: logger, can_fail: true, with_delay: true) do
+        retryable(can_fail: true, with_delay: true, skip_airbrake: true) do
           @client = TrackerApi::Client.new(token: config['tracker_token'], logger: pivotal_log)
           @project  = client.project(config['tracker_project_id'])
         end
@@ -57,7 +57,7 @@ module JiraToPivotal
       end
 
       def map_users_by_email
-        retryable(logger: logger, can_fail: true, with_delay: true) do
+        retryable(can_fail: true, with_delay: true) do
           project.memberships.map(&:person).map { |member| { member.name => member.email } }.reduce({}, :merge)
         end
       end
@@ -84,6 +84,11 @@ module JiraToPivotal
 
       def usefull_stories
         project.stories(filter: 'story_type:bug,chore,feature state:unstarted,started,finished,delivered,rejected')
+      rescue TrackerApi::Error => e
+        airbrake_report_and_log(
+          e,
+          parameters: config.airbrake_message_parameters,
+          skip_airbrake: true)
       end
 
       def find_stories_by(attrs = {})

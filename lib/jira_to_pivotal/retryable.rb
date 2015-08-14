@@ -19,13 +19,18 @@ module JiraToPivotal
       begin
         yield
 
-      rescue retry_exception => e
-        airbrake_report_and_log(
-          e,
-          parameters: config.airbrake_message_parameters,
-          skip_airbrake: opts[:skip_airbrake])
+      # Temp, until logger refactoring
+      rescue retry_exception, SocketError => e
+        skip_airbrake = e.class == SocketError ? true : opts[:skip_airbrake]
 
-        sleep delay unless opts[:with_delay]
+        report_params = {
+          parameters: config.airbrake_message_parameters,
+          skip_airbrake: skip_airbrake
+        }
+
+        airbrake_report_and_log e, report_params
+
+        sleep delay if opts[:with_delay]
 
         retry unless (retries -= 1).zero?
 
