@@ -18,5 +18,10 @@ FactoryGirl.define do
       FactoryGirl.create :jira_issue_type, config: config
       FactoryGirl.create :jira_custom_field, config: config
     end
+
+    after :build do |config|
+      FactoryGirl.build :jira_issue_type, config: config
+      FactoryGirl.build :jira_custom_field, config: config
+    end
   end
 end
