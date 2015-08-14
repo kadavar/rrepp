@@ -98,4 +98,5 @@ group :test do
 
   gem 'shoulda-matchers'
   gem 'fuubar'
+  gem 'database_cleaner'
 end

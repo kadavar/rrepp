@@ -10,4 +10,7 @@ require 'capybara/poltergeist'
 
 Capybara.javascript_driver = :poltergeist
 
-RSpec.configure &:infer_spec_type_from_file_location!
+RSpec.configure do |config|
+  config.infer_spec_type_from_file_location!
+  config.use_transactional_fixtures = false
+end
