@@ -89,6 +89,7 @@ module JiraToPivotal
           e,
           parameters: config.airbrake_message_parameters,
           skip_airbrake: true)
+        return {}
       end
 
       def find_stories_by(attrs = {})

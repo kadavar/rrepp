@@ -20,8 +20,8 @@ module JiraToPivotal
         yield
 
       # Temp, until logger refactoring
-      rescue retry_exception, SocketError => e
-        skip_airbrake = e.class == SocketError ? true : opts[:skip_airbrake]
+    rescue retry_exception, SocketError, TrackerApi::Error => e
+        skip_airbrake = e.class == SocketError || TrackerApi::Error ? true : opts[:skip_airbrake]
 
         report_params = {
           parameters: config.airbrake_message_parameters,

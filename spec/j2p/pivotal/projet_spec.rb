@@ -35,7 +35,7 @@ describe JiraToPivotal::Pivotal::Project do
         expect(Airbrake).to receive(:notify_or_ignore).exactly(0).times
         expect(logger).to receive(:error_log).exactly(1).times
 
-        is_expected.to be nil
+        is_expected.to eq({})
       end
     end
   end

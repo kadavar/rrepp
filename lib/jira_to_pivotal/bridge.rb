@@ -1,5 +1,5 @@
 module JiraToPivotal
-  class Bridge < Base
+  class Bridge < JiraToPivotal::Base
     attr_reader :config
 
     def initialize(hash)
@@ -20,6 +20,7 @@ module JiraToPivotal
 
     def sync!
     	init_logger(config)
+      logger.update_config(options)
 
       retryable(can_fail: true, try: 1) do
         pivotal.update_config(ownership_handler: ownership_handler)
