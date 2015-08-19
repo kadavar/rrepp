@@ -16,7 +16,6 @@ $(document).on 'click', '#modal', ->
   $('#force-form').validator('validate')
 
 $(document).ready ->
-  $('#force-form').validator()
   $('#force-form').validator().on 'submit', (e) ->
     unless e.isDefaultPrevented()
       $('#modal').modal('hide')
