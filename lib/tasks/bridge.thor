@@ -67,9 +67,10 @@ class Bridge < Thor
 
     def monitoring
       monitoring_hash = Sidekiq.redis { |connection| connection.get('monitoring') }
+
+      return {} if monitoring_hash.nil?
+
       JSON.parse monitoring_hash
-    rescue JSON::ParseError
-      return {}
     end
 
     def push_monitoring_to_redis(project, emails, pid)
