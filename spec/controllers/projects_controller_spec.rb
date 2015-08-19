@@ -12,7 +12,7 @@ describe ProjectsController do
       }
 
       expect(ThorHelpers::Redis).to receive(:insert_config) do |config, random_hash|
-        expect(%w('jira_password', 'tracker_token').all? { |key| config.key? key }).to be true
+        expect(%w(jira_password tracker_token).all? { |key| config.key? key }).to be true
       end
 
       get :force_sync, params

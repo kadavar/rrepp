@@ -38,3 +38,8 @@ Style/GuardClause:
 
 Style/Documentation:
   Enabled: false
+
+AllCops:
+  Excludes:
+    - db/schema.rb
+    - app/assets/javascripts/validator.min.js

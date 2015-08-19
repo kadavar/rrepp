@@ -1,0 +1,17 @@
+development: &development
+  adapter: postgresql
+  encoding: unicode
+  database: j2p_development
+  pool: 100
+  username:
+  password:
+  host: localhost
+  min_messages: WARNING
+
+test:
+  <<: *development
+  database: j2p_test
+
+production:
+  <<: *development
+  database: j2p_production

@@ -38,12 +38,10 @@ class ProjectsController < ApplicationController
 
   def start_worker(project)
     random_hash = SecureRandom.hex(30)
-
     config = project.config.attributes
     config.merge!('jira_password' => params[:jira_password],
                   'tracker_token' => params[:pivotal_token],
-                  'project_name' => project.name
-                 )
+                  'project_name' => project.name)
 
     ThorHelpers::Redis.insert_config(config, random_hash)
 

@@ -1,31 +1,24 @@
 $(document).on 'click', '.force-sync', ->
   projectId = $(this).data('project-id')
-  $('input[name="id"]').val(projectId)
+
+  $('#force-form').attr('action', "/projects/#{projectId}/force_sync")
+
+  $('input[type="submit"]').addClass('disabled')
 
   $('#modal').modal('show')
 
-$(document).on 'click', '#force-button', ->
-  projectId = $('input[name="id"]').val()
-  jiraPassword = $('input[name="jira_password"]').val()
-  pivotalToken = $('input[name="pivotal_token"]').val()
+$(document).on 'click', '#cancel-modal', ->
+  $('#modal').modal('hide')
 
-  if validate(jiraPassword, pivotalToken)
-    forceSync projectId, jiraPassword, pivotalToken
+  $("#force-form")[0].reset()
 
-    $('#modal').modal('hide');
+$(document).on 'click', '#modal', ->
+  $('#force-form').validator('validate')
 
-forceSync = (projectId, jiraPassword, pivotalToken) ->
-  $.ajax
-    type: 'GET'
-    url: "/projects/#{projectId}/force_sync"
-    data: jira_password: jiraPassword, pivotal_token: pivotalToken
+$(document).ready ->
+  $('#force-form').validator()
+  $('#force-form').validator().on 'submit', (e) ->
+    unless e.isDefaultPrevented()
+      $('#modal').modal('hide')
 
-validate = (jiraPassword, pivotalToken) ->
-  jiraPassword.trim()
-  pivotalToken.trim()
-
-  valid = jiraPassword || pivotalToken
-
-  $('#form-errors').append $("<label>").text('Fields can not be empty') unless valid
-
-  return valid
+      $("#force-form")[0].reset()

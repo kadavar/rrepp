@@ -11,8 +11,8 @@ describe 'force sync', :js do
 
   describe 'opens modal' do
     specify 'modal exists' do
-      expect(page).to have_css('input[name="jira_password"]')
-      expect(page).to have_css('input[name="pivotal_token"]')
+      expect(page).to have_css('input[name="project[jira_password]"]')
+      expect(page).to have_css('input[name="project[pivotal_token]"]')
     end
   end
 
@@ -20,32 +20,34 @@ describe 'force sync', :js do
     before { click_link 'Cancel' }
 
     specify 'modal closed' do
-      expect(page).not_to have_css('input[name="jira_password"]')
-      expect(page).not_to have_css('input[name="pivotal_token"]')
+      expect(page).not_to have_css('input[name="project[jira_password]"]')
+      expect(page).not_to have_css('input[name="project[pivotal_token]"]')
     end
   end
 
-  describe 'submit empty form' do
-    before { click_link 'Force sync' }
+  describe 'click empty form' do
+    before do
+      page.find('#force-form').trigger(:click)
+    end
 
     specify 'error message appears' do
-      expect(page).to have_content('Fields can not be empty')
+      expect(page).to have_css('.list-unstyled')
     end
   end
 
   describe 'filled form submition' do
     before do
-      fill_in 'jira_password', with: 'password'
-      fill_in 'pivotal_token', with: 'token'
+      fill_in 'project_jira_password', with: 'password'
+      fill_in 'project_pivotal_token', with: 'token'
 
-      click_link 'Force sync'
+      click_button 'Force sync'
     end
 
     specify 'no messge, closing' do
-      expect(page).not_to have_content('Fields can not be empty')
+      expect(page).not_to have_content('Please fill out this field.')
 
-      expect(page).not_to have_css('input[name="jira_password"]')
-      expect(page).not_to have_css('input[name="pivotal_token"]')
+      expect(page).not_to have_css('input[name="project[jira_password]"]')
+      expect(page).not_to have_css('input[name="project[pivotal_token]"]')
     end
   end
 end
