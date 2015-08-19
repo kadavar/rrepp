@@ -20,6 +20,7 @@ module JiraToPivotal
 
     def sync!
     	init_logger(config)
+
       logger.update_config(options)
 
       retryable(can_fail: true, try: 1) do
