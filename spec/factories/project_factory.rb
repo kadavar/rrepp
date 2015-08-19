@@ -14,7 +14,7 @@ FactoryGirl.define do
 
   trait :with_config do
     after :create do |project|
-      FactoryGirl.create :config, :issues_and_custom_fields, project: project
+      FactoryGirl.create :config, project: project
     end
   end
 end

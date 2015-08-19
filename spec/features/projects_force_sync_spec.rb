@@ -4,6 +4,9 @@ describe 'force sync', :js do
   let!(:project) { create :project, :online, :with_config }
 
   before do
+    create :jira_issue_type, config: project.config
+    create :jira_custom_field, config: project.config
+
     visit projects_path
 
     click_link("id-#{project.id}", match: :first)
