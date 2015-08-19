@@ -26,7 +26,6 @@ module JiraToPivotal
         story = stories.find { |local_story| local_story.url == issue.send(jira_pivotal_field) }
 
         return false unless story.present?
-        putc '.'
 
         subtask = create_sub_task!(issue, story.url)
 
@@ -51,7 +50,6 @@ module JiraToPivotal
           }
 
         sub_task, attrs = jira_project.build_issue(attributes)
-
         return false unless sub_task.save!(attrs, config)
 
         logger.jira_logger.create_sub_task_log(story_url: story_url,
