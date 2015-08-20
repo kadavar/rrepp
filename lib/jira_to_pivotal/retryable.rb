@@ -34,7 +34,9 @@ module JiraToPivotal
 
         retry unless (retries -= 1).zero?
 
-        fail e if opts[:can_fail]
+        can_fail = opts[:can_fail] && !(e.class == SocketError || e.class == TrackerApi::Error)
+
+        fail e if can_fail
 
         opts[:returns]
       end
