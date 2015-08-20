@@ -11,6 +11,10 @@ module JiraToPivotal
       logger
     end
 
+    def update_config(params)
+      config.merge!(params)
+    end
+
     def logger
       @logger ||= Logger.new("log/#{config['log_file_name']}")
     end

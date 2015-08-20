@@ -1,5 +1,5 @@
 module JiraToPivotal
-  class Config < Base
+  class Config < JiraToPivotal::Base
     def initialize(config)
       @config = config
     end
