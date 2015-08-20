@@ -27,8 +27,6 @@ gem 'tracker_api', github: 'dashofcode/tracker_api'
 gem 'jira-ruby'
 
 group :development do
-  gem 'pry'
-  gem 'pry-byebug'
 
   # code linters
   gem 'overcommit'
@@ -40,6 +38,8 @@ end
 
 group :development, :test do
   gem 'rspec-rails'
+  gem 'pry'
+  gem 'pry-byebug'
 end
 
 group :tools do
@@ -67,9 +67,6 @@ group :test do
 
   # fake redis implemented in ruby
   gem 'mock_redis'
-
-  # the one true way of mocking and stubbing
-  gem 'mocha', require: false
 
   # to test sorting, timing
   gem 'timecop'
