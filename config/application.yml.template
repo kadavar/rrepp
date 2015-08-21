@@ -1,3 +1,5 @@
 SECRET_KEY_BASE: 11ca86bc42061280b238883553f58e020449e1db504245d5b8c5f9e42aeb0fe6e6abdb9a05cefdad82f5ac590fc54712497fa764b4bfce73c1c95913d5f5c168
 
 NEWRELIC_KEY: hsdkjanewkjn1230udkajn12heasd
+
+default_from: j2p@example.com

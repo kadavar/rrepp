@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Jira
-    class Project < Base
+    class Project < Jira::Base
       attr_accessor :config
       attr_reader :client
 
@@ -39,19 +39,9 @@ module JiraToPivotal
       end
 
       def project
-        retries ||= config['script_repeat_time'].to_i
-        @project ||= client.Project.find(config['jira_project'])
-      rescue JIRA::HTTPError =>  error
-        retry unless (retries -= 1).zero?
-
-        logger.error_log(error)
-        Airbrake.notify_or_ignore(
-          error,
-          parameters: { config: config.airbrake_message_parameters },
-          cgi_data: ENV.to_hash
-        )
-
-        fail error
+        retryable(can_fail: true, with_delay: true, on: JIRA::HTTPError) do
+          @project ||= client.Project.find(config['jira_project'])
+        end
       end
 
       def project_name
@@ -112,10 +102,12 @@ module JiraToPivotal
 
         while issues.count > 0
           issues.each do |issue|
-            issue.fetch
+            next unless retryable(on: JIRA::HTTPError, with_delay: true) do
+              issue.fetch
 
-            # unless already_scheduled?(issue)
-            unsynchronized_issues << Issue.new(options_for_issue(issue))
+              # unless already_scheduled?(issue)
+              unsynchronized_issues << Issue.new(options_for_issue(issue))
+            end
           end
 
           issues = issues.count > PER_PAGE ? next_issues : []
@@ -139,23 +131,15 @@ module JiraToPivotal
       end
 
       def find_issues(jql, options = {})
-        JIRA::Resource::Issue.jql(client, jql, options)
-      rescue JIRA::HTTPError => e
-        unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
-          logger.error_log(e)
-          Airbrake.notify_or_ignore(
-            e,
-            parameters: { jql: jql },
-            cgi_data: ENV.to_hash
-          )
+        retryable(on: JIRA::HTTPError, returns: [], with_delay: true) do
+          JIRA::Resource::Issue.jql(client, jql, options)
         end
-
-        return []
       end
 
       def create_tasks!(stories)
         stories.each do |story|
           putc '.'
+
           next unless story.to_jira(issue_custom_fields)
 
           issue, attributes = build_issue story.to_jira(issue_custom_fields)
@@ -241,6 +225,7 @@ module JiraToPivotal
 
           correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
           incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+
         else
           incorrect_jira_ids, correct_jira_ids = Array.new(2) { [] }
         end
@@ -282,10 +267,12 @@ module JiraToPivotal
       end
 
       def issues(start_index)
-        if config['jira_filter']
-          project.issues_by_filter(config['jira_filter'], start_index)
-        else
-          project.issues(start_index)
+        retryable(with_delay: true, on: JIRA::HTTPError, returns: nil) do
+          if config['jira_filter']
+            project.issues_by_filter(config['jira_filter'], start_index)
+          else
+            project.issues(start_index)
+          end
         end
       end
 

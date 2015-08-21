@@ -1,6 +1,6 @@
 module JiraToPivotal
   module Pivotal
-    class Project < Base
+    class Project < Pivotal::Base
       attr_accessor :config
       attr_reader :project, :client
 
@@ -12,16 +12,21 @@ module JiraToPivotal
       end
 
       def build_project
-        retries ||= @config['script_repeat_time'].to_i
-        @client = TrackerApi::Client.new(token: config['tracker_token'])
-        @project  = client.project(config['tracker_project_id'])
+        retryable(can_fail: true, with_delay: true, skip_airbrake: true) do
+          @client = TrackerApi::Client.new(token: config['tracker_token'], logger: pivotal_log)
+          @project  = client.project(config['tracker_project_id'])
+        end
+      end
 
-      rescue => error
-        retry unless (retries -= 1).zero?
+      # Temp pivotal log for finding bugs
+      def pivotal_log
+        name = config['log_file_name'].split('.').first
+        log_name = "#{name}_pivotal.log"
+        file = open("log/#{log_name}", File::WRONLY | File::APPEND | File::CREAT)
 
-        logger.error_log(error)
-        Airbrake.notify_or_ignore(error, parameters: { config: @config }, cgi_data: ENV.to_hash)
-        fail error
+        my_logger = ::Logger.new(file)
+        my_logger.level = ::Logger::DEBUG
+        my_logger
       end
 
       def update_config(options)
@@ -52,11 +57,9 @@ module JiraToPivotal
       end
 
       def map_users_by_email
-        retries ||= @config['script_repeat_time'].to_i
-        project.memberships.map(&:person).map { |member| { member.name => member.email } }.reduce({}, :merge)
-      rescue => error
-        sleep(1) && retry unless (retries -= 1).zero?
-        fail error
+        retryable(can_fail: true, with_delay: true) do
+          project.memberships.map(&:person).map { |member| { member.name => member.email } }.reduce({}, :merge)
+        end
       end
 
       private
@@ -81,6 +84,12 @@ module JiraToPivotal
 
       def usefull_stories
         project.stories(filter: 'story_type:bug,chore,feature state:unstarted,started,finished,delivered,rejected')
+      rescue TrackerApi::Error => e
+        airbrake_report_and_log(
+          e,
+          parameters: config.airbrake_message_parameters,
+          skip_airbrake: true)
+        return {}
       end
 
       def find_stories_by(attrs = {})
