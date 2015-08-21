@@ -3,7 +3,7 @@ require 'rails_helper'
 describe JiraToPivotal::Pivotal::Project do
   before { allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:build_project) {} }
 
-  let(:config) { { 'script_repeat_time' => '1' } }
+  let(:config) { { 'retry_count' => '1' } }
   let(:project) { JiraToPivotal::Pivotal::Project.new(config) }
   let(:inner_project) { double 'inner project' }
   let(:logger) { double 'logger' }
@@ -43,7 +43,7 @@ describe JiraToPivotal::Pivotal::Project do
   describe '#map_users_by_email' do
     context 'on TrackerApi error' do
       before { allow(inner_project).to receive(:memberships) { fail TrackerApi::Error.new(error), 'error' } }
-      before { config['script_repeat_time'] = '2' }
+      before { config['retry_count'] = '2' }
 
       specify 'retries two times and didnt raises error' do
         expect(project).to receive(:airbrake_report_and_log).exactly(2).times
@@ -54,7 +54,7 @@ describe JiraToPivotal::Pivotal::Project do
 
     context 'on general exception' do
       before { allow(inner_project).to receive(:memberships) { fail 'error' } }
-      before { config['script_repeat_time'] = '2' }
+      before { config['retry_count'] = '2' }
 
       specify 'retries two times and raises error' do
         expect(project).to receive(:airbrake_report_and_log).exactly(2).times
@@ -72,7 +72,7 @@ describe JiraToPivotal::Pivotal::Project do
 
     context 'on TrackerApi error' do
       before { allow(TrackerApi::Client).to receive(:new) { fail TrackerApi::Error.new(error), 'error' } }
-      before { config['script_repeat_time'] = '2' }
+      before { config['retry_count'] = '2' }
 
       specify 'retries 2 times, didnt send airbrake notification, no error' do
         expect(Airbrake).to receive(:notify_or_ignore).exactly(0).times
@@ -84,7 +84,7 @@ describe JiraToPivotal::Pivotal::Project do
 
     context 'on general exception' do
       before { allow(TrackerApi::Client).to receive(:new) { fail 'error' } }
-      before { config['script_repeat_time'] = '2' }
+      before { config['retry_count'] = '2' }
 
       specify 'retries 2 times, didnt send airbrake notification' do
         expect(Airbrake).to receive(:notify_or_ignore).exactly(0).times

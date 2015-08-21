@@ -12,7 +12,7 @@ describe JiraToPivotal::Jira::Project do
   let(:stories) { [story] }
   let(:jira_logger) { double create_issue_log: true }
   let(:logger) { double 'logger' }
-  let(:conf) { { 'script_repeat_time' => '2' } }
+  let(:conf) { { 'script_repeat_time' => '2', 'retry_count' => '2' } }
   let(:client) { double 'client' }
   let(:inner_project) { double 'inner project'}
 
@@ -122,68 +122,12 @@ describe JiraToPivotal::Jira::Project do
     before { allow(story).to receive(:story) { story_vith_url } }
     before { allow(project).to receive(:find_issues) { [issue] } }
 
-    context 'without story urls' do
-      before { stories.clear }
-
-      it 'does not create subtasks' do
-        expect(project).to receive(:prepare_and_create_sub_task!).exactly(0).times
-
-        project.create_sub_task_for_invosed_issues!(stories)
-      end
-    end
-
-    context 'with story urls and founded jira issue' do
+    context 'call subtask handler' do
       it 'creates sub task' do
-        expect(project).to receive(:prepare_and_create_sub_task!).exactly(1).times
+        expect_any_instance_of(JiraToPivotal::Jira::SubtasksHandler).to receive(:create_sub_tasks!).with(stories).exactly(1).times
 
         project.create_sub_task_for_invosed_issues!(stories)
       end
-    end
-  end
-
-  describe '#prepare_and_create_sub_task!' do
-    subject { project.prepare_and_create_sub_task!(issue, stories) }
-
-    let(:invoced_issue_log) { double 'invoced_issue_log' }
-    let(:logger) { double 'jira logger' }
-
-    before { allow(invoced_issue_log).to receive(:invoced_issue_log) { true } }
-    before { allow(logger).to receive(:jira_logger) { invoced_issue_log } }
-    before { allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:logger).and_return(logger) }
-    before { allow(project).to receive(:jira_pivotal_field) { 'pivotal_field' } }
-    before { allow(issue).to receive(:pivotal_field) { 'field' } }
-    before { allow(story).to receive(:url) { 'no' } }
-
-    context 'without jira field' do
-      it { is_expected.to be false }
-    end
-
-    context 'with jira field' do
-      before do
-        allow(project).to receive(:create_sub_task!) { false }
-        allow(story).to receive(:url) { 'field' }
-      end
-
-      it { is_expected.to be false }
-    end
-
-    context 'with jira field and subtask' do
-      let(:key) { double 'key' }
-
-      before { allow(key).to receive(:key) { 'key' } }
-
-      before do
-        allow(project).to receive(:create_sub_task!) { key }
-        allow(project).to receive(:build_issue) { [[], []] }
-        allow(project).to receive(:url) { '' }
-      end
-
-      before do
-        allow(story).to receive(:url) { 'field' }
-        allow(story).to receive(:assign_to_jira_issue) { {} }
-      end
-
-      it { is_expected.to be true }
     end
   end
 

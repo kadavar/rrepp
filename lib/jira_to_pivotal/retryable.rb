@@ -7,7 +7,7 @@ module JiraToPivotal
         can_fail: false,
         returns: false,
         with_delay: false,
-        try: config['script_repeat_time'].to_i,
+        try: config['retry_count'].to_i,
         delay: config['repeat_delay'].to_i,
         skip_airbrake: false
       }.merge(options)
@@ -32,7 +32,7 @@ module JiraToPivotal
 
         sleep delay if opts[:with_delay]
 
-        retry unless (retries -= 1).zero?
+        retry unless (retries -= 1) <= 0
 
         can_fail = opts[:can_fail] && !(e.class == SocketError || e.class == TrackerApi::Error)
 

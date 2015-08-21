@@ -5,7 +5,7 @@ describe JiraToPivotal::Bridge do
   let(:logger) { double 'logger' }
   let(:jira) { double 'jira' }
   let(:jira_logger) { double 'jira logger' }
-  let(:config) { { 'script_repeat_time' => '1' } }
+  let(:config) { { 'script_repeat_time' => '1', 'retry_count' => '1' } }
 
   before { allow_any_instance_of(JiraToPivotal::Bridge).to receive(:decrypt_config) { {} } }
 
@@ -17,7 +17,7 @@ describe JiraToPivotal::Bridge do
     allow(bridge).to receive(:init_logger) { {} }
     allow(bridge).to receive(:from_pivotal_to_jira!) { {} }
     allow(bridge).to receive(:config!) { config }
-    allow(bridge).to receive(:airbrake_report_and_log) {} 
+    allow(bridge).to receive(:airbrake_report_and_log) {}
   end
 
   before { allow(config).to receive(:airbrake_message_parameters) {} }
@@ -29,7 +29,7 @@ describe JiraToPivotal::Bridge do
     subject(:sync) { bridge.sync! }
 
     context 'raise error' do
-      before { allow(bridge).to receive(:pivotal) { fail(RuntimeError, 'Bad case') } }
+      before { allow(bridge).to receive(:jira) { fail(RuntimeError, 'Bad case') } }
 
       specify 'raises error' do
         expect { sync }.to raise_exception(RuntimeError, 'Bad case')

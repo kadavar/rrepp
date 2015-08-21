@@ -211,11 +211,11 @@ module JiraToPivotal
         result
       end
 
-      private
-
       def map_jira_ids_for_search(jira_ids)
         "(#{jira_ids.map { |s| "'#{s}'" }.join(',')})"
       end
+
+      private
 
       def check_deleted_issues_in_jira(pivotal_jira_ids)
         if pivotal_jira_ids.present?
