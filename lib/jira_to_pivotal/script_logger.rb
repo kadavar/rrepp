@@ -3,7 +3,6 @@
 module JiraToPivotal
   class ScriptLogger
     include Singleton
-
     attr_accessor :config
 
     def init_logger
@@ -31,8 +30,9 @@ module JiraToPivotal
     # Please consider splitting this to separate error handlers sub-classes
     # https://github.com/hndsm/j2p/issues/58
     def error_log(exception)
+      binding.pry
       if exception.instance_of?(JIRA::HTTPError)
-        logger.error exception.response.body
+        logger.error exception.response
       elsif exception.instance_of?(TrackerApi::Error)
         logger.error exception.response
       else
