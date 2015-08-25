@@ -43,7 +43,7 @@ module JiraToPivotal
         end
 
       rescue => error
-        airbrake_report_and_log(e, parameters: config.airbrake_message_parameters)
+        airbrake_report_and_log(error, parameters: config.airbrake_message_parameters)
       end
 
       # TODO: Temporary method until gem would be updated
