@@ -32,7 +32,7 @@ module JiraToPivotal
     # https://github.com/hndsm/j2p/issues/58
     def error_log(exception)
       if exception.instance_of?(JIRA::HTTPError)
-        logger.error exception.response.body
+        logger.error exception.response
       elsif exception.instance_of?(TrackerApi::Error)
         logger.error exception.response
       else
