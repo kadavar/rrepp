@@ -28,8 +28,19 @@ describe JiraToPivotal::Bridge do
   describe '#sync!' do
     subject(:sync) { bridge.sync! }
 
-    context 'raise error' do
-      before { allow(bridge).to receive(:jira) { fail(RuntimeError, 'Bad case') } }
+
+    context 'no pivotal' do
+      before { allow(jira).to receive(:project) { true } }
+      before { allow(bridge).to receive(:pivotal) { fail(RuntimeError, 'Bad case') } }
+
+      specify 'raises error' do
+        expect { sync }.to raise_exception(RuntimeError, 'Bad case')
+      end
+    end
+
+    context 'no jira' do
+      before { allow(jira).to receive(:project) { fail(RuntimeError, 'Bad case') } }
+      before { allow(bridge).to receive(:pivotal) { true } }
 
       specify 'raises error' do
         expect { sync }.to raise_exception(RuntimeError, 'Bad case')

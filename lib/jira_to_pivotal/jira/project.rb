@@ -42,6 +42,8 @@ module JiraToPivotal
         retryable(can_fail: true, with_delay: true, on: JIRA::HTTPError) do
           @project ||= client.Project.find(config['jira_project'])
         end
+      rescue Errno::ETIMEDOUT, Errno::EHOSTUNREACH
+        false
       end
 
       def project_name

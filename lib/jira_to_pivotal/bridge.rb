@@ -19,7 +19,9 @@ module JiraToPivotal
     end
 
     def sync!
-    	init_logger(config)
+      return unless jira.project && pivotal
+
+      init_logger(config)
 
       logger.update_config(options)
 
@@ -89,7 +91,7 @@ module JiraToPivotal
         issue = issues.find  { |local_issue| local_issue.key == key }
         story = stories.find { |local_story| local_story.url == value }
 
-        story.assign_to_jira_issue(issue.issue.key, jira.url)
+        next unless story.assign_to_jira_issue(issue.issue.key, jira.url)
 
         logger.jira_logger.update_jira_pivotal_connection_log(key, value)
       end
