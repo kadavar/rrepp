@@ -39,11 +39,8 @@ module JiraToPivotal
           update_integration(options)
         else
           logger.attrs_log(integrations, 'integrations')
-          fail 'something wrong with integrations'
+          return false
         end
-
-      rescue => error
-        airbrake_report_and_log(error, parameters: config.airbrake_message_parameters)
       end
 
       # TODO: Temporary method until gem would be updated
@@ -70,6 +67,8 @@ module JiraToPivotal
       end
 
       def to_jira(custom_fields)
+        return false unless custom_fields
+
         retryable do
           main_attrs.merge!(original_estimate_attrs).
             merge!(custom_fields_attrs(custom_fields)).

@@ -17,7 +17,7 @@ describe JiraToPivotal::Bridge do
     allow(bridge).to receive(:init_logger) { {} }
     allow(bridge).to receive(:from_pivotal_to_jira!) { {} }
     allow(bridge).to receive(:config!) { config }
-    allow(bridge).to receive(:airbrake_report_and_log) {} 
+    allow(bridge).to receive(:airbrake_report_and_log) {}
   end
 
   before { allow(config).to receive(:airbrake_message_parameters) {} }
@@ -28,8 +28,18 @@ describe JiraToPivotal::Bridge do
   describe '#sync!' do
     subject(:sync) { bridge.sync! }
 
-    context 'raise error' do
+    context 'no pivotal' do
+      before { allow(jira).to receive(:project) { true } }
       before { allow(bridge).to receive(:pivotal) { fail(RuntimeError, 'Bad case') } }
+
+      specify 'raises error' do
+        expect { sync }.to raise_exception(RuntimeError, 'Bad case')
+      end
+    end
+
+    context 'no jira' do
+      before { allow(jira).to receive(:project) { fail(RuntimeError, 'Bad case') } }
+      before { allow(bridge).to receive(:pivotal) { true } }
 
       specify 'raises error' do
         expect { sync }.to raise_exception(RuntimeError, 'Bad case')
