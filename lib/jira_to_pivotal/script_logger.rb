@@ -31,7 +31,7 @@ module JiraToPivotal
     # Please consider splitting this to separate error handlers sub-classes
     # https://github.com/hndsm/j2p/issues/58
     def error_log(exception)
-      if exception.instance_of?(JIRA::HTTPError) || exception.instance_of?(TrackerApi::Error)
+      if exception.class.in?([JIRA::HTTPError, TrackerApi::Error])
         logger.error exception.response
       else
         logger.error exception.message
