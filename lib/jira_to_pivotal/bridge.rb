@@ -19,7 +19,9 @@ module JiraToPivotal
     end
 
     def sync!
-    	init_logger(config)
+      return unless jira.project || pivotal
+
+      init_logger(config)
 
       logger.update_config(options)
 
