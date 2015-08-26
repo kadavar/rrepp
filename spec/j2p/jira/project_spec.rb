@@ -115,7 +115,7 @@ describe JiraToPivotal::Jira::Project do
     end
   end
 
-  describe '#create_sub_task_for_invoced_issues!' do
+  describe '#create_sub_task_for_invoiced_issues!' do
     let(:story_vith_url) { double 'url' }
 
     before { allow(story_vith_url).to receive(:url) { 'url' } }
@@ -126,7 +126,7 @@ describe JiraToPivotal::Jira::Project do
       it 'creates sub task' do
         expect_any_instance_of(JiraToPivotal::Jira::SubtasksHandler).to receive(:create_sub_tasks!).with(stories).exactly(1).times
 
-        project.create_sub_task_for_invoced_issues!(stories)
+        project.create_sub_task_for_invoiced_issues!(stories)
       end
     end
   end

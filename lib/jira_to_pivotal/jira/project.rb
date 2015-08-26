@@ -171,7 +171,7 @@ module JiraToPivotal
         end
       end
 
-      def create_sub_task_for_invoced_issues!(stories)
+      def create_sub_task_for_invoiced_issues!(stories)
         subtasks_handler.create_sub_tasks!(stories)
       end
 
