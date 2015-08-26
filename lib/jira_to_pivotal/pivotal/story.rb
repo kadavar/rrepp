@@ -70,6 +70,8 @@ module JiraToPivotal
       end
 
       def to_jira(custom_fields)
+        return false unless custom_fields
+
         retryable do
           main_attrs.merge!(original_estimate_attrs).
             merge!(custom_fields_attrs(custom_fields)).
