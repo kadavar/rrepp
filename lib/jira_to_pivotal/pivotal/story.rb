@@ -39,11 +39,8 @@ module JiraToPivotal
           update_integration(options)
         else
           logger.attrs_log(integrations, 'integrations')
-          fail 'something wrong with integrations'
+          return false
         end
-
-      rescue => error
-        airbrake_report_and_log(error, parameters: config.airbrake_message_parameters)
       end
 
       # TODO: Temporary method until gem would be updated
