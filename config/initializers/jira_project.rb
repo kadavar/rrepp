@@ -32,7 +32,7 @@ JIRA::Resource::Project.class_eval do
     get_path = full_path ? path : client.options[:rest_base_path] + path
     self.class.parse_json(client.get(get_path).body)
   rescue JIRA::HTTPError, SocketError => error
-    retry unless (retries -= 1).zero?
+    retry unless (retries -= 1) <= 0
     sleep(3)
     raise error
   end

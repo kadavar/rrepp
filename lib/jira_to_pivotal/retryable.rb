@@ -32,7 +32,7 @@ module JiraToPivotal
 
         sleep delay if opts[:with_delay]
 
-        retry unless (retries -= 1).zero?
+        retry unless (retries -= 1) <= 0
 
         can_fail = opts[:can_fail] && !(e.class == SocketError || e.class == TrackerApi::Error)
 
