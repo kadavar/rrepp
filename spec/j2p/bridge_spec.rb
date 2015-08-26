@@ -5,7 +5,7 @@ describe JiraToPivotal::Bridge do
   let(:logger) { double 'logger' }
   let(:jira) { double 'jira' }
   let(:jira_logger) { double 'jira logger' }
-  let(:config) { { 'script_repeat_time' => '1' } }
+  let(:config) { { 'script_repeat_time' => '1', 'retry_count' => '1' } }
 
   before { allow_any_instance_of(JiraToPivotal::Bridge).to receive(:decrypt_config) { {} } }
 
@@ -27,6 +27,7 @@ describe JiraToPivotal::Bridge do
 
   describe '#sync!' do
     subject(:sync) { bridge.sync! }
+
 
     context 'no pivotal' do
       before { allow(jira).to receive(:project) { true } }

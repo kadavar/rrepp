@@ -7,7 +7,7 @@ module JiraToPivotal
         can_fail: false,
         returns: false,
         with_delay: false,
-        try: config['script_repeat_time'].to_i,
+        try: config['retry_count'].to_i,
         delay: config['repeat_delay'].to_i,
         skip_airbrake: false
       }.merge(options)

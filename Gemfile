@@ -67,9 +67,6 @@ group :test do
   # fake redis implemented in ruby
   gem 'mock_redis'
 
-  # the one true way of mocking and stubbing
-  gem 'mocha', require: false
-
   # to test sorting, timing
   gem 'timecop'
 

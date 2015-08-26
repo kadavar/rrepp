@@ -54,7 +54,7 @@ module JiraToPivotal
       # because some of them might be updated
       stories = pivotal.unsynchronized_stories
 
-      jira.create_sub_task_for_invosed_issues!(stories[:to_create])
+      jira.create_sub_task_for_invoiced_issues!(stories[:to_create])
       jira.create_tasks!(stories[:to_create])
     end
 
