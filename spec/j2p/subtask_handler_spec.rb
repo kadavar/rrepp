@@ -7,11 +7,11 @@ describe JiraToPivotal::Jira::SubtasksHandler do
   end
 
   let!(:jira_project) { JiraToPivotal::Jira::Project.new({}) }
-  let(:subtasks_handler) { JiraToPivotal::Jira::SubtasksHandler.new }
   let(:logger) { double 'logger' }
   let(:jira_logger) { double 'jira_logger' }
   let(:inner_jira_project) { double 'inner jira project' }
   let(:conf) { double 'config' }
+  let(:subtasks_handler) { JiraToPivotal::Jira::SubtasksHandler.new(jira_project: jira_project, project_name: 'test') }
 
   before do
     allow(jira_project).to receive(:project) { inner_jira_project }
