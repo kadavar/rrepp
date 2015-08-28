@@ -29,7 +29,7 @@ module JiraToPivotal
 
         return false unless subtask
 
-        story.assign_to_jira_issue(subtask.key, url)
+        story.assign_to_jira_issue(subtask.key, @jira_project.url)
 
         old_issue, _attrs = @jira_project.build_issue({}, issue)
         logger.jira_logger.invoced_issue_log(story: story, issue: subtask, old_issue: old_issue)
@@ -48,7 +48,7 @@ module JiraToPivotal
           }
 
         sub_task, attrs = @jira_project.build_issue(attributes)
-        return false unless sub_task.save!(attrs, config)
+        return false unless sub_task.save!(attrs, @jira_project.config)
 
         logger.jira_logger.create_sub_task_log(story_url: story_url,
                                                issue_key: sub_task.key,
