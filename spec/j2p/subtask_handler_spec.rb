@@ -85,9 +85,9 @@ describe JiraToPivotal::Jira::SubtasksHandler do
         end
 
         before do
-          allow(subtasks_handler). to receive(:jira_pivotal_field) { 'url' }
-          allow(subtasks_handler). to receive(:url) { 'url' }
+          allow(jira_project).to receive(:jira_pivotal_field) { 'url' }
           allow(subtasks_handler).to receive(:parent_id_for) { '1' }
+          allow(subtasks_handler).to receive(:url) { 'url' }
         end
 
         before { allow(jira_project).to receive(:client) { jira_project_client } }

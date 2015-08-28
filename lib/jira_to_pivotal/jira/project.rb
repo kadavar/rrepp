@@ -217,6 +217,11 @@ module JiraToPivotal
         "(#{jira_ids.map { |s| "'#{s}'" }.join(',')})"
       end
 
+      def jira_pivotal_field
+        pivotal_url = config['jira_custom_fields']['pivotal_url']
+        issue_custom_fields.key(pivotal_url)
+      end
+
       private
 
       def check_deleted_issues_in_jira(pivotal_jira_ids)
@@ -276,11 +281,6 @@ module JiraToPivotal
             project.issues(start_index)
           end
         end
-      end
-
-      def jira_pivotal_field
-        pivotal_url = config['jira_custom_fields']['pivotal_url']
-        issue_custom_fields.key(pivotal_url)
       end
     end
   end

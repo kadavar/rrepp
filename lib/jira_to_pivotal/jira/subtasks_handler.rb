@@ -23,7 +23,7 @@ module JiraToPivotal
       private
 
       def prepare_and_create_sub_task!(issue, stories)
-        story = stories.find { |local_story| local_story.url == issue.send(jira_pivotal_field) }
+        story = stories.find { |local_story| local_story.url == issue.send(jira_project.jira_pivotal_field) }
 
         return false unless story.present?
 
@@ -46,7 +46,7 @@ module JiraToPivotal
             'summary' => issue.fields['summary'],
             'issuetype' => { 'id' => '5' },
             'description' => issue.fields['description'].to_s,
-            jira_pivotal_field => issue.send(jira_pivotal_field)
+            jira_project.jira_pivotal_field => issue.send(jira_project.jira_pivotal_field)
           }
 
         sub_task, attrs = jira_project.build_issue(attributes)
