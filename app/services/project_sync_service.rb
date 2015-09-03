@@ -4,7 +4,7 @@ class ProjectSyncService
     @params = params
   end
 
-  def start_synchronization(one_time=false)
+  def synchronize(one_time=false)
     set_flag_in_redis unless one_time
 
     ThorHelpers::Redis.insert_config(config_with_credentials, random_hash)
@@ -15,7 +15,7 @@ class ProjectSyncService
   private
 
   def set_flag_in_redis
-    Sidekiq.redis { |connection| connection.set() }
+    Sidekiq.redis { |connection| connection.set("#{@project.name}_sync_flag", true) }
   end
 
   def random_hash

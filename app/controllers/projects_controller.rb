@@ -25,7 +25,7 @@ class ProjectsController < ApplicationController
   end
 
   def force_sync
-    start_worker @project
+    ProjectSyncService.new(@project, params).synchronize(true)
 
     render nothing: true
   end
@@ -34,17 +34,5 @@ class ProjectsController < ApplicationController
 
   def find_project
     @project = Project.find(params[:id])
-  end
-
-  def start_worker(project)
-    random_hash = SecureRandom.hex(30)
-    config = project.config.attributes
-    config.merge!('jira_password' => params[:jira_password],
-                  'tracker_token' => params[:pivotal_token],
-                  'project_name' => project.name)
-
-    ThorHelpers::Redis.insert_config(config, random_hash)
-
-    SyncWorker.perform_async({ 'project' => project.name }, random_hash)
   end
 end
