@@ -21,6 +21,8 @@ class Bridge < Thor
     ThorHelpers::Redis.insert_config(updated_config, random_hash)
     ThorHelpers::Redis.update_project(options[:project], options[:config])
 
+    push_monitoring_to_redis(options[:project], updated_config['emails'], Process.pid)
+
     scheduler = Rufus::Scheduler.new
 
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do

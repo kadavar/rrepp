@@ -40,7 +40,7 @@ gem 'jquery-rails'
 gem 'jquery-ui-rails'
 
 # Pivotal Tracker Api
-gem 'tracker_api', github: 'dashofcode/tracker_api'
+gem 'tracker_api', github: 'dashofcode/tracker_api', branch: 'master'
 
 # Jira Api
 gem 'jira-ruby'
@@ -48,8 +48,6 @@ gem 'jira-ruby'
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
-
-  # code linters
   gem 'overcommit'
   gem 'rubocop', require: false
 end
@@ -86,9 +84,6 @@ group :test do
 
   # fake redis implemented in ruby
   gem 'mock_redis'
-
-  # the one true way of mocking and stubbing
-  gem 'mocha', require: false
 
   # to test sorting, timing
   gem 'timecop'

@@ -1,9 +1,10 @@
 module JiraToPivotal
   module Pivotal
-    class Story < Base
+    class Story < Pivotal::Base
       delegate :url, to: :story
+      delegate :client, to: :story
 
-      attr_accessor :project, :story, :config
+      attr_reader :project, :story, :config
 
       def initialize(project, story = nil, config = nil)
         @project    = project
@@ -12,17 +13,14 @@ module JiraToPivotal
       end
 
       def ownership_handler
-        @config[:ownership_handler]
+        config[:ownership_handler]
       end
 
       # TODO: Rewrite using new gem classes
       def notes
-        retries ||= @config['script_repeat_time'].to_i
-        @note ||= story.comments
-      rescue => error
-        sleep(1) && retry unless (retries -= 1).zero?
-        Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-        false
+        retryable do
+          @notes ||= story.comments
+        end
       end
 
       # TODO: Temporary method until gem would be updated
@@ -41,12 +39,8 @@ module JiraToPivotal
           update_integration(options)
         else
           logger.attrs_log(integrations, 'integrations')
-          fail 'something wrong with integrations'
+          return false
         end
-
-      rescue Exception => error
-        Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-        false
       end
 
       # TODO: Temporary method until gem would be updated
@@ -73,25 +67,27 @@ module JiraToPivotal
       end
 
       def to_jira(custom_fields)
-        main_attrs.merge!(original_estimate_attrs).
-          merge!(custom_fields_attrs(custom_fields)).
-          merge!(ownership_handler.reporter_and_asignee_attrs(story, project))
-      rescue Exception => error
-        Airbrake.notify_or_ignore(error, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
-        false
+        return false unless custom_fields
+
+        retryable do
+          main_attrs.merge!(original_estimate_attrs).
+            merge!(custom_fields_attrs(custom_fields)).
+            merge!(ownership_handler.reporter_and_asignee_attrs(story))
+        end
       end
 
       def regexp_for_image_tag_replace
-        # Match ![some_title](http://some.site.com/some_imge.png)
-        /\!\[\w*\]\(([\w\p{P}\p{S}]+)\)/u
+        # Matches:
+        # ![some title](http://some.site.com/some_imge.png)
+        # ![some title](http://some.site.com/some_imge.png "some alt")
+        /\!\[\w+ *\w+\]\(([\w\p{P}\p{S}]+) *\"*\w* *\w*\"*\)/u
       end
 
       def custom_fields_attrs(custom_fields)
         attrs = {}
-        # Custom fields in Jira
-        # Set Name in config.yml file
-        pivotal_url    = @config['jira_custom_fields']['pivotal_tracker_url']
-        pivotal_points = @config['jira_custom_fields']['story_points']
+
+        pivotal_url    = config['jira_custom_fields']['pivotal_url']
+        pivotal_points = config['jira_custom_fields']['pivotal_points']
 
         pivotal_url_id    = custom_fields.key(pivotal_url)
         pivotal_points_id = custom_fields.key(pivotal_points)
@@ -104,9 +100,9 @@ module JiraToPivotal
       def story_type_to_issue_type
         type_map =
           {
-            'bug'     => @config['jira_issue_types']['bug'].to_s,
-            'feature' => @config['jira_issue_types']['feature'].to_s,
-            'chore'   => @config['jira_issue_types']['chore'].to_s
+            'bug'     => config['jira_issue_types']['bug'].to_s,
+            'feature' => config['jira_issue_types']['feature'].to_s,
+            'chore'   => config['jira_issue_types']['chore'].to_s
           }
 
         type_map[story.story_type]
