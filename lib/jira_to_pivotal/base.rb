@@ -3,14 +3,8 @@ module JiraToPivotal
     include Retryable
     include ErrorsHandler
 
-    def init_logger(config)
-      logger = JiraToPivotal::ScriptLogger.instance
-      logger.config = config
-      logger.init_logger
-    end
-
     def logger
-      JiraToPivotal::ScriptLogger.instance
+      @logger ||= JiraToPivotal::ScriptLogger.new(config)
     end
   end
 end
