@@ -12,4 +12,16 @@ FactoryGirl.define do
     script_first_start '5'
     script_repeat_time '5'
   end
+
+  trait :issues_and_custom_fields do
+    after :create do |config|
+      FactoryGirl.create :jira_issue_type, config: config
+      FactoryGirl.create :jira_custom_field, config: config
+    end
+
+    after :build do |config|
+      FactoryGirl.build :jira_issue_type, config: config
+      FactoryGirl.build :jira_custom_field, config: config
+    end
+  end
 end
