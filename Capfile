@@ -23,6 +23,8 @@ set :repository,       'git@github.com:hndsm/j2p.git'
 set :user,             'arnold'
 set :application_user, 'arnold'
 
+ssh_options[:forward_agent] = true
+
 #== Multistage
 set :stages, %w(production staging)
 set :default_stage, 'production'
