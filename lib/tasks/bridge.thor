@@ -17,10 +17,9 @@ class Bridge < Thor
     Process.daemon()
 
     updated_config['process_pid'] = Process.pid
-    set_params_to_redis(updated_config, random_hash)
 
     ThorHelpers::Redis.insert_config(updated_config, random_hash)
-    ThorHelpers::Redis.update_project(options[:project])
+    ThorHelpers::Redis.update_project(options[:project], options[:config])
 
     scheduler = Rufus::Scheduler.new
 

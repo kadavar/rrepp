@@ -1,100 +1,70 @@
+require 'singleton'
+
 class ProjectConfigsHandler
-  require 'find'
+  include Singleton
 
-  class << self
-    def synchronize
-      pull_from_config_folder
-      push_to_config_folder
-    end
+  def initialize
+    @reader = ProjectConfigsReader.new
+    @writer = ProjectConfigsWriter.new
+    @composer = ConfigComposer.new
+    @path = PathHandler.new
+  end
 
-    def update_config_file(attributes)
-      load_and_update_config(attributes)
-    end
+  def synchronize
+    pull_from_config_folder
+    push_to_config_folder
+  end
 
-    private
+  def update_config_file(attributes)
+    load_and_update_config(attributes)
+  end
 
-    def pull_from_config_folder
-      list_of_config_names.each { |name| load_or_create_config(name) }
-    end
+  private
 
-    def push_to_config_folder
-      list_of_config_names.each { |name| create_config_file(name) }
-    end
+  def pull_from_config_folder
+    @path.list_of_config_names.each { |name| load_or_create_config(name) }
+  end
 
-    def load_or_create_config(name)
-      data = YAML.load(ERB.new(File.read(config_path(name))).result)
-      config_params = data.except('jira_custom_fields', 'jira_issue_types')
+  def push_to_config_folder
+    db_configs = @composer.list_of_config_names
+    file_configs = @path.list_of_config_names
 
-      config = Project::Config.where(name: name).first
+    (db_configs - file_configs).each { |name| create_config_file(name) }
+  end
 
-      if config.present?
-        config.update_attributes(config_params)
-      else
-        config = Project::Config.create(config_params.merge(name: name))
-      end
+  def load_or_create_config(name)
+    config_params = @reader.load_config(@path.config_path(name))
 
-      data['jira_custom_fields'].values.each do |custom_field_name|
-        config.jira_custom_fields.find_or_create_by(name: custom_field_name)
-      end
+    @composer.update_or_create(config_params, name)
 
-      data['jira_issue_types'].each do |name, id|
-        config.jira_issue_types.find_or_create_by(name: name, jira_id: id)
-      end
+  rescue Exception => e
+    # TODO: Add errors handler to show them on frontend
+    Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+    false
+  end
 
-    rescue Exception => e
-      # TODO: Add errors handler to show them on frontend
-      Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
-      false
-    end
+  def create_config_file(name)
+    path = @path.config_path(name)
 
-    def create_config_file(name)
-      return true if File.readable?(config_path(name))
+    return true if File.readable?(path)
 
-      config = Project::Config.find_by(name: name)
-      config_hash = config.attributes.except('updated_at', 'created_at', 'name', 'id', 'project_id')
+    config_hash = @composer.config(name)
 
-      jira_custom_fields =
-        config.jira_custom_fields.map do |custom_field|
-          custom_field.attributes.except('created_at', 'updated_at', 'id', 'config_id').values
-        end.flatten.map { |name| { name.split.join.underscore => name } }.reduce(Hash.new, :merge)
+    @writer.write_config(path, config_hash)
 
-      jira_issue_types =
-        config.jira_issue_types.map do |issue_type|
-          issue_type.attributes.except('created_at', 'updated_at', 'id', 'config_id').values
-        end.map { |a| Hash[*a] }.reduce(Hash.new, :merge)
+  rescue Exception => e
+    # TODO: Add errors handler to show them on frontend
+    Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
+    false
+  end
 
-      config_hash.merge!('jira_custom_fields' => jira_custom_fields)
-      config_hash.merge!('jira_issue_types' => jira_issue_types)
+  def load_and_update_config(attributes)
+    path = @path.config_path(attributes[:old_name])
 
-      File.open(config_path(name), 'w') { |f| f.write config_hash.to_yaml }
+    data = @reader.load_config(path)
 
-    rescue Exception => e
-      # TODO: Add errors handler to show them on frontend
-      Airbrake.notify_or_ignore(e, cgi_data: ENV.to_hash)
-      false
-    end
+    attributes.except(:old_name, :new_name).each { |key, value| data[key] = value }
 
-    def load_and_update_config(attributes)
-      data = YAML.load(ERB.new(File.read(config_path(attributes[:old_name]))).result)
-
-      # update config file attributes
-      attributes.except(:old_name, :new_name).each { |key, value| data[key] = value }
-      File.open(config_path(attributes[:old_name]), 'w') { |f| f.write data.to_yaml }
-
-      # rename config file
-      File.rename(config_path(attributes[:old_name]), config_path(attributes[:new_name])) if attributes[:new_name].present?
-    end
-
-    def list_of_config_names
-      Find.find(Rails.root.join(default_config_path)).select { |p| /.*\.yml$/ =~ p }.map { |path| path.split('/').last.gsub('.yml', '') }
-    end
-
-    def default_config_path
-      'config/integrations'
-    end
-
-    def config_path(name)
-      Rails.root.join "#{default_config_path}/#{name}.yml"
-    end
+    @writer.update(data, attributes[:new_name].present?, path, @path.config_path(attributes[:new_name]))
   end
 end

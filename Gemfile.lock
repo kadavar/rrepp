@@ -127,6 +127,7 @@ GEM
     columnize (0.9.0)
     commonjs (0.2.7)
     connection_pool (2.2.0)
+    database_cleaner (1.4.1)
     debug_inspector (0.0.2)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
@@ -137,6 +138,9 @@ GEM
     execjs (2.5.2)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
+    factory_girl_rails (4.5.0)
+      factory_girl (~> 4.5.0)
+      railties (>= 3.0.0)
     faraday (0.9.1)
       multipart-post (>= 1.2, < 3)
     faraday_middleware (0.9.1)
@@ -182,6 +186,8 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
     kgio (2.9.3)
+    launchy (2.4.3)
+      addressable (~> 2.3)
     less (2.6.0)
       commonjs (~> 0.2.7)
     less-rails (2.7.0)
@@ -404,8 +410,9 @@ DEPENDENCIES
   certified
   coffee-rails
   colorize
+  database_cleaner
   differ!
-  factory_girl
+  factory_girl_rails
   figaro
   fuubar
   haml-rails
@@ -415,6 +422,7 @@ DEPENDENCIES
   jquery-rails
   jquery-ui-rails
   kaminari
+  launchy
   less-rails
   mocha
   mock_redis

@@ -37,6 +37,6 @@
                   / TODO: uncomment when logic would be implemented
                   / %a.action-link.white
                   /   %i.fa.fa-play
-                %a.action-link.white
+                = link_to '#',id: "id-#{project.id}", class: 'action-link white force-sync', data: { project_id: project.id } do
                   %i.fa.fa-refresh
-
+= render 'force_sync_modal'

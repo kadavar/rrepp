@@ -5,7 +5,7 @@ Style/CyclomaticComplexity:
   Max: 6
 
 Metrics/AbcSize:
-  Max: 19
+  Max: 25
 
 Style/SignalException:
   EnforcedStyle: only_fail
@@ -23,6 +23,9 @@ Style/LineLength:
 Style/DotPosition:
   EnforcedStyle: trailing
 
+Style/MultilineBlockChain:
+  Enabled: false
+
 # Get rid of $redis global!!!
 Style/GlobalVars:
   Description: 'Do not introduce global variables.'
@@ -38,3 +41,8 @@ Style/GuardClause:
 
 Style/Documentation:
   Enabled: false
+
+AllCops:
+  Excludes:
+    - db/schema.rb
+    - app/assets/javascripts/validator.min.js
