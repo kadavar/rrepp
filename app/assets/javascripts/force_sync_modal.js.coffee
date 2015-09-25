@@ -20,4 +20,5 @@ $(document).ready ->
     unless e.isDefaultPrevented()
       $('#modal').modal('hide')
 
-      $("#force-form")[0].reset()
+  $('#force-form').on 'hidden', ->
+    $("#force-form")[0].reset()

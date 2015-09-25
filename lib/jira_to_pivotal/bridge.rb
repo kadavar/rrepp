@@ -19,6 +19,7 @@ module JiraToPivotal
     end
 
     def sync!
+      binding.pry
       ThorHelpers::Redis.last_update(@config['project_name'], Time.zone.now)
       pivotal.update_config(ownership_handler: ownership_handler)
 
@@ -108,7 +109,7 @@ module JiraToPivotal
     end
 
     def map_issues_by_pivotal_url(issues)
-      pivotal_url_id = options[:custom_fields].key(@config['jira_custom_fields']['pivotal_tracker_url'])
+      pivotal_url_id = options[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
       issues.map { |issue| { issue.issue.send(pivotal_url_id) => issue.issue.key } }
     end
   end
