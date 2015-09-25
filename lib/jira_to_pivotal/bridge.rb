@@ -21,10 +21,7 @@ module JiraToPivotal
     def sync!
       return unless jira.project && pivotal
 
-      init_logger(config)
-
       logger.update_config(options)
-
       retryable(can_fail: true, try: 1) do
         pivotal.update_config(ownership_handler: ownership_handler)
 

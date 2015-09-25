@@ -2,11 +2,11 @@
 # https://github.com/hndsm/j2p/issues/58
 module JiraToPivotal
   class ScriptLogger
-    include Singleton
-
     attr_accessor :config
 
-    def init_logger
+    def initialize(config)
+      @config = config
+
       logger.formatter = formatter
       logger
     end
