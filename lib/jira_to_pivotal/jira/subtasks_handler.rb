@@ -1,9 +1,10 @@
 module JiraToPivotal
   module Jira
     class SubtasksHandler < Base
-      attr_reader :jira_project, :project_name
+      attr_reader :jira_project, :project_name, :config
 
       def initialize(options = {})
+        @config       = options[:config]
         @jira_project = options[:jira_project]
         @project_name = options[:project_name]
       end

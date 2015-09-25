@@ -19,9 +19,11 @@ server '83.143.200.3:55022', :web, :app, :db, primary: true
 set :domain_name,      'j2p'
 set :ruby_version,     '2.2.0'
 set :application,      'j2p'
-set :repository,       'git@github.com:hndsm/j2p.git'
+set :repository,       'git@github.com:jetruby/j2p.git'
 set :user,             'arnold'
 set :application_user, 'arnold'
+
+ssh_options[:forward_agent] = true
 
 #== Multistage
 set :stages, %w(production staging)
