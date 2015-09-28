@@ -4,11 +4,11 @@ class ConfigComposer
   end
 
   def update_or_create(config_params, name)
-    binding.pry
     config = Project::Config.where(name: name).first_or_initialize
 
-    config_params['jira_custom_fields'].values.each do |custom_field_name|
-      config.jira_custom_fields.find_or_create_by(name: custom_field_name)
+    config_params['jira_custom_fields'].each do |key, value|
+      custom_field = config.jira_custom_fields.find_or_create_by(name: key)
+      custom_field.update_attributes(value: value)
     end
 
     config.jira_custom_fields.where.not(name: data['jira_custom_fields'].values).destroy_all
@@ -18,7 +18,6 @@ class ConfigComposer
       issue_type.update_attributes(jira_id: id)
     end
 
-    binding.pry
     config.update_attributes(config_params.except('jira_custom_fields', 'jira_issue_types'))
   end
 

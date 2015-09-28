@@ -5,7 +5,6 @@ class ProjectSyncService
   end
 
   def synchronize(one_time=false)
-    binding.pry
     set_flag_in_redis unless one_time
 
     ThorHelpers::Redis.insert_config(config_with_credentials, random_hash)
@@ -29,7 +28,36 @@ class ProjectSyncService
                   'tracker_token' => @params[:pivotal_token],
                   'project_name' => @project.name,
                   'log_file_name' => create_log_file)
+
+    config['jira_custom_fields'] = jira_custom_fields
+
+    config['jira_issue_types'] = jira_issue_types
+
     config
+  end
+
+  def jira_custom_fields
+    custom_fields = {}
+
+    config = @project.config
+
+    config.jira_custom_fields.each do |custom_field|
+      custom_fields[custom_field.name] = custom_field.value
+    end
+
+    custom_fields
+  end
+
+  def jira_issue_types
+    issue_types = {}
+
+    config = @project.config
+
+    config.jira_issue_types.each do |issue_type|
+      issue_types[issue_type.name] = issue_type.jira_id
+    end
+
+    issue_types
   end
 
   def create_log_file
