@@ -75,7 +75,7 @@ module JiraToPivotal
       end
 
       def subtasks_handler
-        @subtasks_handler ||= SubtasksHandler.new(jira_project: self, project_name: project_name)
+        @subtasks_handler ||= SubtasksHandler.new(jira_project: self, project_name: project_name, config: config)
       end
 
       def difference_checker
