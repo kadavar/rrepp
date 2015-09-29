@@ -1,0 +1,13 @@
+image: jetruby/jenkins-ruby
+
+before_script:
+  - . /etc/profile.d/rvm.sh
+  - rvm --default use 2.2.2
+  - bundle install --path /cache
+
+rubocop:
+  script:
+    - test -f .rubocop.yml && (gem install rubocop --no-ri --no-rdoc && cd app && rubocop) || true
+test:
+  script:
+    - bundle exec rspec
