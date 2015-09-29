@@ -6,12 +6,12 @@ describe JiraToPivotal::Jira::SubtasksHandler do
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields).and_return({})
   end
 
-  let!(:jira_project) { JiraToPivotal::Jira::Project.new({}) }
+  let(:config) { JiraToPivotal::Config.new({ 'jira_uri_scheme' => 'https', 'jira_host' => 'localhost' }) }
+  let!(:jira_project) { JiraToPivotal::Jira::Project.new(config) }
   let(:logger) { double 'logger' }
   let(:jira_logger) { double 'jira_logger' }
   let(:inner_jira_project) { double 'inner jira project' }
-  let(:conf) { double 'config' }
-  let(:subtasks_handler) { JiraToPivotal::Jira::SubtasksHandler.new(jira_project: jira_project, project_name: 'test') }
+  let(:subtasks_handler) { JiraToPivotal::Jira::SubtasksHandler.new(jira_project: jira_project, project_name: 'test', config: config) }
 
   before do
     allow(jira_project).to receive(:project) { inner_jira_project }
@@ -20,7 +20,6 @@ describe JiraToPivotal::Jira::SubtasksHandler do
 
   before do
     allow(subtasks_handler).to receive(:logger) { logger }
-    allow(subtasks_handler).to receive(:config) { conf }
   end
 
   before do
@@ -73,6 +72,7 @@ describe JiraToPivotal::Jira::SubtasksHandler do
           allow(story).to receive(:url) { 'url' }
           allow(story).to receive(:assign_to_jira_issue) {}
         end
+
         before do
           allow_any_instance_of(JiraToPivotal::Jira::Issue).to receive(:save!) { true }
           allow_any_instance_of(JiraToPivotal::Jira::Issue).to receive(:key) {}
