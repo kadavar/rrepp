@@ -3,9 +3,9 @@ development: &development
   encoding: unicode
   database: j2p_development
   pool: 100
-  username:
+  username: postgres
   password:
-  host: localhost
+  host: postgres
   min_messages: WARNING
 
 test:
