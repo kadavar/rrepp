@@ -1,4 +1,6 @@
 image: jetruby/jenkins-ruby
+services:
+  - postgres
 
 before_script:
   - . /etc/profile.d/rvm.sh
@@ -10,4 +12,6 @@ rubocop:
     - test -f .rubocop.yml && (gem install rubocop --no-ri --no-rdoc && cd app && rubocop) || true
 test:
   script:
+    - cp config/database.yml.template config/database.yml
+    - bundle exec rake db:setup
     - bundle exec rspec
