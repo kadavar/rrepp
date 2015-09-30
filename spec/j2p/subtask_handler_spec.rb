@@ -1,10 +1,13 @@
 require 'rails_helper'
 
 describe JiraToPivotal::Jira::SubtasksHandler do
-  before do
-    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:build_api_client).and_return({})
-    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields).and_return({})
-  end
+  before { allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:build_api_client).and_return({}) }
+
+  let(:issue_custom_fields) { { 'jira_url' => 'url' } }
+
+  before { allow(issue_custom_fields).to receive(:jira_url) { 'url' } }
+
+  before { allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields).and_return(issue_custom_fields) }
 
   let!(:jira_project) { JiraToPivotal::Jira::Project.new({}) }
   let(:logger) { double 'logger' }

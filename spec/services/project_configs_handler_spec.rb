@@ -4,7 +4,12 @@ describe ProjectConfigsHandler do
   include UsesTempFiles
 
   let(:config) { build :config, :issues_and_custom_fields }
-  let(:file_content) { config.attributes.to_yaml }
+  let(:file_content) do
+    content = config.attributes
+    content['jira_custom_fields'] = { 'field' => 'field' }
+    content['jira_issue_types'] = { 'bug' => 1 }
+    content.to_yaml
+  end
 
   before { allow_any_instance_of(PathHandler).to receive(:default_config_path) { 'tmp' } }
 
@@ -13,7 +18,7 @@ describe ProjectConfigsHandler do
       in_directory_with_file('non_empty_config.yml')
 
       before { content_for_file(file_content) }
-      before { ProjectConfigsHandler.instance.synchronize }
+      before { ProjectConfigsHandler.new.synchronize }
 
       specify 'creates config in db' do
         expect(Project::Config.count).to eq 1
@@ -26,7 +31,7 @@ describe ProjectConfigsHandler do
       before do
         create :config, :issues_and_custom_fields
 
-        ProjectConfigsHandler.instance.synchronize
+        ProjectConfigsHandler.new.synchronize
       end
 
       specify 'creates config file' do
@@ -44,7 +49,7 @@ describe ProjectConfigsHandler do
       in_directory_with_file('non_empty_config.yml')
 
       before { content_for_file(file_content) }
-      before { ProjectConfigsHandler.instance.synchronize }
+      before { ProjectConfigsHandler.new.synchronize }
 
       before do
         conf = Project::Config.first
@@ -54,7 +59,7 @@ describe ProjectConfigsHandler do
         attributes = conf.attributes
         attributes[:old_name] = conf.name
 
-        ProjectConfigsHandler.instance.update_config_file attributes
+        ProjectConfigsHandler.new.update_config_file attributes
       end
 
       specify 'updates config file' do

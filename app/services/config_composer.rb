@@ -5,6 +5,7 @@ class ConfigComposer
 
   def update_or_create(config_params, name)
     config = Project::Config.where(name: name).first_or_initialize
+    config.update_attributes(config_params.except('jira_custom_fields', 'jira_issue_types'))
 
     config_params['jira_custom_fields'].each do |key, value|
       custom_field = config.jira_custom_fields.find_or_create_by(name: key)
@@ -17,8 +18,6 @@ class ConfigComposer
       issue_type = config.jira_issue_types.find_or_create_by(name: name)
       issue_type.update_attributes(jira_id: id)
     end
-
-    config.update_attributes(config_params.except('jira_custom_fields', 'jira_issue_types'))
   end
 
   def config(name)

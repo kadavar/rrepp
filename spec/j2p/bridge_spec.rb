@@ -20,17 +20,19 @@ describe JiraToPivotal::Bridge do
     allow(bridge).to receive(:airbrake_report_and_log) {}
   end
 
+  before do
+    allow(jira).to receive(:logger) { jira_logger }
+    allow(jira).to receive(:project) { {} }
+  end
+  
   before { allow(config).to receive(:airbrake_message_parameters) {} }
-  before { allow(jira).to receive(:logger) { jira_logger } }
   before { allow(jira_logger).to receive(:error_log) {} }
   before { allow(pivotal).to receive(:update_config) { {} } }
 
   describe '#sync!' do
     subject(:sync) { bridge.sync! }
 
-
     context 'no pivotal' do
-      before { allow(jira).to receive(:project) { true } }
       before { allow(bridge).to receive(:pivotal) { fail(RuntimeError, 'Bad case') } }
 
       specify 'raises error' do
@@ -40,7 +42,6 @@ describe JiraToPivotal::Bridge do
 
     context 'no jira' do
       before { allow(jira).to receive(:project) { fail(RuntimeError, 'Bad case') } }
-      before { allow(bridge).to receive(:pivotal) { true } }
 
       specify 'raises error' do
         expect { sync }.to raise_exception(RuntimeError, 'Bad case')
@@ -48,7 +49,7 @@ describe JiraToPivotal::Bridge do
     end
 
     context 'raise SocketError' do
-      before { allow(bridge).to receive(:pivotal) { fail(SocketError, 'Bad case') } }
+      before { allow(pivotal).to receive(:update_config) { fail(SocketError, 'Bad case') } }
 
       specify 'without error' do
         expect { sync }.not_to raise_error(SocketError, 'Bad case')

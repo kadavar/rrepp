@@ -20,7 +20,6 @@ module JiraToPivotal
 
     def sync!
       ThorHelpers::Redis.last_update(@config['project_name'], Time.zone.now)
-      pivotal.update_config(ownership_handler: ownership_handler)
 
       return unless jira.project && pivotal
 

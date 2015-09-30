@@ -282,11 +282,6 @@ module JiraToPivotal
           end
         end
       end
-
-      def jira_pivotal_field
-        pivotal_url = @config['jira_custom_fields']['pivotal_url']
-        issue_custom_fields.key(pivotal_url)
-      end
     end
   end
 end
