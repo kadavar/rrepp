@@ -24,7 +24,6 @@ module JiraToPivotal
       private
 
       def prepare_and_create_sub_task!(issue, stories)
-        binding.pry
         story = stories.find { |local_story| local_story.url == issue.send(@jira_project.jira_pivotal_field) }
 
         return false unless story.present?
