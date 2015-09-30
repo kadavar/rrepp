@@ -5,7 +5,7 @@ describe JiraToPivotal::Bridge do
   let(:logger) { double 'logger' }
   let(:jira) { double 'jira' }
   let(:jira_logger) { double 'jira logger' }
-  let(:config) { { 'script_repeat_time' => '1', 'retry_count' => '1' } }
+  let(:config) { { 'script_repeat_time' => '1', 'retry_count' => '1', 'log_file_name' => 'log' } }
 
   before { allow_any_instance_of(JiraToPivotal::Bridge).to receive(:decrypt_config) { {} } }
 
@@ -16,8 +16,9 @@ describe JiraToPivotal::Bridge do
     allow(bridge).to receive(:jira) { jira }
     allow(bridge).to receive(:init_logger) { {} }
     allow(bridge).to receive(:from_pivotal_to_jira!) { {} }
-    allow(bridge).to receive(:config!) { config }
+    allow(bridge).to receive(:config) { config }
     allow(bridge).to receive(:airbrake_report_and_log) {}
+    allow(bridge).to receive(:loger) { logger }
   end
 
   before { allow(config).to receive(:airbrake_message_parameters) {} }
@@ -30,8 +31,8 @@ describe JiraToPivotal::Bridge do
 
 
     context 'no pivotal' do
-      before { allow(jira).to receive(:project) { true } }
-      before { allow(bridge).to receive(:pivotal) { fail(RuntimeError, 'Bad case') } }
+      before { allow(pivotal).to receive(:project) { fail(RuntimeError, 'Bad case') } }
+      before { allow(jira).to receive(:project) { {} } }
 
       specify 'raises error' do
         expect { sync }.to raise_exception(RuntimeError, 'Bad case')
@@ -40,7 +41,6 @@ describe JiraToPivotal::Bridge do
 
     context 'no jira' do
       before { allow(jira).to receive(:project) { fail(RuntimeError, 'Bad case') } }
-      before { allow(bridge).to receive(:pivotal) { true } }
 
       specify 'raises error' do
         expect { sync }.to raise_exception(RuntimeError, 'Bad case')
@@ -48,7 +48,7 @@ describe JiraToPivotal::Bridge do
     end
 
     context 'raise SocketError' do
-      before { allow(bridge).to receive(:pivotal) { fail(SocketError, 'Bad case') } }
+      before { allow(pivotal).to receive(:project) { fail(SocketError, 'Bad case') } }
 
       specify 'without error' do
         expect { sync }.not_to raise_error(SocketError, 'Bad case')
