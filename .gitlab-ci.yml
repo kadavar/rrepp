@@ -1,4 +1,6 @@
 image: jetruby/jenkins-ruby
+services:
+  - redis
 
 before_script:
   - . /etc/profile.d/rvm.sh
