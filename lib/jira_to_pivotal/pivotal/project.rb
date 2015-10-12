@@ -13,20 +13,9 @@ module JiraToPivotal
 
       def build_project
         retryable(can_fail: true, with_delay: true, skip_airbrake: true) do
-          @client = TrackerApi::Client.new(token: config['tracker_token'], logger: pivotal_log)
+          @client = TrackerApi::Client.new(token: config['tracker_token'])
           @project  = client.project(config['tracker_project_id'])
         end
-      end
-
-      # Temp pivotal log for finding bugs
-      def pivotal_log
-        name = config['log_file_name'].split('.').first
-        log_name = "#{name}_pivotal.log"
-        file = open("log/#{log_name}", File::WRONLY | File::APPEND | File::CREAT)
-
-        my_logger = ::Logger.new(file)
-        my_logger.level = ::Logger::DEBUG
-        my_logger
       end
 
       def update_config(options)
