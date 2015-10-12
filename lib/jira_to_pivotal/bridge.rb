@@ -76,12 +76,12 @@ module JiraToPivotal
     def check_projects
       valid = true
 
-      if jira.project
+      unless jira && jira.project
         logger.logger.error 'Failed to initialize jira project'
         valid = false
       end
 
-      if pivotal.project
+      unless pivotal && pivotal.project
         logger.logger.error 'Failed to initialize pivotal project'
         valid = false
       end
