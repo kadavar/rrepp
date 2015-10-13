@@ -28,6 +28,6 @@ class Project::Config < ActiveRecord::Base
       attributes.merge!(old_name: name)
     end
 
-    ProjectConfigsHandler.instance.update_config_file(attributes)
+    ProjectConfigsHandler.new.update_config_file(attributes)
   end
 end

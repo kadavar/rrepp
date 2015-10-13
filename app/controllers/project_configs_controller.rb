@@ -26,7 +26,8 @@ class ProjectConfigsController < ApplicationController
   end
 
   def synchronize
-    if ProjectConfigsHandler.instance.synchronize
+    configs_handler = ProjectConfigsHandler.new
+    if configs_handler.synchronize
       flash[:success] = 'Configs was successfully synchronized'
     else
       flash[:error] = 'Synchronization failed. Contact to administator'

@@ -25,7 +25,7 @@ class ProjectsController < ApplicationController
   end
 
   def force_sync
-    ProjectSyncService.new(@project, params).synchronize(true)
+    ProjectSyncService.new(@project, params[:project]).synchronize(true)
 
     render nothing: true
   end

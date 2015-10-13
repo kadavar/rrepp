@@ -1,8 +1,6 @@
 require 'singleton'
 
 class ProjectConfigsHandler
-  include Singleton
-
   def initialize
     @reader = ProjectConfigsReader.new
     @writer = ProjectConfigsWriter.new

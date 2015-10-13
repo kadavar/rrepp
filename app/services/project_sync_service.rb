@@ -26,7 +26,44 @@ class ProjectSyncService
     config = @project.config.attributes
     config.merge!('jira_password' => @params[:jira_password],
                   'tracker_token' => @params[:pivotal_token],
-                  'project_name' => @project.name)
+                  'project_name' => @project.name,
+                  'log_file_name' => create_log_file)
+
+    config['jira_custom_fields'] = jira_custom_fields
+
+    config['jira_issue_types'] = jira_issue_types
+
     config
+  end
+
+  def jira_custom_fields
+    custom_fields = {}
+
+    config = @project.config
+
+    config.jira_custom_fields.each do |custom_field|
+      custom_fields[custom_field.name] = custom_field.value
+    end
+
+    custom_fields
+  end
+
+  def jira_issue_types
+    issue_types = {}
+
+    config = @project.config
+
+    config.jira_issue_types.each do |issue_type|
+      issue_types[issue_type.name] = issue_type.jira_id
+    end
+
+    issue_types
+  end
+
+  def create_log_file
+    file_name = "#{@project.name.underscore.gsub(' ', '_')}.log"
+    file = open("log/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
+
+    file_name
   end
 end

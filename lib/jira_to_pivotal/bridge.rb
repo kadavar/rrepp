@@ -1,34 +1,37 @@
 module JiraToPivotal
-  class Bridge < Base
+  class Bridge < JiraToPivotal::Base
+    attr_reader :config
+
     def initialize(hash)
       @config = JiraToPivotal::Config.new(decrypt_config(hash))
     end
 
     def jira
-      @jira ||= JiraToPivotal::Jira::Project.new(@config)
+      @jira ||= JiraToPivotal::Jira::Project.new(config)
     end
 
     def pivotal
-      @pivotal ||= JiraToPivotal::Pivotal::Project.new(@config)
+      @pivotal ||= JiraToPivotal::Pivotal::Project.new(config)
     end
 
     def ownership_handler
-      @handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal)
+      @ownership_handler ||= JiraToPivotal::Jira::OwnershipHandler.new(jira, pivotal, config)
     end
 
     def sync!
       ThorHelpers::Redis.last_update(@config['project_name'], Time.zone.now)
-      pivotal.update_config(ownership_handler: ownership_handler)
 
-      connect_jira_to_pivotal!
-      # Right now flow jira -> pivotal is disabled
-      # from_jira_to_pivotal!
-      from_pivotal_to_jira!
-    rescue Exception => e
-      jira.logger.error_log(e)
-      Airbrake.notify_or_ignore(e, parameters: @config.airbrake_message_parameters, cgi_data: ENV.to_hash)
+      return unless jira.project && pivotal
 
-      fail e
+      logger.update_config(options)
+      retryable(can_fail: true, try: 1) do
+        pivotal.update_config(ownership_handler: ownership_handler)
+
+        connect_jira_to_pivotal!
+        # Right now flow jira -> pivotal is disabled
+        # from_jira_to_pivotal!
+        from_pivotal_to_jira!
+      end
     end
 
     def connect_jira_to_pivotal!
@@ -50,7 +53,7 @@ module JiraToPivotal
       # because some of them might be updated
       stories = pivotal.unsynchronized_stories
 
-      jira.create_sub_task_for_invosed_issues!(stories[:to_create])
+      jira.create_sub_task_for_invoiced_issues!(stories[:to_create])
       jira.create_tasks!(stories[:to_create])
     end
 
@@ -87,7 +90,7 @@ module JiraToPivotal
         issue = issues.find  { |local_issue| local_issue.key == key }
         story = stories.find { |local_story| local_story.url == value }
 
-        story.assign_to_jira_issue(issue.issue.key, jira.url)
+        next unless story.assign_to_jira_issue(issue.issue.key, jira.url)
 
         logger.jira_logger.update_jira_pivotal_connection_log(key, value)
       end
@@ -104,7 +107,7 @@ module JiraToPivotal
     end
 
     def map_issues_by_pivotal_url(issues)
-      pivotal_url_id = options[:custom_fields].key(@config['jira_custom_fields']['pivotal_tracker_url'])
+      pivotal_url_id = options[:custom_fields].key(@config['jira_custom_fields']['pivotal_url'])
       issues.map { |issue| { issue.issue.send(pivotal_url_id) => issue.issue.key } }
     end
   end

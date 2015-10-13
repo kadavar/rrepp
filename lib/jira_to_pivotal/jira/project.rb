@@ -1,16 +1,19 @@
 module JiraToPivotal
   module Jira
-    class Project < Base
+    class Project < Jira::Base
       attr_accessor :config
+      attr_reader :client
 
-      def initialize(config)
-        @config = config
+      PER_PAGE = 50
+
+      def initialize(init_config)
+        @config = init_config
         @start_index = 0
 
         build_api_client
 
-        @config.delete('jira_password')
-        @config.merge!(custom_fields: issue_custom_fields)
+        config.delete('jira_password')
+        config.merge!(custom_fields: issue_custom_fields)
       end
 
       def issue_custom_fields
@@ -36,27 +39,19 @@ module JiraToPivotal
       end
 
       def project
-        retries ||= @config['script_repeat_time'].to_i
-        @project ||= @client.Project.find(@config['jira_project'])
-      rescue JIRA::HTTPError =>  error
-        retry unless (retries -= 1).zero?
-
-        logger.error_log(error)
-        Airbrake.notify_or_ignore(
-          error,
-          parameters: { config: @config.airbrake_message_parameters },
-          cgi_data: ENV.to_hash
-        )
-
-        fail error
+        retryable(can_fail: true, with_delay: true, on: JIRA::HTTPError) do
+          @project ||= client.Project.find(config['jira_project'])
+        end
+      rescue Errno::ETIMEDOUT, Errno::EHOSTUNREACH
+        false
       end
 
       def project_name
-        @config['jira_project']
+        config['jira_project']
       end
 
       def update_config(options)
-        @config.merge!(options)
+        config.merge!(options)
       end
 
       def ssl?
@@ -68,26 +63,30 @@ module JiraToPivotal
       end
 
       def options_for_issue(issue = nil)
-        { client: build_api_client, project: project, issue: issue, config: @config }
+        { client: client, project: project, issue: issue, config: config }
       end
 
       def build_issue(attributes, issue = nil)
         attributes = { 'fields' =>  { 'project' =>  { 'id' => project.id } }.merge(attributes) }
 
-        issue = issue.present? ? issue : @client.Issue.build(attributes)
+        issue = issue.present? ? issue : client.Issue.build(attributes)
 
         [Issue.new(options_for_issue(issue)), attributes]
       end
 
+      def subtasks_handler
+        @subtasks_handler ||= SubtasksHandler.new(jira_project: self, project_name: project_name, config: config)
+      end
+
       def difference_checker
-        @difference_checker ||= DifferenceChecker.new(@project, @config)
+        @difference_checker ||= DifferenceChecker.new(project, config)
       end
 
       def next_issues
         list = issues(@start_index)
 
         if list.present?
-          @start_index += per_page
+          @start_index += PER_PAGE
 
           list
         else
@@ -105,13 +104,15 @@ module JiraToPivotal
 
         while issues.count > 0
           issues.each do |issue|
-            issue.fetch
+            next unless retryable(on: JIRA::HTTPError, with_delay: true) do
+              issue.fetch
 
-            # unless already_scheduled?(issue)
-            unsynchronized_issues << Issue.new(options_for_issue(issue))
+              # unless already_scheduled?(issue)
+              unsynchronized_issues << Issue.new(options_for_issue(issue))
+            end
           end
 
-          issues = issues.count > per_page ? next_issues : []
+          issues = issues.count > PER_PAGE ? next_issues : []
         end
 
         # unsynchronized_issues
@@ -132,28 +133,20 @@ module JiraToPivotal
       end
 
       def find_issues(jql, options = {})
-        JIRA::Resource::Issue.jql(@client, jql, options)
-      rescue JIRA::HTTPError => e
-        unless JSON.parse(e.response.body)['errorMessages'].first.include?("does not exist for field 'key'")
-          logger.error_log(e)
-          Airbrake.notify_or_ignore(
-            e,
-            parameters: { jql: jql },
-            cgi_data: ENV.to_hash
-          )
+        retryable(on: JIRA::HTTPError, returns: [], with_delay: true) do
+          JIRA::Resource::Issue.jql(client, jql, options)
         end
-
-        return []
       end
 
       def create_tasks!(stories)
         stories.each do |story|
           putc '.'
+
           next unless story.to_jira(issue_custom_fields)
 
           issue, attributes = build_issue story.to_jira(issue_custom_fields)
 
-          next unless issue.save!(attributes, @config)
+          next unless issue.save!(attributes, config)
 
           logger.jira_logger.create_issue_log(story, issue, attributes)
 
@@ -180,35 +173,8 @@ module JiraToPivotal
         end
       end
 
-      def create_sub_task_for_invosed_issues!(stories)
-        story_urls = stories.map { |story| story.story.url }
-
-        return unless story_urls.present?
-
-        pivotal_urls = map_jira_ids_for_search(story_urls)
-        jql = "project=#{project_name} AND 'Pivotal Tracker URL' IN #{pivotal_urls} AND status = Invoiced"
-        jira_issues = find_issues(jql)
-
-        jira_issues.each { |issue| prepare_and_create_sub_task!(issue, stories) }
-      end
-
-      def prepare_and_create_sub_task!(issue, stories)
-        story = stories.find { |local_story| local_story.url == issue.send(jira_pivotal_field) }
-
-        return false unless story.present?
-        putc '.'
-
-        subtask = create_sub_task!(issue, story.url)
-
-        return false unless subtask
-
-        story.assign_to_jira_issue(subtask.key, url)
-
-        old_issue, _attrs = build_issue({}, issue)
-        logger.jira_logger.invoced_issue_log(story: story, issue: subtask, old_issue: old_issue)
-
-        stories.delete(story)
-        true
+      def create_sub_task_for_invoiced_issues!(stories)
+        subtasks_handler.create_sub_tasks!(stories)
       end
 
       def update_issue!(story, jira_issues)
@@ -223,7 +189,7 @@ module JiraToPivotal
 
         if difference_checker.main_attrs_difference?(attributes, issue)
           logger.jira_logger.update_issue_log(story, issue, attributes)
-          return false unless issue.save!(attributes, @config)
+          return false unless issue.save!(attributes, config)
         end
 
         # TODO: Disable untill new logic would be finished
@@ -233,32 +199,6 @@ module JiraToPivotal
         # end
 
         true
-      end
-
-      def create_sub_task!(issue, story_url)
-        attributes =
-          { 'parent' => { 'id' => parent_id_for(issue) },
-            'summary' => issue.fields['summary'],
-            'issuetype' => { 'id' => '5' },
-            'description' => issue.fields['description'].to_s,
-            jira_pivotal_field => issue.send(jira_pivotal_field)
-          }
-
-        sub_task, attrs = build_issue(attributes)
-
-        return false unless sub_task.save!(attrs, @config)
-
-        logger.jira_logger.create_sub_task_log(story_url: story_url,
-                                               issue_key: sub_task.key,
-                                               old_issue_key: issue.key,
-                                               attrs: attributes)
-
-        sub_task
-      end
-
-      def parent_id_for(issue)
-        j2p_issue, _attrs = build_issue({}, issue)
-        j2p_issue.subtask? ? issue.fields['parent']['id'] : issue.id
       end
 
       def select_task(issues, story)
@@ -273,11 +213,16 @@ module JiraToPivotal
         result
       end
 
-      private
-
       def map_jira_ids_for_search(jira_ids)
         "(#{jira_ids.map { |s| "'#{s}'" }.join(',')})"
       end
+
+      def jira_pivotal_field
+        pivotal_url = config['jira_custom_fields']['pivotal_url']
+        issue_custom_fields.key(pivotal_url)
+      end
+
+      private
 
       def check_deleted_issues_in_jira(pivotal_jira_ids)
         if pivotal_jira_ids.present?
@@ -287,6 +232,7 @@ module JiraToPivotal
 
           correct_jira_ids = jira_issues.map(&:key) & pivotal_jira_ids - invoiced_issues_ids
           incorrect_jira_ids = pivotal_jira_ids - correct_jira_ids
+
         else
           incorrect_jira_ids, correct_jira_ids = Array.new(2) { [] }
         end
@@ -327,21 +273,14 @@ module JiraToPivotal
         false
       end
 
-      def per_page
-        50
-      end
-
       def issues(start_index)
-        if config['jira_filter']
-          project.issues_by_filter(config['jira_filter'], start_index)
-        else
-          project.issues(start_index)
+        retryable(with_delay: true, on: JIRA::HTTPError, returns: nil) do
+          if config['jira_filter']
+            project.issues_by_filter(config['jira_filter'], start_index)
+          else
+            project.issues(start_index)
+          end
         end
-      end
-
-      def jira_pivotal_field
-        pivotal_url = @config['jira_custom_fields']['pivotal_tracker_url']
-        issue_custom_fields.key(pivotal_url)
       end
     end
   end

@@ -22,7 +22,6 @@ class Bridge < Thor
     ThorHelpers::Redis.update_project(options[:project], options[:config])
 
     scheduler = Rufus::Scheduler.new
-
     scheduler.every updated_config['script_repeat_time'], first_in: updated_config['script_first_start'] do
       SyncWorker.perform_async({ 'project' => options[:project] }, random_hash)
     end
