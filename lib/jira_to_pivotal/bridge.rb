@@ -19,9 +19,10 @@ module JiraToPivotal
     end
 
     def sync!
-      return unless jira.project && pivotal
+      return unless check_projects
 
       logger.update_config(options)
+
       retryable(can_fail: true, try: 1) do
         pivotal.update_config(ownership_handler: ownership_handler)
 
@@ -71,6 +72,22 @@ module JiraToPivotal
     end
 
     private
+
+    def check_projects
+      valid = true
+
+      unless jira && jira.project
+        logger.logger.error 'Failed to initialize jira project'
+        valid = false
+      end
+
+      unless pivotal && pivotal.project
+        logger.logger.error 'Failed to initialize pivotal project'
+        valid = false
+      end
+
+      valid
+    end
 
     def decrypt_config(hash)
       crypt = ActiveSupport::MessageEncryptor.new(hash)
