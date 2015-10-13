@@ -1,6 +1,7 @@
 image: jetruby/jenkins-ruby
 services:
   - postgres
+  - redis
 
 before_script:
   - . /etc/profile.d/rvm.sh
