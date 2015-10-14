@@ -51,11 +51,7 @@ describe JiraToPivotal::Bridge do
     end
 
     context 'raise SocketError' do
-<<<<<<< HEAD
-      before { allow(pivotal).to receive(:project) { fail(SocketError, 'Bad case') } }
-=======
       before { allow(pivotal).to receive(:update_config) { fail(SocketError, 'Bad case') } }
->>>>>>> id-120-project-dashboard
 
       specify 'without error' do
         expect { sync }.not_to raise_error(SocketError, 'Bad case')
