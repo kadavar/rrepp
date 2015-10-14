@@ -14,7 +14,7 @@ set(:sidekiq_cmd) { "#{fetch(:bundle_cmd, "bundle")} exec sidekiq -C config/side
 set(:sidekiq_pid) { File.join(deploy_to, 'tmp', 'pids', 'sidekiq.pid') }
 set(:sidekiq_log) { File.join(deploy_to, 'log', 'sidekiq.log') }
 
-server '83.143.200.3:55022', :web, :app, :db, primary: true
+server '10.0.1.252', :web, :app, :db, primary: true
 
 set :domain_name,      'j2p'
 set :ruby_version,     '2.2.0'
@@ -31,10 +31,12 @@ set :default_stage, 'production'
 require 'capistrano/ext/multistage'
 
 #== Recipes
-# set :recipes_dir, File.expand_path('/cap-recipes', __FILE__)
-# load recipes_dir + '/config/recipes/base'
-# load recipes_dir + '/config/recipes/nginx'
-# load recipes_dir + '/config/recipes/rbenv'
+set :recipes_dir, File.expand_path('/cap-recipes', __FILE__)
+load recipes_dir + '/config/recipes/base'
+load recipes_dir + '/config/recipes/nginx'
+load recipes_dir + '/config/recipes/unicorn'
+load recipes_dir + '/config/recipes/postgresql'
+load recipes_dir + '/config/recipes/redis'
 
 #== Fallback vars for old recipes
 set(:current_path) { deploy_to }
@@ -51,8 +53,8 @@ after 'deploy:restart', 'unicorn:reload'    # app IS NOT preloaded
 #after 'deploy:restart', 'unicorn:restart'   # app preloaded
 # after 'deploy:restart', 'unicorn:duplicate' # before_fork hook implemented (zero downtime deployments)
 
-before 'sidekiq:quiet', 'script:run_bundle'
-before 'sidekiq:start', 'script:create_folders'
+#before 'sidekiq:quiet', 'script:run_bundle'
+#before 'sidekiq:start', 'script:create_folders'
 
 # Slack
 set :slack_token, 'SRxImWhjpPYBcID29xE8cjR5' # comes from inbound webhook integration
