@@ -10,7 +10,7 @@ namespace :script do
   end
 
   task :run_bundle do
-    run "cd /home/arnold/apps/j2p; bundle install"
+    run 'cd /home/arnold/apps/j2p; bundle install'
   end
 end
 

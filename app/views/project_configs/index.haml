@@ -1,0 +1,33 @@
+.container.white
+  .pull-right
+    / TODO: Uncoment when finished
+    / # = link_to 'New Config', new_project_config_path, class: 'btn btn-primary btn-large'
+    = link_to 'Synchronize Configs', synchronize_project_configs_path, class: 'btn btn-success btn-large'
+
+  %h1.text-center Project Configs
+
+
+  .col-md-12
+    %table.table.project-table
+      %thead
+        %tr
+          %th Id
+          %th Name
+          %th Jira project
+          %th Jira filter
+          %th Pivotal project id
+          %th Actions
+      %tbody
+        - @configs.each_with_index do |config, index|
+          %tr
+            %td= index + 1
+            %td= link_to config.name, project_config_path(config), style: 'color: white'
+            %td= config.jira_project
+            %td= config.jira_filter
+            %td= config.tracker_project_id
+            %td
+              = link_to 'Show', project_config_path(config), class: 'btn btn-success btn-xs'
+              / TODO: Uncoment when finished
+              / # = link_to 'Edit', edit_project_config_path(config), class: 'btn btn-warning btn-xs'
+              = link_to 'Delete', project_config_path(config), class: 'btn btn-danger btn-xs', method: :delete, data: { confirm: 'Are you sure?' }
+

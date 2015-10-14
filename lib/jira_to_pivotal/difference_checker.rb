@@ -42,6 +42,7 @@ module JiraToPivotal
       params[:story_attrs]['fields'][points_field_id] != params[:jira_issue].fields[points_field_id] || empty_estimate?(params)
     end
 
+
     def incorrect_issue_type?(params)
       params[:j2p_issue].bug? || params[:j2p_issue].chore? || params[:j2p_issue].subtask?
     end

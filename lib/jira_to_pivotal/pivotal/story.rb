@@ -85,8 +85,7 @@ module JiraToPivotal
 
       def custom_fields_attrs(custom_fields)
         attrs = {}
-        # Custom fields in Jira
-        # Set Name in config.yml file
+
         pivotal_url    = config['jira_custom_fields']['pivotal_url']
         pivotal_points = config['jira_custom_fields']['pivotal_points']
 

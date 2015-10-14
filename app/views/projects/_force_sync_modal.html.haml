@@ -1,0 +1,12 @@
+.modal.fade#modal
+  .modal-dialog
+    .modal-content
+      .modal-header
+        %h3 Credentials
+      .modal-body
+        = simple_form_for :project, html: { method: :get, id: 'force-form', remote: true } do |f|
+          = f.input :jira_password, html: { required: true, value: nil, class: 'form-control' }
+          = f.input :pivotal_token, html: { required: true, value: nil, class: 'form-control' }
+          .form-group
+            = link_to 'Cancel', '#', class: 'btn btn-default', id: 'cancel-modal'
+            = f.submit 'Force sync', class: 'btn btn-primary'

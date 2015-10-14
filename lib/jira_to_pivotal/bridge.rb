@@ -20,6 +20,7 @@ module JiraToPivotal
 
     def sync!
       return unless check_projects
+      ThorHelpers::Redis.last_update(@config['project_name'], Time.zone.now)
 
       logger.update_config(options)
 

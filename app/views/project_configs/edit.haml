@@ -1,0 +1,33 @@
+.container
+  .col-md-8.col-md-offset-3
+    %h2.white="Edit #{@config.name} config"
+
+    = simple_form_for @config, url: project_config_path, html: { method: :put, class: 'form-horizontal' } do |f|
+      .form-group.col-md-4.config-form
+        = f.input :name, input_html: { class: 'form-control' }
+        = f.input :tracker_project_id, input_html: { class: 'form-control' }
+        = f.input :script_first_start, input_html: { class: 'form-control' }
+        = f.input :script_repeat_time, input_html: { class: 'form-control' }
+        = f.input :retry_count, input_html: { class: 'form-control' }
+
+      .form-group.col-md-4.config-form
+        = f.input :jira_project, input_html: { class: 'form-control' }
+        = f.input :jira_login, input_html: { class: 'form-control' }
+        = f.input :jira_filter, input_html: { class: 'form-control' }
+        = f.input :jira_host, input_html: { class: 'form-control' }
+        = f.input :jira_uri_scheme, input_html: { class: 'form-control' }
+        = f.input :jira_port, input_html: { class: 'form-control' }
+
+      .form-group.col-md-8.config-form
+        %h4.text-center Jira Custom Fields
+        = f.simple_fields_for :jira_custom_fields do |field|
+          .col-md-5.custom-fields
+            .col-md-9
+              = field.input :name, label: false
+            = link_to 'X', '#', class: 'btn btn-small btn-danger'
+
+        .col-md-8.pull-right
+          = link_to 'Add Field', '#', class: 'btn btn-success'
+
+      .form-group.col-md-8.text-center
+        = f.submit class: 'btn btn-primary'

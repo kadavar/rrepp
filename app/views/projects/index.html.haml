@@ -1,0 +1,42 @@
+.container.white
+  .pull-right
+    / TODO: Uncoment when finished
+    / # = link_to 'New Project', new_project_path, class: 'btn btn-primary btn-large'
+    = link_to 'Synchronize Projects', synchronize_projects_path, class: 'btn btn-success btn-large'
+
+  %h1.text-center Projects
+
+  .col-md-12
+    %table.table.project-table
+      %thead
+        %tr
+          %th Id
+          %th Name
+          %th Config Name
+          %th Pid
+          %th Last Update
+          %th Log
+          %th Status
+          %th Actions
+      %tbody
+        - @projects.each_with_index do |project, index|
+          %tr
+            %td= index + 1
+            %td= project.name
+            %td= link_to project.config.try(:name), project_config_path(project.config), class: 'white'
+            %td= project.pid
+            %td= project.last_update
+            %td= link_to project.log_name, project_log_path(project.log_name), class: 'white'
+            %td= project_label(project.online)
+            %td
+              .col-md-7.action-border
+                - if project.online
+                  = link_to stop_project_path(project), class: 'action-link white' do
+                    %i.fa.fa-stop
+                - else
+                  / TODO: uncomment when logic would be implemented
+                  / %a.action-link.white
+                  /   %i.fa.fa-play
+                = link_to '#',id: "id-#{project.id}", class: 'action-link white force-sync', data: { project_id: project.id } do
+                  %i.fa.fa-refresh
+= render 'force_sync_modal'

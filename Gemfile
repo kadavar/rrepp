@@ -9,6 +9,13 @@ gem 'highline'
 gem 'rufus-scheduler'
 gem 'airbrake'
 gem 'figaro'
+gem 'simple_form'
+gem "responders"
+
+gem 'pg'
+
+gem 'highlight', require: 'simplabs/highlight'
+gem 'kaminari'
 
 # Background jobber
 gem 'sidekiq'
@@ -20,6 +27,18 @@ gem 'differ', github: 'emintham/differ'
 
 gem 'newrelic_rpm'
 
+gem 'twitter-bootstrap-rails'
+gem 'sass-rails'
+gem 'less-rails'
+gem 'therubyracer'
+gem 'uglifier'
+
+gem 'coffee-rails'
+gem 'haml-rails'
+
+gem 'jquery-rails'
+gem 'jquery-ui-rails'
+
 # Pivotal Tracker Api
 gem 'tracker_api', github: 'dashofcode/tracker_api', branch: 'master'
 
@@ -27,12 +46,10 @@ gem 'tracker_api', github: 'dashofcode/tracker_api', branch: 'master'
 gem 'jira-ruby'
 
 group :development do
-  # code linters
+  gem 'better_errors'
+  gem 'binding_of_caller'
   gem 'overcommit'
   gem 'rubocop', require: false
-
-  # more useful exception page, auto open a console at the exception site
-  gem 'better_errors'
 end
 
 group :development, :test do
@@ -59,10 +76,11 @@ end
 
 group :test do
   # browser level testing
-  gem 'capybara'
-  gem 'poltergeist' # headless js driver for capybara
+  gem 'poltergeist'
 
-  gem 'factory_girl'
+  gem 'capybara'
+  gem 'launchy'
+  gem 'factory_girl_rails'
 
   # fake redis implemented in ruby
   gem 'mock_redis'
@@ -72,4 +90,5 @@ group :test do
 
   gem 'shoulda-matchers'
   gem 'fuubar'
+  gem 'database_cleaner'
 end

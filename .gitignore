@@ -1,4 +1,3 @@
-
 logs/
 .idea/
 .ruby-gemset
@@ -15,6 +14,7 @@ daemons.rb.pid
 /config/application.yml
 /config/newrelic.yml
 /config/integrations
+/config/database.yml
 tmp/
 log/
 vendor/bundle

@@ -1,0 +1,47 @@
+.container.white
+  %h1.text-center= @config.name.camelcase
+
+  .col-md-6.col-md-offset-3
+    %table.table.project-table
+      %tbody
+        %tr
+          %td tracker_project_id
+          %td= @config.tracker_project_id
+        %tr
+          %td jira_login
+          %td= @config.jira_login
+        %tr
+          %td jira_host
+          %td= @config.jira_host
+        %tr
+          %td jira_uri_scheme
+          %td= @config.jira_uri_scheme
+        %tr
+          %td jira_port
+          %td= @config.jira_port
+        %tr
+          %td jira_filter
+          %td= @config.jira_filter
+        %tr
+          %td script_first_start
+          %td= @config.script_first_start
+        %tr
+          %td script_repeat_time
+          %td= @config.script_repeat_time
+        %tr{style: 'border-top: 3px solid #dddddd;'}
+          %td jira_custom_fields
+          %td
+
+        - @config.jira_custom_fields.each do |custom_field|
+          %tr
+            %td
+            %td= custom_field.name
+        %tr{style: 'border-top: 3px solid #dddddd;'}
+          %td jira_issue_types
+          %td
+        - @config.jira_issue_types.each do |issue_type|
+          %tr
+            %td
+            %td
+              = issue_type.name + ':'
+              = issue_type.jira_id
