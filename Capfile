@@ -27,16 +27,14 @@ ssh_options[:forward_agent] = true
 
 #== Multistage
 set :stages, %w(production staging)
-set :default_stage, 'production'
+set :default_stage, 'staging'
 require 'capistrano/ext/multistage'
 
 #== Recipes
-# set :recipes_dir, File.expand_path('/cap-recipes', __FILE__)
-# load recipes_dir + '/config/recipes/base'
-# load recipes_dir + '/config/recipes/nginx'
-# load recipes_dir + '/config/recipes/unicorn'
-# load recipes_dir + '/config/recipes/postgresql'
-# load recipes_dir + '/config/recipes/redis'
+set :recipes_dir, File.expand_path('/cap-recipes', __FILE__)
+load recipes_dir + '/config/recipes/base'
+load recipes_dir + '/config/recipes/nginx'
+# load recipes_dir + '/config/recipes/rbenv'
 
 #== Fallback vars for old recipes
 set(:current_path) { deploy_to }
@@ -54,7 +52,11 @@ after 'deploy:restart', 'unicorn:reload'    # app IS NOT preloaded
 # after 'deploy:restart', 'unicorn:duplicate' # before_fork hook implemented (zero downtime deployments)
 
 #before 'sidekiq:quiet', 'script:run_bundle'
+<<<<<<< HEAD
 #before 'sidekiq:start', 'script:create_folders'
+=======
+before 'sidekiq:start', 'script:create_folders'
+>>>>>>> 71450e14d9e9fc3d4a039363b3ac5fcb2c600fdb
 
 # Slack
 set :slack_token, 'SRxImWhjpPYBcID29xE8cjR5' # comes from inbound webhook integration
