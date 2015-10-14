@@ -53,6 +53,7 @@ after 'deploy:restart', 'unicorn:reload'    # app IS NOT preloaded
 
 before 'sidekiq:quiet', 'script:run_bundle'
 before 'sidekiq:start', 'script:create_folders'
+after 'script:run_bundle', 'script:assets_precompile'
 
 # Slack
 set :slack_token, 'SRxImWhjpPYBcID29xE8cjR5' # comes from inbound webhook integration
