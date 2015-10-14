@@ -29,12 +29,21 @@ Rails.application.configure do
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
+  # config.assets.compile = false
   config.assets.compile = true
-  config.assets.precompile =  ['*.js', '*.css']
+
+  # Compress JavaScripts and CSS
+  config.assets.compress = false
 
   # Asset digests allow you to set far-future HTTP expiration dates on all assets,
   # yet still be able to expire them through the digest params.
   config.assets.digest = true
+
+  # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
+  config.assets.precompile << %w(
+    jquery-ui.css highlight.css landing.css project_configs.css projects.css
+    force_sync_modal.js landing project_configs.js projects.js validator.min.js
+  )
 
   # `config.assets.precompile` and `config.assets.version` have moved to config/initializers/assets.rb
 
