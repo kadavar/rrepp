@@ -16,15 +16,13 @@
  *= require landing
  *= require project_configs
  *= require projects
+ *= require bootstrap_and_overrides
   */
-
-body {
-  margin-top: 60px;
-}
 
 .main-image {
   background: asset_url('main_image.jpg') no-repeat;
   background-size: 100%;
+  margin-top: 60px;
 }
 
 .white {

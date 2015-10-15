@@ -18,3 +18,4 @@
 //= require landing
 //= require project_configs
 //= require projects
+//= require validator.min
