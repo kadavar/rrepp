@@ -17,7 +17,9 @@
         = f.input :jira_host, input_html: { class: 'form-control' }
         = f.input :jira_uri_scheme, input_html: { class: 'form-control' }
         = f.input :jira_port, input_html: { class: 'form-control' }
-
+      .form-group.col-md-4.config-form
+        = f.input :jira_password, input_html: { class: 'form-control' }
+        = f.input :tracker_token, input_html: { class: 'form-control' }
       .form-group.col-md-8.config-form
         %h4.text-center Jira Custom Fields
         = f.simple_fields_for :jira_custom_fields do |field|

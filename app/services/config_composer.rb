@@ -35,6 +35,48 @@ class ConfigComposer
       end.map { |a| Hash[*a] }.reduce({}, :merge)
 
     config_hash.merge!('jira_custom_fields' => jira_custom_fields)
-    config_hash.merge!('jira_issue_types' => jira_issue_types)
+    config_hash.merge!('jira_issue_types'   => jira_issue_types)
+  end
+
+  def compose_project_config(project)
+    project_config = project.config.attributes
+
+    project_config.merge!('project_name'  => project.name,
+                          'log_file_name' => log_file_name(project))
+
+    project_config['jira_custom_fields'] = compose_jira_custom_fields(project.config)
+
+    project_config['jira_issue_types']   = compose_jira_issue_types(project.config)
+
+    project_config
+  end
+
+  private
+
+  def compose_jira_custom_fields(config)
+    custom_fields = {}
+
+    config.jira_custom_fields.each do |custom_field|
+      custom_fields[custom_field.name] = custom_field.value
+    end
+
+    custom_fields
+  end
+
+  def compose_jira_issue_types(config)
+    issue_types = {}
+
+    config.jira_issue_types.each do |issue_type|
+      issue_types[issue_type.name] = issue_type.jira_id
+    end
+
+    issue_types
+  end
+
+  def log_file_name(project)
+    file_name = "#{project.name.underscore.gsub(' ', '_')}.log"
+    file = open("log/#{file_name}", File::WRONLY | File::APPEND | File::CREAT)
+
+    file_name
   end
 end
