@@ -43,9 +43,11 @@ class ProjectConfigsController < ApplicationController
   end
 
   def config_params
-    params[:project_config].permit(:tracker_project_id, :jira_login, :jira_host, :jira_uri_scheme,
-                                   :jira_project, :jira_port, :jira_filter, :script_first_start,
-                                   :script_repeat_time, :project_id, :name, :retry_count,
+    params[:project_config].permit(:tracker_project_id, :jira_login, :jira_host,
+                                   :jira_uri_scheme, :jira_project, :jira_port,
+                                   :jira_filter, :script_first_start,
+                                   :script_repeat_time, :project_id, :name,
+                                   :retry_count, :jira_password, :tracker_token,
                                    jira_issue_types_attributes: [:id, :name, :jira_id, :config_id],
                                    jira_custom_fields_attributes: [:id, :name, :config_id])
   end

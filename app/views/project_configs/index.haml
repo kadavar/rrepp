@@ -27,7 +27,5 @@
             %td= config.tracker_project_id
             %td
               = link_to 'Show', project_config_path(config), class: 'btn btn-success btn-xs'
-              / TODO: Uncoment when finished
-              / # = link_to 'Edit', edit_project_config_path(config), class: 'btn btn-warning btn-xs'
+              = link_to 'Edit', edit_project_config_path(config), class: 'btn btn-warning btn-xs'
               = link_to 'Delete', project_config_path(config), class: 'btn btn-danger btn-xs', method: :delete, data: { confirm: 'Are you sure?' }
-
