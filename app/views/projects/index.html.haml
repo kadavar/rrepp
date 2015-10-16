@@ -34,7 +34,7 @@
                   = link_to stop_project_path(project), class: 'action-link white' do
                     %i.fa.fa-stop
                 - else
-                = link_to '#', id: "id-#{project.id}", class: 'action-link white', data: { project_id: project.id } do
+                = link_to '#', id: "id-#{project.id}", class: 'action-link white sync-project', data: { project_id: project.id } do
                   %i.fa.fa-play
                 = link_to '#', id: "id-#{project.id}", class: 'action-link white force-sync', data: { project_id: project.id } do
                   %i.fa.fa-refresh

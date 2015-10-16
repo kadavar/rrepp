@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_filter :find_project, only: [:start, :stop, :force_sync]
+  before_filter :find_project, only: [:start, :stop, :sync_project]
 
   def index
     @projects = Project.all
@@ -24,8 +24,8 @@ class ProjectsController < ApplicationController
     redirect_to projects_path
   end
 
-  def force_sync
-    ProjectSyncService.new(@project, params[:project]).synchronize(true)
+  def sync_project
+    ProjectSyncService.new(@project, params[:project]).synchronize(params[:one_time])
 
     render nothing: true
   end
