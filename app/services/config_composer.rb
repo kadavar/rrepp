@@ -19,7 +19,7 @@ class ConfigComposer
       issue_type.update_attributes(jira_id: id)
     end
 
-    Project.create(name: config.jira_project, config: config) unless config.project.present?
+    config.create_project(name: config.jira_project) if config.project.nil?
   end
 
   def config(name)
