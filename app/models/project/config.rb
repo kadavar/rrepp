@@ -14,7 +14,9 @@ class Project::Config < ActiveRecord::Base
   before_destroy :delete_config_file
 
   def delete_config_file
-    File.delete(Rails.root.join "config/integrations/#{name}.yml")
+    config_path = Rails.root.join "config/integrations/#{name}.yml"
+
+    File.delete(config_path) if File.exist?(config_path)
   end
 
   def update_config_file
