@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_filter :find_project, only: [:start, :stop, :sync_project]
+  before_filter :find_project, only: [:start, :stop, :force_sync, :destroy]
 
   def index
     @projects = Project.all
@@ -10,6 +10,12 @@ class ProjectsController < ApplicationController
 
   def stop
     Process.kill('SIGTERM', @project.pid)
+
+    redirect_to projects_path
+  end
+
+  def destroy
+    @project.destroy
 
     redirect_to projects_path
   end

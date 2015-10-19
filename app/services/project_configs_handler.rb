@@ -1,5 +1,3 @@
-require 'singleton'
-
 class ProjectConfigsHandler
   def initialize
     @reader = ProjectConfigsReader.new

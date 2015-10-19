@@ -12,12 +12,13 @@ class ConfigComposer
       custom_field.update_attributes(value: value)
     end
 
-    config.jira_custom_fields.where.not(name: data['jira_custom_fields'].values).destroy_all
+    config.jira_custom_fields.where.not(name: config_params['jira_custom_fields'].values).destroy_all
 
     config_params['jira_issue_types'].each do |name, id|
       issue_type = config.jira_issue_types.find_or_create_by(name: name)
       issue_type.update_attributes(jira_id: id)
     end
+    Project.create(name: config.jira_project, config: config) if config.project.nil?
   end
 
   def config(name)
