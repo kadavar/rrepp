@@ -26,29 +26,28 @@ class ConfigComposer
     config_hash = config.attributes.except('updated_at', 'created_at', 'name', 'id', 'project_id')
 
     jira_custom_fields =
-      config.jira_custom_fields.map do |custom_field|
-        custom_field.attributes.except('created_at', 'updated_at', 'id', 'config_id').values
-      end.flatten.map { |name| { name.split.join.underscore => name } }.reduce({}, :merge)
+        config.jira_custom_fields.map do |custom_field|
+          custom_field.attributes.except('created_at', 'updated_at', 'id', 'config_id').values
+        end.flatten.map { |name| {name.split.join.underscore => name} }.reduce({}, :merge)
 
     jira_issue_types =
-      config.jira_issue_types.map do |issue_type|
-        issue_type.attributes.except('created_at', 'updated_at', 'id', 'config_id').values
-      end.map { |a| Hash[*a] }.reduce({}, :merge)
+        config.jira_issue_types.map do |issue_type|
+          issue_type.attributes.except('created_at', 'updated_at', 'id', 'config_id').values
+        end.map { |a| Hash[*a] }.reduce({}, :merge)
 
     config_hash.merge!('jira_custom_fields' => jira_custom_fields)
-    config_hash.merge!('jira_issue_types'   => jira_issue_types)
+    config_hash.merge!('jira_issue_types' => jira_issue_types)
   end
 
   def compose_project_config(project)
     project_config = project.config.attributes
 
-    project_config.merge!('project_name'  => project.name,
+    project_config.merge!('project_name' => project.name,
                           'log_file_name' => log_file_name(project))
 
     project_config['jira_custom_fields'] = compose_jira_custom_fields(project.config)
 
-    project_config['jira_issue_types']   = compose_jira_issue_types(project.config)
-
+    project_config['jira_issue_types'] = compose_jira_issue_types(project.config)
     project_config
   end
 

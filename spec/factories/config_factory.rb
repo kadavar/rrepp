@@ -11,6 +11,8 @@ FactoryGirl.define do
     jira_filter '10000'
     script_first_start '5'
     script_repeat_time '5'
+    jira_password 'test'
+    tracker_token 'test'
   end
 
   trait :issues_and_custom_fields do
