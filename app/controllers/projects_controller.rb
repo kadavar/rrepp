@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_filter :find_project, only: [:start, :stop, :force_sync, :destroy]
+  before_filter :find_project, only: [:start, :stop, :sync_project, :destroy]
 
   def index
     @projects = Project.all

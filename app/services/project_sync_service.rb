@@ -7,7 +7,6 @@ class ProjectSyncService
 
   def synchronize(one_time=false)
     set_flag_in_redis unless one_time
-
     config = @config_composer.compose_project_config(@project)
 
     ThorHelpers::Redis.insert_config(config, random_hash)
