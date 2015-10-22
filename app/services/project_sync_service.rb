@@ -1,7 +1,6 @@
 class ProjectSyncService
-  def initialize(project, params)
+  def initialize(project)
     @project = project
-    @params = params
     @config_composer = ConfigComposer.new
   end
 

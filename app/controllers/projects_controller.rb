@@ -1,5 +1,5 @@
 class ProjectsController < ApplicationController
-  before_filter :find_project, only: [:start, :stop, :force_sync, :destroy]
+  before_filter :find_project, only: [:start, :stop, :sync_project, :destroy]
 
   def index
     @projects = Project.all
@@ -31,7 +31,7 @@ class ProjectsController < ApplicationController
   end
 
   def sync_project
-    ProjectSyncService.new(@project, params[:project]).synchronize(params[:one_time])
+    ProjectSyncService.new(@project).synchronize(params[:one_time])
 
     render nothing: true
   end
