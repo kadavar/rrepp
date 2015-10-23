@@ -14,8 +14,8 @@
 //= require jquery_ujs
 //= require jquery-ui
 //= require twitter/bootstrap
-//= require force_sync_modal
 //= require landing
 //= require project_configs
 //= require projects
+//= require projects_actions
 //= require validator.min
