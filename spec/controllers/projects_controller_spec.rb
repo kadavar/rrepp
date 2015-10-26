@@ -1,8 +1,10 @@
 require 'rails_helper'
+include AuthHelper
 
 describe ProjectsController do
   let!(:project) { create :project, :online, :with_config }
   let(:params) { { id: project.id } }
+  before(:each) { http_login }
 
   describe '#force_sync' do
     specify 'it passes right config to redis' do

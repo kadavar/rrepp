@@ -1,4 +1,4 @@
-class ProjectsController < ApplicationController
+class ProjectsController < BaseController
   before_filter :find_project, only: [:start, :stop, :sync_project, :destroy]
 
   def index

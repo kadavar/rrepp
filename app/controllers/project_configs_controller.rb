@@ -1,4 +1,4 @@
-class ProjectConfigsController < ApplicationController
+class ProjectConfigsController < BaseController
   respond_to :js, :html
   before_filter :find_config, only: [:edit, :update, :destroy, :show]
 
