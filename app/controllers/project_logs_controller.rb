@@ -1,4 +1,4 @@
-class ProjectLogsController < ApplicationController
+class ProjectLogsController < BaseController
   require 'find'
 
   def index
