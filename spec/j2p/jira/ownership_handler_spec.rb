@@ -18,6 +18,7 @@ describe JiraToPivotal::Jira::OwnershipHandler do
 
   describe '#reporter_and_asignee_attrs' do
     subject(:attrs) { handler.reporter_and_asignee_attrs(story) }
+    before { allow(story).to receive(:owners) { [owner_1, owner_2] } }
 
     context 'raise an TrackerApi::Error' do
       before { allow(story).to receive(:owners) { fail(TrackerApi::Error, instance_double('error', response: 'message')) } }
@@ -52,7 +53,7 @@ describe JiraToPivotal::Jira::OwnershipHandler do
 
     context 'when name_by_full_name doens`t` present' do
       let(:jira) { instance_double('jira',
-                  jira_assignable_users: { 'email_address' =>
+                   jira_assignable_users: { 'email_address' =>
                                           { 'examp@emailkey' => 'exampemail@email' },
                                            'display_name' =>
                                           { nil => '' } }) }
