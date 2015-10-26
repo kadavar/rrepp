@@ -16,13 +16,63 @@
  *= require landing
  *= require project_configs
  *= require projects
- *= require bootstrap_and_overrides
   */
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "font-awesome";
+@import "colors";
+@import "header";
+@import "footer";
 
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,700);
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,300,500,700);
+
+html,
+body {
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+}
 .main-image {
-  background: asset_url('main_image.jpg') no-repeat;
   background-size: 100%;
   margin-top: 60px;
+}
+
+.jumbotron{
+  h3{
+    font-weight: 300;
+  }
+  p{
+    font-size: 14px;
+    color: $secondary_text;
+  }
+  .highlight{
+    margin-top: 40px;
+  }
+  .h-caption{
+    text-align: center;
+
+
+    h4{
+      color: $text_color;
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+    i{
+      display: block;
+      font-size: 54px;
+      color: #0A2C68;
+      margin-bottom: 36px;
+    }
+  }
+}
+.project_block{
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin-bottom: -284px; /* отрицательный нижний отступ на высоту футера */
+  margin-top: 60px;
+  padding: 0;
 }
 
 .white {

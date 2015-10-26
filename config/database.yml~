@@ -1,0 +1,15 @@
+development: &development
+  adapter: postgresql
+  encoding: unicode
+  database: j2p_development
+  pool: 100
+  username: mihailsedov
+  password:
+
+test:
+  <<: *development
+  database: j2p_test
+
+production:
+  <<: *development
+  database: j2p_production
