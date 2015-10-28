@@ -1,10 +1,9 @@
 .container.white.project_block
-  .pull-right
+  %h2.text-center.col-md-12 Projects
+  .pull-right.btn-synchronize
     / TODO: Uncoment when finished
     / # = link_to 'New Project', new_project_path, class: 'btn btn-primary btn-large'
     = link_to 'Synchronize Projects', synchronize_projects_path, class: 'btn btn-success btn-large'
-
-  %h1.text-center Projects
 
   .col-md-12
     %table.table.project-table.table-striped
@@ -29,7 +28,7 @@
             %td= link_to project.log_name, project_log_path(project.log_name), class: 'white'
             %td= project_label(project.online)
             %td
-              .col-md-7.action-border
+              .col-md-12
                 - if project.online
                   = link_to stop_project_path(project), class: 'action-link white' do
                     %i.fa.fa-stop
@@ -41,4 +40,5 @@
                   %i.fa.fa-refresh
                 = link_to project_path(project), id: "id-#{project.id}", class: 'action-link white', method: :delete do
                   %i.fa.fa-times
+
 = render 'force_sync_modal'

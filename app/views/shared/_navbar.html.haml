@@ -19,23 +19,11 @@
         %li
           = link_to_menu 'Sidekiq', sidekiq_path
         %li
-          = link_to 'About', root_path
+          = link_to 'About', about_path
         %li
-          = link_to 'Contact', root_path
-        %li.dropdown
-          %a.dropdown-toggle{"data-toggle" => "dropdown", href: "#"}
-            Other Pages
-            %b.caret
-          %ul.dropdown-menu
-            %li
-              %a{href: "full-width.html"} Full Width Page
-            %li
-              %a{href: "sidebar.html"} Sidebar Page
-            %li
-              %a{href: "faq.html"} FAQ
-            %li
-              %a{href: "404.html"} 404
-            %li
-              %a{href: "pricing.html"} Pricing Table
+          = link_to 'Contact', contacts_path
+        %li
+          = link_to 'Login', root_path
+        
     / /.navbar-collapse
   / /.container

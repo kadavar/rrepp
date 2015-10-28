@@ -23,4 +23,7 @@ Rails.application.routes.draw do
 
   get 'sidekiq_web', to: 'landing#sidekiq', as: 'sidekiq'
   root to: 'landing#index'
+  get '/about', to: 'landing#about'
+  get '/contacts', to: 'landing#contacts'
+
 end
