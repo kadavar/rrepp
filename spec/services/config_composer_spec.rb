@@ -1,14 +1,18 @@
 require 'rails_helper'
+
 describe ConfigComposer do
 
   describe '#compose_project_config' do
-    let!(:project) { create :project, :online }
-    let(:config) { create :config, :issues_and_custom_fields }
-    let!(:issue_type) { config.jira_issue_types.first }
-    let!(:custom_field) { config.jira_custom_fields.first }
+    let!(:project) { create :project, :online ,:with_config}
+    let!(:issue_type) { create :jira_issue_type }
+    let!(:custom_field) { create :jira_custom_field }
     subject(:compose) { ConfigComposer.new.compose_project_config(project) }
     context 'when return the right config' do
-      before { project.config = config }
+      before do
+        project.config.jira_issue_types<<issue_type
+        project.config.jira_custom_fields<<custom_field
+      end
+
       let (:new_fields) { {"project_id" => project.id,
                            "project_name" => project.name,
                            "jira_custom_fields" =>
