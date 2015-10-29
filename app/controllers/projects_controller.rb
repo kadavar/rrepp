@@ -1,5 +1,5 @@
-class ProjectsController < ApplicationController
-  before_filter :find_project, only: [:start, :stop, :force_sync, :destroy]
+class ProjectsController < BaseController
+  before_filter :find_project, only: [:start, :stop, :sync_project, :destroy]
 
   def index
     @projects = Project.all
@@ -16,7 +16,7 @@ class ProjectsController < ApplicationController
 
   def destroy
     @project.destroy
-    
+
     redirect_to projects_path
   end
 
@@ -30,8 +30,8 @@ class ProjectsController < ApplicationController
     redirect_to projects_path
   end
 
-  def force_sync
-    ProjectSyncService.new(@project, params[:project]).synchronize(true)
+  def sync_project
+    ProjectSyncService.new(@project).synchronize(params[:one_time])
 
     render nothing: true
   end

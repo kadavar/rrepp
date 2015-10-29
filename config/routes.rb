@@ -7,7 +7,7 @@ Rails.application.routes.draw do
     member do
       get :stop
       get :start
-      get :force_sync
+      get :sync_project
     end
     collection do
       get :synchronize

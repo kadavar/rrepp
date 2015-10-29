@@ -11,6 +11,9 @@ before_script:
 rubocop:
   script:
     - test -f .rubocop.yml && (gem install rubocop --no-ri --no-rdoc && cd app && rubocop) || true
+rails_best_practices:
+  script:
+    - test -f rails_best_practices.yml && (gem install rails_best_practices --no-ri --no-rdoc && rails_best_practices . ) || true
 test:
   script:
     - cp config/database.yml.template config/database.yml
