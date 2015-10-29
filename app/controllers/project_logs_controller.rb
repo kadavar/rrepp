@@ -31,6 +31,9 @@ class ProjectLogsController < BaseController
       end
     end
     text.reverse
+
+  rescue Errno::ENOENT
+    []
   end
 
   def line_regex
