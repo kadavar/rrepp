@@ -18,7 +18,7 @@ describe JiraToPivotal::Jira::SubtasksHandler do
 
   before do
     allow(jira_project).to receive(:project) { inner_jira_project }
-    allow(jira_project).to receive(:options_for_issue) { {} }
+ #   allow(jira_project).to receive(:options_for_issue) { {} }
   end
 
   before do
@@ -67,7 +67,7 @@ describe JiraToPivotal::Jira::SubtasksHandler do
       end
 
       describe 'creates sub task' do
-        let(:fields) { { 'summary' => 'summary' } }
+        let(:fields) { { 'summary' => 'summary','issuetype' => { 'name' => 'Sub-task' }, 'parent' => { 'id' => 1 }  } }
         let(:jira_project_client) { double 'jira project client' }
         let(:jira_client_issue) { double 'jira_client_issue' }
 
@@ -85,11 +85,12 @@ describe JiraToPivotal::Jira::SubtasksHandler do
           allow(issue).to receive(:url) { 'url' }
           allow(issue).to receive(:fields) { fields }
           allow(issue).to receive(:key) {}
+          allow(issue).to receive(:id) {}
         end
 
         before do
           allow(jira_project).to receive(:jira_pivotal_field) { 'url' }
-          allow(subtasks_handler).to receive(:parent_id_for) { '1' }
+          #allow(subtasks_handler).to receive(:parent_id_for) { '1' }
           allow(subtasks_handler).to receive(:url) { 'url' }
         end
 
@@ -97,10 +98,11 @@ describe JiraToPivotal::Jira::SubtasksHandler do
         before { allow(jira_project_client).to receive(:Issue) { jira_client_issue } }
         before { allow(jira_client_issue).to receive(:build) { issue } }
 
-        specify 'creates subask' do
+        specify 'creates subtask' do
           expect_any_instance_of(JiraToPivotal::Jira::Issue).to receive(:save!) do |issue, attrs, config|
             expect(attrs['fields']['project']['id']).to eq '1'
           end
+
 
           subtasks_handler.create_sub_tasks!(stories)
 
