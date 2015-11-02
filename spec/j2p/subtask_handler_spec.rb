@@ -18,7 +18,6 @@ describe JiraToPivotal::Jira::SubtasksHandler do
 
   before do
     allow(jira_project).to receive(:project) { inner_jira_project }
- #   allow(jira_project).to receive(:options_for_issue) { {} }
   end
 
   before do
@@ -90,7 +89,6 @@ describe JiraToPivotal::Jira::SubtasksHandler do
 
         before do
           allow(jira_project).to receive(:jira_pivotal_field) { 'url' }
-          #allow(subtasks_handler).to receive(:parent_id_for) { '1' }
           allow(subtasks_handler).to receive(:url) { 'url' }
         end
 
