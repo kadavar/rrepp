@@ -2,11 +2,16 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 .config-form {
-  background-color: grey;
+  background-color: transparent;
   padding-top: 10px;
   padding-left: 20px;
   padding-bottom: 10px;
   min-height: 80px;
+}
+
+.form-horizontal .form-group{
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .custom-fields {
