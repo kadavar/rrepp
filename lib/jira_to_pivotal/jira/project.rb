@@ -17,6 +17,8 @@ module JiraToPivotal
       end
 
       def issue_custom_fields
+        return [] unless project
+
         @issue ||= project.issue_with_name_expand
 
         unless @issue.names.present?
