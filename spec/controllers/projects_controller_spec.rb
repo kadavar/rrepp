@@ -3,7 +3,7 @@ include AuthHelper
 
 describe ProjectsController do
   let!(:project) { create :project, :online, :with_config }
-  let(:params) { { id: project.id } }
+  let(:params) { { id: project.id, one_time: true } }
   before(:each) { http_login }
 
   describe '#force_sync' do
