@@ -27,7 +27,9 @@ gem 'differ', github: 'emintham/differ'
 
 gem 'newrelic_rpm'
 
+gem 'bootstrap-sass', '~> 3.3.5'
 gem 'twitter-bootstrap-rails'
+gem 'font-awesome-rails'
 gem 'sass-rails'
 gem 'less-rails'
 gem 'therubyracer'

@@ -1,0 +1,59 @@
+.navbar{
+  background: $blue;
+  border-color: transparent;
+
+  .navbar-brand{
+  	color: $white;
+  }
+  .navbar-nav{
+	  >li{
+		  >a{
+			  color: $white;
+		  }
+	  }
+    .dropdown.open > a{
+      background: $dark_blue;
+    }
+    .active > a{
+      background: $dark_blue;
+
+      &:hover{
+        background: $dark_blue;
+      }
+    }
+  }
+}
+
+#picture1{
+	background: image-url('stars1.jpg');
+}
+#picture2{
+  background: image-url('mountain.jpg');
+}
+#picture3{
+  background: image-url('bridge.jpg');
+}
+#picture1, #picture2, #picture3{
+	background-position:100% 100%;
+  background-repeat:no-repeat;
+  display:block;
+  height:100%;
+  text-indent:-9999px;
+  -moz-background-size:cover;
+  -webkit-background-size:cover;
+  background-size:cover;	
+}
+header.carousel {
+  height: 70%;
+}
+
+header.carousel .item,
+header.carousel .item.active,
+header.carousel .carousel-inner {
+    height: 100%;
+}
+
+.carousel-caption{
+  bottom: 50%
+}
+

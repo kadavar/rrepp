@@ -16,13 +16,195 @@
  *= require landing
  *= require project_configs
  *= require projects
- *= require bootstrap_and_overrides
   */
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "font-awesome";
+@import "colors";
+@import "header";
+@import "footer";
 
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,700);
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,300,500,700);
+
+html,
+body {
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+}
 .main-image {
-  background: asset_url('main_image.jpg') no-repeat;
   background-size: 100%;
   margin-top: 60px;
+}
+
+/* ABOUT PAGE
+********************************************/
+.about{
+  img{
+    border-radius: 5px;
+  }
+  h2{
+    font-weight: 400;
+    font-size: 26px;
+  }
+}
+
+/* JUMBOTRON BLOCK
+********************************************/
+.jumbotron{
+  margin-bottom: 0;
+  h3{
+    font-weight: 300;
+  }
+  p{
+    font-size: 16px;
+    color: $secondary_text;
+  }
+  .highlight{
+    margin-top: 40px;
+  }
+  .h-caption{
+    text-align: center;
+
+
+    h4{
+      color: $text_color;
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+    i{
+      display: block;
+      font-size: 54px;
+      color: #00bcd4;
+      margin-bottom: 36px;
+    }
+  }
+}
+
+/* CONTENT SECTION
+********************************************/
+.content_section{
+  padding: 50px 0;
+  h3{
+    display: inline-block;
+    color: #565656;
+  }
+  p{
+    margin-top: 20px;
+    font-size: 18px;
+  }
+}
+
+/* CONTENT IMAGE BLOCK
+********************************************/
+.content_image{
+  background: image-url('sea.jpg') no-repeat center center fixed;
+  -webkit-background-size: 100%;
+  -moz-background-size: 100%;
+  -o-background-size: 100%;
+  background-size: 100%;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  min-height: 30%;
+  h2{
+    color: #fff;
+  }
+  .text-muted{
+    color: rgb(233, 227, 227);
+  }
+}
+
+/* PROJECT BLOCK
+********************************************/
+.project_block{
+  min-height: 100%;
+  position: relative;
+  margin-top: 60px;
+  margin-bottom: 60px;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: #4B4B4B;
+  h2{
+    color: #4B4B4B;
+  }
+  table{
+    background: transparent linear-gradient(-45deg, white, rgb(215, 235, 245)) repeat scroll 0% 0%;
+    color: $secondary_text;
+    border-radius: 7px;
+    margin-top: 20px;
+    > thead > tr > th{
+      padding: 15px;
+      text-align: center;
+    }
+    > tbody > tr > td{
+      padding: 14px;
+      text-align: center;
+    }
+    .label{
+      padding: 0.8em 1.2em;
+    }
+  }
+  .action-link i{
+    font-size: 18px;
+    color: #00bcd4;
+  }
+}
+
+/* OTHER STYLES
+********************************************/
+.btn-synchronize{
+  margin-right: 15px;
+  a{
+    background: #00bcd4;
+    border-color: #00bcd4;
+    padding: 8px 12px;
+    &:hover{
+      background: #0097a7;
+      border:1px solid transparent;
+    }
+  }
+}
+
+.divider::after {
+  content: "";
+  position: relative;
+  height: 4px;
+  width: 60px;
+  display: block;
+  text-align: center;
+  margin: 13px auto;
+  border-radius: 5em;
+  background: #00bcd4;
+}
+
+.btn{
+  background: $blue;
+  color: #fff;
+  &:hover{
+    background: #dark_blue;
+    color: #fff;
+  }
+}
+
+.checkbox{
+  margin-left: 20px;
+}
+
+.page-header{
+  border-bottom: 2px solid $blue;
+}
+.section-heading-spacer{
+  float: left;
+  width: 200px;
+  border-top: 3px solid #00bcd4;
+}
+
+.text-muted{
+  font-size: 18px;
+  margin-top: 40px;
 }
 
 .white {
@@ -46,6 +228,3 @@
   margin-top: 250px;
 }
 
-.project-table {
-  background-color: grey;
-}

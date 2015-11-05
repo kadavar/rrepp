@@ -1,11 +1,9 @@
-.container.white
-  .pull-right
+.container.white.project_block
+  %h2.text-center Project Configs
+  .pull-right.btn-synchronize
     / TODO: Uncoment when finished
     / # = link_to 'New Config', new_project_config_path, class: 'btn btn-primary btn-large'
     = link_to 'Synchronize Configs', synchronize_project_configs_path, class: 'btn btn-success btn-large'
-
-  %h1.text-center Project Configs
-
 
   .col-md-12
     %table.table.project-table
