@@ -8,7 +8,6 @@ require 'jira'
 require 'open-uri'
 require 'yaml'
 require 'colorize'
-require 'rufus-scheduler'
 require 'highline/import'
 
 module J2p

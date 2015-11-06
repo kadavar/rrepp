@@ -1,2 +1,0 @@
-class ThorHelpers::Base
-end
