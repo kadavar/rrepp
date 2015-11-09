@@ -22,10 +22,10 @@
           %tr
             %td= index + 1
             %td= project.config.jira_project
-            %td= link_to project.config.try(:name), project_config_path(project.config), class: 'white'
+            %td= link_to project.config.try(:name), project_config_path(project.config), class: 'table-link'
             %td= project.pid
             %td= project.last_update
-            %td= link_to project.log_name, project_log_path(project.log_name), class: 'white'
+            %td= link_to project.log_name, project_log_path(project.log_name), class: 'table-link'
             %td= project_label(project.online)
             %td
               .col-md-12
