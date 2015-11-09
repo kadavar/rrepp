@@ -6,7 +6,7 @@
     = link_to 'Synchronize Configs', synchronize_project_configs_path, class: 'btn btn-success btn-large'
 
   .col-md-12
-    %table.table.project-table
+    %table.table.project-table.table-striped
       %thead
         %tr
           %th Id
@@ -19,7 +19,7 @@
         - @configs.each_with_index do |config, index|
           %tr
             %td= index + 1
-            %td= link_to config.name, project_config_path(config), style: 'color: white'
+            %td= link_to config.name, project_config_path(config), class: 'table-link'
             %td= config.jira_project
             %td= config.jira_filter
             %td= config.tracker_project_id

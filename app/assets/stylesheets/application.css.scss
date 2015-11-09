@@ -151,6 +151,9 @@ body {
     font-size: 18px;
     color: #00bcd4;
   }
+  .table-link{
+    color: $secondary_text;
+  }
 }
 
 /* OTHER STYLES
@@ -180,6 +183,7 @@ body {
   background: #00bcd4;
 }
 
+/*
 .btn{
   background: $blue;
   color: #fff;
@@ -188,6 +192,7 @@ body {
     color: #fff;
   }
 }
+*/
 
 .checkbox{
   margin-left: 20px;
@@ -216,7 +221,7 @@ body {
 }
 
 .action-link {
-  margin-right: 3px;
+  margin: 0 7px;
 }
 
 .action-border {

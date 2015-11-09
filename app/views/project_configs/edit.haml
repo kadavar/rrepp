@@ -19,7 +19,7 @@
         = f.input :jira_login, input_html: { class: 'form-control' }
         = f.input :jira_filter, input_html: { class: 'form-control' }
 
-        .form-group.col-md-2.config-form
+      .form-group.col-md-2.config-form
         = f.input :jira_password, input_html: { class: 'form-control' }
         = f.input :tracker_token, input_html: { class: 'form-control' }
 
@@ -34,6 +34,7 @@
           .col-md-5.custom-fields
             .col-md-9
               = field.input :name, label: false
+              = field.input :value, label: false
             = link_to 'X', '#', class: 'btn btn-small btn-danger'
 
         .col-md-8.pull-right.text-right
