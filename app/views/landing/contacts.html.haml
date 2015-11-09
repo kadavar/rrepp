@@ -10,22 +10,23 @@
         %form
           .row
             .col-sm-4
-              %input.form-control{:placeholder => "Name", :type => "text"}
+              %input.form-control{ placeholder: 'Name', type: 'text' }
             .col-sm-4
-              %input.form-control{:placeholder => "Email", :type => "text"}
+              %input.form-control{ placeholder: 'Email', type: 'text' }
             .col-sm-4
-              %input.form-control{:placeholder => "Phone", :type => "text"}
+              %input.form-control{ placeholder: 'Phone', type: 'text' }
           %br
             .row
               .col-sm-12
-                %textarea.form-control{:placeholder => "Type your message here...", :rows => "9"}
+                %textarea.form-control{ placeholder: 'Type your message here...', rows: '9' }
             %br
               .row
                 .col-sm-6
                   %label.checkbox
-                    %input{:type => "checkbox"} Sign up for newsletter
+                    %input{ type: 'checkbox' } Sign up for newsletter
                 .col-sm-6.text-right
-                  %input.btn.btn-action{:type => "submit", :value => "Send message"}
+                  %input.btn.btn-action{ type: 'submit', value: 'Send message' }
+
     / /Article
     / Sidebar
     %aside.col-sm-3.sidebar.sidebar-right
@@ -37,6 +38,7 @@
         %address
           (713) 791-1414
     / /Sidebar
+
 / /container
 %section.container-full.top-space
   #map

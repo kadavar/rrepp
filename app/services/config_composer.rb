@@ -12,7 +12,7 @@ class ConfigComposer
       custom_field.update_attributes(value: value)
     end
 
-    config.jira_custom_fields.where.not(name: config_params['jira_custom_fields'].values).destroy_all
+    config.jira_custom_fields.where.not(name: config_params['jira_custom_fields'].keys).destroy_all
 
     config_params['jira_issue_types'].each do |name, id|
       issue_type = config.jira_issue_types.find_or_create_by(name: name)
@@ -41,7 +41,7 @@ class ConfigComposer
 
   def compose_project_config(project)
     project_config = project.config.attributes
-
+    
     project_config.merge!('project_name' => project.name,
                           'log_file_name' => log_file_name(project))
 
@@ -80,4 +80,3 @@ class ConfigComposer
     file_name
   end
 end
-

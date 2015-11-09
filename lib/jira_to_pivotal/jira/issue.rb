@@ -47,7 +47,10 @@ module JiraToPivotal
             parameters: config.airbrake_message_parameters.merge(attrs),
             error_message: "#{e.response.body}"
           )
+          return false
         end
+
+        true
       end
 
       def remove_not_saveable_fields(attrs, config)

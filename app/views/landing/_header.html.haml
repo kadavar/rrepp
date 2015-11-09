@@ -1,9 +1,10 @@
 %header#myCarousel.carousel.slide
   / Indicators
   %ol.carousel-indicators
-    %li.active{"data-slide-to" => "0", "data-target" => "#myCarousel"}
-    %li{"data-slide-to" => "1", "data-target" => "#myCarousel"}
-    %li{"data-slide-to" => "2", "data-target" => "#myCarousel"}
+    %li.active{ "data-slide-to" => "0", "data-target" => "#myCarousel" }
+    %li{ "data-slide-to" => "1", "data-target" => "#myCarousel" }
+    %li{ "data-slide-to" => "2", "data-target" => "#myCarousel" }
+
   / Wrapper for slides
   .carousel-inner
     .item.active
@@ -21,9 +22,10 @@
       .carousel-caption
         %h2 J2P Project
         %h2 Bridge between Jira and Pivotal
+
   / Controls
-  %a.left.carousel-control{"data-slide" => "prev", href: "#myCarousel"}
+  %a.left.carousel-control{ "data-slide" => "prev", href: "#myCarousel" }
     %span.icon-prev
-  %a.right.carousel-control{"data-slide" => "next", href: "#myCarousel"}
+  %a.right.carousel-control{ "data-slide" => "next", href: "#myCarousel" }
     %span.icon-next
 

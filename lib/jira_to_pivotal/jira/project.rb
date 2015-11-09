@@ -17,6 +17,8 @@ module JiraToPivotal
       end
 
       def issue_custom_fields
+        return [] unless project
+
         @issue ||= project.issue_with_name_expand
 
         unless @issue.names.present?
@@ -140,8 +142,6 @@ module JiraToPivotal
 
       def create_tasks!(stories)
         stories.each do |story|
-          putc '.'
-
           next unless story.to_jira(issue_custom_fields)
 
           issue, attributes = build_issue story.to_jira(issue_custom_fields)
@@ -157,7 +157,6 @@ module JiraToPivotal
           # ********************************************************************************************************* #
           #   We can't grab attachments because there is a bug in gem and it returns all attachments from project     #
           # ********************************************************************************************************* #
-
           story.assign_to_jira_issue(issue.issue.key, url)
         end
       end

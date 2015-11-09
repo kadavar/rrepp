@@ -19,7 +19,7 @@ server '83.143.200.3:55022', :web, :app, :db, primary: true
 set :domain_name,      'j2p'
 set :ruby_version,     '2.2.0'
 set :application,      'j2p'
-set :repository,       'ssh://git@gl.jetruby.com:10022/jetruby/j2p.git'
+set :repository,       'git@gl.jetru.by:jetruby/j2p.git'
 set :user,             'arnold'
 set :application_user, 'arnold'
 
