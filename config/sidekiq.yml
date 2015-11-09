@@ -3,4 +3,12 @@
 :pidfile: tmp/pids/sidekiq.pid
 :logfile: log/sidekiq.log
 :queues:
-  - default
+ - jtp_development
+
+:staging:
+  :queues:
+   - jtp_staging
+
+:production:
+ :queues:
+   - jtp_production
