@@ -7,9 +7,9 @@ describe ProjectsController do
   before(:each) { http_login }
 
   describe '#force_sync' do
-    specify 'it passes right config to redis' do
-      expect(ThorHelpers::Redis).to receive(:insert_config) do |config, random_hash|
-        expect(%w(jira_password tracker_token).all? { |key| config.key? key }).to be true
+    specify 'it invokes sync_worker' do
+      expect(SyncWorker).to receive(:perform_async) do |project_id|
+        expect(project_id).to be project.id
       end
 
       get :sync_project, params
