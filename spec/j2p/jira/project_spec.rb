@@ -19,9 +19,10 @@ describe JiraToPivotal::Jira::Project do
                       'iira_custom_fields' => { 'pivotal_url' => 'pivotal_url' } } }
 
   let(:conf) { JiraToPivotal::Config.new(init_conf) }
-  let!(:project) { JiraToPivotal::Jira::Project.new(conf) }
   let(:client) { double 'client' }
   let(:inner_project) { double 'inner project' }
+
+  let!(:project) { JiraToPivotal::Jira::Project.new(conf) }
 
   before do
     allow(conf).to receive(:airbrake_message_parameters) {}
@@ -29,6 +30,7 @@ describe JiraToPivotal::Jira::Project do
   end
 
   before { project.build_api_client }
+
   before do
     allow(logger).to receive(:jira_logger) { jira_logger }
     allow(logger).to receive(:error_log) {}
@@ -173,6 +175,7 @@ describe JiraToPivotal::Jira::Project do
       let(:difference_checker) { double 'difference_checker' }
 
       before { allow(project).to receive(:difference_checker) { difference_checker } }
+
       before do
         allow(project).to receive(:select_task) { double 'jira issue' }
         allow(story).to receive(:to_jira) { double 'story to jira' }
@@ -220,11 +223,13 @@ describe JiraToPivotal::Jira::Project do
     describe 'non empty pivotal jira ids' do
       context 'when find_issues returns jira_issues' do
         before { allow(project).to receive(:find_issues) { jira_issues } }
+
         it 'returns 1 correct and 1 incorrect ids' do
           expect(check[0].count).to be 1
           expect(check[1].count).to be 1
         end
       end
+
       context 'when find_issues returns non present result' do
         before do
           allow(project).to receive(:find_issues) { nil }
@@ -241,10 +246,13 @@ describe JiraToPivotal::Jira::Project do
   end
 
   describe '#project' do
-    before { allow(project).to receive(:project).and_call_original }
     subject { project.project }
+
+    before { allow(project).to receive(:project).and_call_original }
+
     context 'with error' do
       let(:error) { double 'error' }
+
       before do
         allow(error).to receive(:message) { 'message' }
         allow(error).to receive(:code) { 'code' }
@@ -257,24 +265,27 @@ describe JiraToPivotal::Jira::Project do
         expect { project.project }.to raise_exception JIRA::HTTPError
       end
     end
+
     context 'with Errno::ETIMEDOUT' do
       let(:error) { double 'error' }
+
       before do
         allow_any_instance_of(JiraToPivotal::Retryable).to receive(:retryable) { fail Errno::ETIMEDOUT }
       end
+
       it { is_expected.to eq false }
     end
-
   end
 
   describe '#update_config' do
-    let(:options) { { new: 'option' } }
     subject { project.update_config(options) }
+    let(:options) { { new: 'option' } }
 
     context 'when options is empty' do
       let(:opt) { {} }
       it { expect(project.update_config(opt)).to eq init_conf }
     end
+
     context 'when options is not empty' do
       it { is_expected.to include options }
     end
@@ -311,6 +322,7 @@ describe JiraToPivotal::Jira::Project do
 
   describe '#differnce_checker' do
     subject { project.difference_checker }
+
     context ' when its working ' do
       before { allow(JiraToPivotal::DifferenceChecker).to receive(:new) { 'its working' } }
       it { is_expected.to eq 'its working' }
@@ -322,12 +334,14 @@ describe JiraToPivotal::Jira::Project do
 
     context 'with Jira::HTTPError' do
       let(:error) { double 'error' }
+
       before do
         allow(error).to receive(:message) { 'message' }
         allow(error).to receive(:code) { 'code' }
       end
 
       before { allow(inner_project).to receive(:issues_by_filter) { fail JIRA::HTTPError.new(error), 'message' } }
+
       it 'retries 2 times, and returns nil' do
         expect(inner_project).to receive(:issues_by_filter).exactly(2).times
         expect(project.send :issues, 1).to eq nil
@@ -345,12 +359,14 @@ describe JiraToPivotal::Jira::Project do
   end
 
   describe '#issue_custom_fields' do
+    subject { project.issue_custom_fields }
+
+    let(:issue) { double 'issue' }
+
     before do
       allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields).and_call_original
     end
     before { allow(inner_project).to receive(:issue_with_name_expand) { issue } }
-    let(:issue) { double 'issue' }
-    subject { project.issue_custom_fields }
 
     context 'when names is present' do
       before { allow(issue).to receive(:names) { 'names' } }
@@ -360,18 +376,22 @@ describe JiraToPivotal::Jira::Project do
     context 'when names not present' do
       before { allow(issue).to receive(:names) {} }
       before { allow(logger).to receive(:attrs_log) {} }
+
       it { expect { project.issue_custom_fields }.to raise_error RuntimeError }
     end
   end
 
   describe '#next_issues' do
-    let(:issues) { double 'issues' }
-    before { allow(inner_project).to receive(:issues).and_return(issues) }
     subject { project.next_issues }
+
+    let(:issues) { double 'issues' }
+
+    before { allow(inner_project).to receive(:issues).and_return(issues) }
 
     context 'when issues list is present' do
       it { is_expected.to eq issues }
-      specify 'change @start_index by 50' do
+
+      it 'change @start_index by 50' do
         project.next_issues
         expect(project.instance_variable_get(:@start_index)).to eq 50
       end
@@ -384,12 +404,15 @@ describe JiraToPivotal::Jira::Project do
   end
 
   describe '#select_task' do
+    subject { project.select_task(issues, story) }
+
     let(:issues) { double 'issues' }
     let(:story) { double 'story' }
+
     before do
       allow(issues).to receive(:find) { issues }
     end
-    subject { project.select_task(issues, story) }
+
     context 'when return issues' do
       it { is_expected.to eq issues }
     end
@@ -397,37 +420,38 @@ describe JiraToPivotal::Jira::Project do
 
   describe '#unsynchronized_issues' do
     subject { project.unsynchronized_issues }
+
     let(:issue) { double 'issue' }
     let(:fields) { { 'fields' => { 'url' => 'urls', 'pivotal_url' => 'url' } } }
     let(:con) { { 'jira_custom_fields' => { 'pivotal_url' => 'piv_url' } } }
+    let(:issues) { Array.new(1, issue) }
+    let(:empty_result) { { to_create: [], to_update: [] } }
+
     before do
       allow(issue).to receive(:fetch).and_return(issue)
       allow(issue).to receive(:issue).and_return(issue)
       allow(issue).to receive(:attrs).and_return(fields)
       allow(project).to receive(:config).and_return(con)
-    end
-    let(:issues) { Array.new(1, issue) }
-    let(:empty_result) { { to_create: [], to_update: [] } }
-    before do
       allow(inner_project).to receive(:issues).and_return(issues)
     end
+
     context 'to create ' do
       let(:to_update) { { to_update: [] } }
+
       it { is_expected.not_to eq empty_result }
       it { is_expected.to include to_update }
     end
+
     context 'to update ' do
       let(:issue_names) { double 'issue' }
+      let(:to_create) { { to_create: [] } }
+
       before do
         allow(issue_names).to receive(:names).and_return({ 'pivotal_url' => 'piv_url' })
-      end
-      before do
         allow(inner_project).to receive(:issue_with_name_expand) { issue_names }
-      end
-      before do
         allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields).and_call_original
       end
-      let(:to_create) { { to_create: [] } }
+
       it { is_expected.not_to eq empty_result }
       it { is_expected.to include to_create }
     end
