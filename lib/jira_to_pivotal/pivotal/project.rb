@@ -73,11 +73,11 @@ module JiraToPivotal
 
       def usefull_stories
         project.stories(filter: 'story_type:bug,chore,feature state:unstarted,started,finished,delivered,rejected')
-        rescue TrackerApi::Error => e
-          airbrake_report_and_log(
-            e,
-            parameters: config.airbrake_message_parameters,
-            skip_airbrake: true)
+      rescue TrackerApi::Error => e
+        airbrake_report_and_log(
+          e,
+          parameters: config.airbrake_message_parameters,
+          skip_airbrake: true)
         return {}
       end
 
