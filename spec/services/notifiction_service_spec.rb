@@ -33,4 +33,13 @@ describe NotificationService do
       end
     end
   end
+
+  describe '#process_exist?' do
+    subject(:notify) { NotificationService.check_and_notify(monitoring_hash) }
+    context 'when Process.kill returns Errno:EPERM ' do
+      before { allow(Process).to receive(:kill) { fail(Errno::EPERM) } }
+
+      it { is_expected.to eq "OK" }
+    end
+  end
 end
