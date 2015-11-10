@@ -101,7 +101,6 @@ describe JiraToPivotal::Jira::SubtasksHandler do
             expect(attrs['fields']['project']['id']).to eq '1'
           end
 
-
           subtasks_handler.create_sub_tasks!(stories)
 
           expect(stories.count).to eq 0

@@ -9,6 +9,7 @@ describe JiraToPivotal::Config do
       let(:key) { 'not_exist' }
       it { expect(j2p_conf.[](key)).to eq nil }
     end
+
     context 'when key is exist' do
       let(:key) { :somekey }
       it { expect(j2p_conf.[](key)).to eq 'somekey' }
