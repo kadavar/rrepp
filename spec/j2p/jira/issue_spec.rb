@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe JiraToPivotal::Jira::Issue do
+RSpec.describe JiraToPivotal::Jira::Issue do
 
   let(:client)  { double 'client' }
   let(:issue)   { double 'issue' }
@@ -19,32 +19,26 @@ describe JiraToPivotal::Jira::Issue do
       :config  => config
     }
   end
+  let(:story_url) { 'story_url' }
+  let(:fields) { {} }
+  let(:jira_issue) { JiraToPivotal::Jira::Issue.new(options) }
 
   before do
     allow(e).to receive(:respoonse) { e }
     allow(e).to receive(:body) { 'message' }
     allow(e).to receive(:message) { 'message' }
-  end
-
-  let(:story_url) { 'story_url' }
-  let(:fields) { {} }
-
-  before { allow(issue).to receive(:fields) { fields } }
-  before { allow(config).to receive(:airbrake_message_parameters) { {} } }
-
-  before do
+    allow(issue).to receive(:fields) { fields }
+    allow(config).to receive(:airbrake_message_parameters) { {} }
     allow(logger).to receive(:attrs_log) { 'true' }
     allow(logger).to receive(:error_log) { 'error_log' }
+    allow(comment).to receive(:body) { 'comment_body' }
+    allow(JiraToPivotal::ScriptLogger).to receive(:new) { logger }
+    allow(issue).to receive(:comments) { [comment] }
   end
-
-  let(:jira_issue) { JiraToPivotal::Jira::Issue.new(options) }
-
-  before { allow(comment).to receive(:body) { 'comment_body' } }
-  before { allow(JiraToPivotal::ScriptLogger).to receive(:new) { logger } }
-  before { allow(issue).to receive(:comments) { [comment] } }
 
   describe '#comments' do
     subject { jira_issue.comments }
+
     context 'when comments' do
       it { is_expected.to eq [comment] }
     end

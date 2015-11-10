@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe SyncWorker, type: :service do
+RSpec.describe SyncWorker, type: :service do
   let(:hash) do
     {
       tracker_project_id: '312',
@@ -33,26 +33,33 @@ describe SyncWorker, type: :service do
   let(:updated_tasks) { double 'updated_tasks' }
   let(:unsynchronized_issues) { double 'unsynchronized_issues' }
   let(:mapped_unsynchronized_issues) { double 'mapped_unsynchronized_issues' }
-  before do
-    allow(mapped_unsynchronized_issues).to receive(:reduce) { mapped_unsynchronized_issues }
-  end
+  let(:inner_pivotal_project) { double 'inner_pivotal_project' }
   let(:issue) { double 'issue' }
   let(:assigned_issue) { double 'assigned_issue' }
+  let(:to_update_stories) { double 'to_update_stories' }
+  let(:jira_id_map) { double 'jira_id_map' }
+  let(:story) { double 'story' }
+  let(:to_create_stories) { double 'to_create_stories' }
+  let(:hash_name) { SecureRandom.random_bytes(64) }
+  let(:project) { double 'project' }
+  let(:worker) { SyncWorker.new }
+  let(:bridge) { JiraToPivotal::Bridge.new(hash_name) }
+  let(:logger) { double 'logger' }
+  let(:jira_logger) { double 'jira_logger' }
+
   before do
     allow(issue).to receive(:send) { 'url' }
     allow(issue).to receive(:key) { 'url' }
     allow(issue).to receive(:issue) { issue }
-  end
-  before do
+
+    allow(mapped_unsynchronized_issues).to receive(:reduce) { mapped_unsynchronized_issues }
+
     allow(unsynchronized_issues).to receive(:[]).with(:to_update) { [unsynchronized_issues] }
     allow(unsynchronized_issues).to receive(:[]).with(:to_create) { [unsynchronized_issues] }
     allow(unsynchronized_issues).to receive(:map) { mapped_unsynchronized_issues }
     allow(unsynchronized_issues).to receive(:key) { 'url' }
     allow(unsynchronized_issues).to receive(:issue) { issue }
 
-  end
-
-  before do
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields) { {} }
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:project) { inner_jira_project }
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:update_tasks!) { updated_tasks }
@@ -63,33 +70,21 @@ describe SyncWorker, type: :service do
       'create_sub_tasks'
     end
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:create_tasks!) { 'create_tasks!' }
-  end
 
-  let(:inner_pivotal_project) { double 'inner_pivotal_project' }
-  before do
     allow(inner_pivotal_project).to receive(:project) { inner_pivotal_project }
     allow(TrackerApi::Client).to receive(:new) { inner_pivotal_project }
-  end
-  let(:to_update_stories) { double 'to_update_stories' }
-  let(:jira_id_map) { double 'jira_id_map' }
-  before do
+
     allow(to_update_stories).to receive(:map) { to_update_stories }
     allow(to_update_stories).to receive(:join).with(',') { jira_id_map }
-  end
-  let(:story) { double 'story' }
-  before do
+
     allow(story).to receive(:url) { 'url' }
     allow(story).to receive(:assign_to_jira_issue) { 'assigned_story' }
-  end
-  let(:to_create_stories) { double 'to_create_stories' }
-  before do
+
     allow(to_create_stories).to receive(:story) { story }
     allow(to_create_stories).to receive(:url) { 'url' }
     allow(to_create_stories).to receive(:jira_issue_id) { 'jira_issue_id' }
     allow(to_create_stories).to receive(:assign_to_jira_issue) { assigned_issue }
-  end
 
-  before do
     allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:load_to_create_stories) do
       [to_create_stories]
     end
@@ -97,27 +92,15 @@ describe SyncWorker, type: :service do
       to_update_stories
     end
     allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:create_tasks!) { 'create_task' }
-  end
 
-  let(:hash_name) { SecureRandom.random_bytes(64) }
-  let(:project) { double 'project' }
-  let(:worker) { SyncWorker.new }
-  let(:bridge) { JiraToPivotal::Bridge.new(hash_name) }
-  before do
     crypt = ActiveSupport::MessageEncryptor.new(hash_name)
     encrypted_hash = crypt.encrypt_and_sign(hash.to_json)
     Sidekiq.redis { |connection| connection.set(hash_name, encrypted_hash) }
-  end
 
-  let(:logger) { double 'logger' }
-  let(:jira_logger) { double 'jira_logger' }
-  before do
     allow(JiraToPivotal::ScriptLogger).to receive(:new) { logger }
-  end
-  before do
+
     allow(jira_logger).to receive(:update_jira_pivotal_connection_log) { 'update_j2p_connection_log' }
-  end
-  before do
+
     allow(logger).to receive(:logger) { logger }
     allow(logger).to receive(:error) { 'log.error' }
     allow(logger).to receive(:update_config) { 'log.update_config' }
@@ -130,16 +113,19 @@ describe SyncWorker, type: :service do
 
   describe '#sync!' do
     subject { worker.perform(project, hash_name) }
-    context 'when check_projects return nil' do
-    let(:inner_jira_project) { nil }
-    let(:inner_pivotal_project) { nil }
 
-    it { is_expected.to eq nil }
+    context 'when check_projects return nil' do
+      let(:inner_jira_project) { nil }
+      let(:inner_pivotal_project) { nil }
+
+      it { is_expected.to eq nil }
     end
+
     context 'when check_projects is true' do
       it { is_expected.to eq 'create_tasks!' }
     end
   end
+
   describe '#from_jira_to_pivotal!' do
     subject { bridge.from_jira_to_pivotal! }
     it { is_expected.to eq 'create_task' }
