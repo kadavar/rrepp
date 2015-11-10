@@ -12,10 +12,11 @@ describe JiraToPivotal::Jira::Issue do
   let(:config) { create :config }
   let(:project) { create :project }
   let(:options) do
-    { :client => client,
+    {
+      :client  => client,
       :project => project,
-      :issue => issue,
-      :config => config
+      :issue   => issue,
+      :config  => config
     }
   end
 
@@ -94,11 +95,14 @@ describe JiraToPivotal::Jira::Issue do
   describe '#save!' do
     let(:config) {
       { custom_fields:
-        { 'piv_points' => 'points',
-          'piv_url' => 'url' },
+        {
+          'piv_points' => 'points',
+          'piv_url'    => 'url' },
           'jira_custom_fields' =>
-        { 'pivotal_points' => 'piv_points',
-          'pivotal_url' => 'piv_url' }
+            {
+              'pivotal_points' => 'piv_points',
+              'pivotal_url'    => 'piv_url'
+            }
       }
     }
     let(:attrs) { double 'attrs' }
@@ -111,9 +115,9 @@ describe JiraToPivotal::Jira::Issue do
 
     describe 'non closed status' do
       let(:fields) do
-        { 'issuetype' => { 'name' => 'name' },
+        { 'issuetype'    => { 'name' => 'name' },
           'timetracking' => 'originalEstimate',
-          'reporter' => 'reporter' }
+          'reporter'     => 'reporter' }
       end
 
       let(:not_equal_fields) { { 'issuetype' => { 'name' => 'names' } } }
@@ -133,9 +137,9 @@ describe JiraToPivotal::Jira::Issue do
         context 'issue with points' do
           let(:fields) do
             {
-              'issuetype' => { 'name' => 'Chore' },
+              'issuetype'    => { 'name' => 'Chore' },
               'timetracking' => 'originalEstimate',
-              'reporter' => 'reporter'
+              'reporter'     => 'reporter'
             }
           end
 
@@ -181,9 +185,9 @@ describe JiraToPivotal::Jira::Issue do
     context 'when issue is subtask' do
       let(:fields) do
         {
-          'issuetype' => { 'name' => 'Sub-task' },
+          'issuetype'    => { 'name' => 'Sub-task' },
           'timetracking' => 'originalEstimate',
-          'reporter' => 'reporter'
+          'reporter'     => 'reporter'
         }
       end
 
@@ -192,9 +196,11 @@ describe JiraToPivotal::Jira::Issue do
 
     context 'when can change status and non subtask' do
       let(:fields) do
-        { 'issuetype' => { 'name' => 'Bug' },
+        {
+          'issuetype'    => { 'name' => 'Bug' },
           'timetracking' => 'originalEstimate',
-          'reporter' => 'reporter' }
+          'reporter'     => 'reporter'
+        }
       end
 
       it { is_expected.to eq 'send_post' }

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe SyncWorker do
+describe SyncWorker, type: :service do
   let(:hash) do
     {
       tracker_project_id: '312',
@@ -14,12 +14,16 @@ describe SyncWorker do
       script_first_start: '2',
       script_repeat_time: '5m',
       jira_custom_fields:
-        { pivotal_points: 'Story Points',
-          pivotal_url: 'Pivotal Tracker URL' },
+        {
+          pivotal_points: 'Story Points',
+          pivotal_url: 'Pivotal Tracker URL'
+        },
       jira_issue_types:
-        { bug: '1',
+        {
+          bug: '1',
           feature: '2',
-          chore: '9' },
+          chore: '9'
+        },
       jira_password: 'password',
       tracker_token: 'token'
     }
@@ -50,10 +54,14 @@ describe SyncWorker do
 
   before do
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:issue_custom_fields) { {} }
-    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:project) {  inner_jira_project  }
-    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:update_tasks!) {  updated_tasks  }
-    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:unsynchronized_issues) { unsynchronized_issues  }
-    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:create_sub_task_for_invoiced_issues!) { 'create_sub_tasks' }
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:project) { inner_jira_project }
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:update_tasks!) { updated_tasks }
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:unsynchronized_issues) do
+      unsynchronized_issues
+    end
+    allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:create_sub_task_for_invoiced_issues!) do
+      'create_sub_tasks'
+    end
     allow_any_instance_of(JiraToPivotal::Jira::Project).to receive(:create_tasks!) { 'create_tasks!' }
   end
 
@@ -82,8 +90,12 @@ describe SyncWorker do
   end
 
   before do
-    allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:load_to_create_stories) { [to_create_stories] }
-    allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:load_to_update_stories) { to_update_stories }
+    allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:load_to_create_stories) do
+      [to_create_stories]
+    end
+    allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:load_to_update_stories) do
+      to_update_stories
+    end
     allow_any_instance_of(JiraToPivotal::Pivotal::Project).to receive(:create_tasks!) { 'create_task' }
   end
 
@@ -94,7 +106,7 @@ describe SyncWorker do
   before do
     crypt = ActiveSupport::MessageEncryptor.new(hash_name)
     encrypted_hash = crypt.encrypt_and_sign(hash.to_json)
-    Sidekiq.redis { |connection| connection.set(hash_name,encrypted_hash) }
+    Sidekiq.redis { |connection| connection.set(hash_name, encrypted_hash) }
   end
 
   let(:logger) { double 'logger' }
@@ -113,11 +125,11 @@ describe SyncWorker do
     allow(logger).to receive(:jira_logger) { jira_logger }
   end
 
-  before { bridge.instance_variable_set(:@logger,logger) }
+  before { bridge.instance_variable_set(:@logger, logger) }
   after { Sidekiq.redis { |connection| connection.del(hash_name) } }
 
   describe '#sync!' do
-    subject { worker.perform(project,hash_name) }
+    subject { worker.perform(project, hash_name) }
     context 'when check_projects return nil' do
     let(:inner_jira_project) { nil }
     let(:inner_pivotal_project) { nil }
