@@ -1,15 +1,13 @@
 require 'rails_helper'
 
-describe NotificationMailer, :type => :mailer do
+describe NotificationMailer do
   before(:each) do
     ActionMailer::Base.delivery_method = :test
     ActionMailer::Base.perform_deliveries = true
     ActionMailer::Base.deliveries = []
-    NotificationMailer.default :from=> 'j2p@examp.com'
+    NotificationMailer.default from: 'j2p@examp.com'
   end
-  after(:each) do
-    ActionMailer::Base.deliveries.clear
-  end
+
   describe '#notification_email' do
     subject { ActionMailer::Base.deliveries.count }
     let(:send_email) { NotificationMailer.send(:new).notification_email('headers','examp@examp.com').deliver }
@@ -18,4 +16,6 @@ describe NotificationMailer, :type => :mailer do
       it { is_expected.to eq 1 }
      end
   end
+
+  after(:each) { ActionMailer::Base.deliveries.clear }
 end
