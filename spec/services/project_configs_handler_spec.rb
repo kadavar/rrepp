@@ -14,6 +14,7 @@ describe ProjectConfigsHandler do
   before { allow_any_instance_of(PathHandler).to receive(:default_config_path) { 'tmp' } }
 
   describe '#synchronize' do
+    subject { File.exist?(Rails.root.join 'tmp/test_config.yml') }
     context 'new config file' do
       in_directory_with_file('non_empty_config.yml')
 
@@ -36,7 +37,18 @@ describe ProjectConfigsHandler do
 
       specify 'creates config file' do
         expect(File.exist?(Rails.root.join 'tmp/test_config.yml')).to be true
+        is_expected.to be true
       end
+    end
+
+    context 'when create_config return Errno:ENOENT' do
+      in_directory_with_file('non_empty_config.yml')
+      before do
+        create :config, :issues_and_custom_fields
+        allow_any_instance_of(PathHandler).to receive(:config_path).and_return('')
+        ProjectConfigsHandler.new.synchronize
+      end
+      it { is_expected.to be false }
     end
   end
 

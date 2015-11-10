@@ -3,11 +3,11 @@ include JiraProjectsHelper
 
 describe JiraToPivotal::Jira::OwnershipHandler do
   let(:pivotal) { instance_double('pivotal',
-                  :map_users_by_email => { 'email_address' => 'examp@examp',
+                  :map_users_by_email => { 'email_address' => 'aexamp@examp',
                                            'owner1_name' => 'name@s' }) }
   let(:jira) { instance_double('jira',
                :jira_assignable_users => { 'email_address' =>
-                                          { 'examp@examp' => 'exampl@examp' },
+                                          { 'name@examp' => 'owner1_name' },
                                            'display_name' =>
                                           { 'owner1_name' => 'owner1_name' } }) }
   let(:owner_1) { instance_double('owner', name: 'owner1_name') }
@@ -63,6 +63,17 @@ describe JiraToPivotal::Jira::OwnershipHandler do
       let(:result) {
         { "reporter" => { "name" => "exampemail@email" },
           "assignee" => { "name" => "exampemail@email" }
+        }
+      }
+      it { is_expected.to eql result }
+    end
+    context 'when name_by_email doens`t` present' do
+      let(:pivotal) { instance_double('pivotal',
+                      map_users_by_email: { 'email_addres' => 'examp@exemail',
+                                                            owner_1.name => 'ex@lda' }) }
+      let(:result) {
+        { "reporter" => { "name" => owner_1.name },
+          "assignee" => { "name" => owner_1.name }
         }
       }
       it { is_expected.to eql result }

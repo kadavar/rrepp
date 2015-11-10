@@ -120,27 +120,42 @@ describe JiraToPivotal::DifferenceChecker do
 
     context 'different reporter names' do
       before { allow(user_permissions).to receive(:modify_reporter?) { true } }
-
-      before do
+      specify 'when reporter name != assignee name ' do
         allow(jira_issue).to receive(:fields) do
           {
-            'summary' => 'summary',
-            'description' => 'description',
-            'issuetype' => { 'id' => 2 },
-            'reporter' => { 'name' => 'different name' },
-            'assignee' => { 'name' => 'name' },
-            'points_field' => 4,
-            'timeoriginalestimate' => 4
+              'summary' => 'summary',
+              'description' => 'description',
+              'issuetype' => { 'id' => 2 },
+              'reporter' => { 'name' => 'different name' },
+              'assignee' => { 'name' => 'name' },
+              'points_field' => 4,
+              'timeoriginalestimate' => 4
           }
         end
+
+        is_expected.to be true
       end
 
-      it { is_expected.to be true }
+      specify 'when reporter name != assignee name ' do
+        allow(jira_issue).to receive(:fields) do
+          {
+              'summary' => 'summary',
+              'description' => 'description',
+              'issuetype' => { 'id' => 2 },
+              'reporter' => nil,
+              'assignee' => { 'name' => 'name' },
+              'points_field' => 4,
+              'timeoriginalestimate' => 4
+          }
+        end
+
+        is_expected.to be true
+      end
     end
 
     context 'different assignee names' do
-      before { allow(user_permissions).to receive(:assign_issue?) { true } }
-      before do
+      before {  allow(user_permissions).to receive(:assign_issue?) { true } }
+      specify 'when story_assignee && jira_assignee' do
         allow(jira_issue).to receive(:fields) do
           {
             'summary' => 'summary',
@@ -153,7 +168,23 @@ describe JiraToPivotal::DifferenceChecker do
           }
         end
 
-        it { is_expected.to be true }
+        is_expected.to be true
+      end
+
+      specify 'when jira_issue assignee is nil' do
+        allow(jira_issue).to receive(:fields) do
+          {
+            'summary' => 'summary',
+            'description' => 'description',
+            'issuetype' => { 'id' => 2 },
+            'reporter' => { 'name' => 'name' },
+            'assignee' => nil,
+            'points_field' => 4,
+            'timeoriginalestimate' => 4
+          }
+        end
+
+        is_expected.to be true
       end
     end
 
@@ -171,8 +202,29 @@ describe JiraToPivotal::DifferenceChecker do
           }
         end
       end
-
       it { is_expected.to be true }
+    end
+  end
+
+  describe '#status_difference?' do
+    let(:jira_issue){ double 'jira_issue' }
+    let(:fields) { { 'status' => { 'name' => 'statusname' } } }
+    let(:story) { double 'story' }
+    before { allow(jira_issue).to receive(:fields) { fields } }
+    subject { difference_checker.status_difference?(jira_issue,story) }
+
+    context 'when story status != jira_issue status' do
+      before do
+        allow(story).to receive(:current_story_status_to_issue_status).and_return('notstatusname')
+      end
+      it { is_expected.to be true }
+    end
+
+    context 'when story status == jira_issue status ' do
+      before do
+        allow(story).to receive(:current_story_status_to_issue_status).and_return('statusname')
+      end
+      it { is_expected.to be false }
     end
   end
 end
