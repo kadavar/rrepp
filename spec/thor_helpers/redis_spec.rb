@@ -1,11 +1,13 @@
 require 'rails_helper'
 describe ThorHelpers::Redis do
   let(:redis) { ThorHelpers::Redis }
+
   describe '#insert_config' do
+    subject { redis.insert_config(config, hash) }
+
     let(:config) { { 'params' => 'par' } }
     let(:hash) { SecureRandom.hex(30) }
     let(:insert_config) { Sidekiq.redis { |connection| connection.get(hash) } }
-    subject { redis.insert_config(config, hash) }
 
     context 'insert config to Redis' do
       it { is_expected.to eq 'OK' }
@@ -18,6 +20,8 @@ describe ThorHelpers::Redis do
   end
 
   describe '#update project' do
+    subject { redis.update_project(project_name, config_path) }
+
     let(:project_name) { 'project_name' }
     let(:config_path) { 'path ' }
     let(:parsed_proj) {
@@ -25,32 +29,34 @@ describe ThorHelpers::Redis do
                           last_update: Time.now.utc,
                           config_path: config_path } } }
 
-    subject { redis.update_project(project_name, config_path) }
-
     context 'update projects ' do
       before do
         allow(ThorHelpers::Redis).to receive(:parsed_projets) { parsed_proj }
       end
+
       it { is_expected.to eq 'OK' }
     end
+
     context 'when parsed_projects is not present ' do
       before do
         allow(ThorHelpers::Redis).to receive(:parsed_projets) { nil }
       end
+
       it { is_expected.to eq 'OK' }
     end
   end
 
   describe '#last_update' do
-    let(:project_name) { 'project_name' }
     subject { redis.last_update(project_name, 'TIME') }
+
+    let(:project_name) { 'project_name' }
+
     context 'when parsed_projects is not present' do
       it { is_expected.to eq 'OK' }
     end
+
     context 'when parsed_projects is not present' do
-      before do
-        Sidekiq.redis { |connection| connection.del('projects') }
-      end
+      before { Sidekiq.redis { |connection| connection.del('projects') } }
       it { is_expected.to be false }
     end
   end
