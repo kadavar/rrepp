@@ -2,10 +2,15 @@ require 'rails_helper'
 
 describe JiraToPivotal::Jira::Issue do
 
-  let(:client) { double 'client' }
-  let(:project) { create :project }
-  let(:issue) { double 'issue' }
+  let(:client)  { double 'client' }
+  let(:issue)   { double 'issue' }
+  let(:e)       { double 'e' }
+  let(:logger)  { double 'logger' }
+  let(:comment) { double 'comment' }
+  let(:story)   { double 'story' }
+
   let(:config) { create :config }
+  let(:project) { create :project }
   let(:options) do
     { :client => client,
       :project => project,
@@ -13,35 +18,36 @@ describe JiraToPivotal::Jira::Issue do
       :config => config
     }
   end
-  let(:e) { double 'e' }
+
   before do
     allow(e).to receive(:respoonse) { e }
     allow(e).to receive(:body) { 'message' }
     allow(e).to receive(:message) { 'message' }
   end
+
   let(:story_url) { 'story_url' }
   let(:fields) { {} }
+
   before { allow(issue).to receive(:fields) { fields } }
   before { allow(config).to receive(:airbrake_message_parameters) { {} } }
 
-  let(:logger) { double 'logger' }
   before do
     allow(logger).to receive(:attrs_log) { 'true' }
     allow(logger).to receive(:error_log) { 'error_log' }
   end
 
   let(:jira_issue) { JiraToPivotal::Jira::Issue.new(options) }
-  let(:comment) { double 'comment' }
+
   before { allow(comment).to receive(:body) { 'comment_body' } }
   before { allow(JiraToPivotal::ScriptLogger).to receive(:new) { logger } }
   before { allow(issue).to receive(:comments) { [comment] } }
-  let(:story) { double 'story' }
 
   describe '#comments' do
     subject { jira_issue.comments }
     context 'when comments' do
       it { is_expected.to eq [comment] }
     end
+
     context 'when comments' do
       let(:body) { jira_issue.comment_text }
       let(:comment) { double 'comment' }
@@ -54,7 +60,9 @@ describe JiraToPivotal::Jira::Issue do
 
   describe '#attachments' do
     let(:attachment) { double 'attachment' }
+
     before { allow(issue).to receive(:attachments) { [attachment] } }
+
     subject { jira_issue.attachments }
 
     context 'when attachments exist' do
@@ -71,6 +79,7 @@ describe JiraToPivotal::Jira::Issue do
   describe '#add_marker_comment' do
     let(:story_url) { 'story_url' }
     let(:new_comment) { double 'new_comment' }
+
     before { allow(issue).to receive(:comments) { new_comment } }
     before { allow(new_comment).to receive(:build) { new_comment } }
     before { allow(new_comment).to receive(:save) { 'saved' } }
@@ -106,9 +115,11 @@ describe JiraToPivotal::Jira::Issue do
                                  'reporter' => 'reporter' } }
       let(:attrs) { { 'fields' => not_equal_fields } }
       let(:permissions) { { 'modify_reporter' => { 'havePermission' => false } } }
+
       before do
         allow(project).to receive(:user_permissions) { { 'permissions' => permissions } }
       end
+
       context 'without exception' do
         before { allow(issue).to receive(:save!) { issue } }
         specify 'issue without points' do
@@ -122,6 +133,7 @@ describe JiraToPivotal::Jira::Issue do
           it { is_expected.to eq issue }
         end
       end
+
       context 'with exception' do
         before { allow(issue).to receive(:save!) { fail(JIRA::HTTPError, e) } }
         it { is_expected.to eq 'error_log' }
@@ -145,8 +157,10 @@ describe JiraToPivotal::Jira::Issue do
 
   describe '#update_status!' do
     subject { jira_issue.update_status!(story) }
+
     let(:response) { double 'responce' }
     let(:transitions) { { 'transitions' => [{ 'name' => 'bug', 'id' => 3 }] } }
+
     before { allow(response).to receive(:body) { transitions.to_json } }
     before do
       allow(client).to receive(:get) { response }
@@ -177,7 +191,9 @@ describe JiraToPivotal::Jira::Issue do
 
   describe '#create_notes!' do
     subject { jira_issue.create_notes!(story) }
+
     let(:note) { double 'note' }
+
     before { allow(note).to receive(:text) { 'text' } }
     before do
       allow(story).to receive(:notes) { [note] }
@@ -185,6 +201,7 @@ describe JiraToPivotal::Jira::Issue do
       allow(story).to receive(:project) { pivotal_project }
       allow(story).to receive(:url) { 'url' }
     end
+
     context 'when notes not exist' do
       before { allow(story).to receive(:notes) {} }
       it { is_expected.to be false }
@@ -193,6 +210,7 @@ describe JiraToPivotal::Jira::Issue do
     context 'when notes is exist' do
       let(:pivotal_project) { double 'pivotal_project' }
       let(:author) { double 'author' }
+
       before { allow(author).to receive(:name) { 'author' } }
       before do
         allow(comment).to receive(:build) { comment }
@@ -204,6 +222,7 @@ describe JiraToPivotal::Jira::Issue do
         allow(pivotal_project).to receive(:map) { pivotal_project }
         allow(pivotal_project).to receive(:find) { author }
       end
+
       it { is_expected.to eq [note] }
 
       specify 'when exception exist' do
