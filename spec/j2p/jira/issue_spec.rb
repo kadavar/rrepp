@@ -92,27 +92,31 @@ describe JiraToPivotal::Jira::Issue do
   end
 
   describe '#save!' do
-    let(:config) { { custom_fields:
-                         { 'piv_points' => 'points',
-                           'piv_url' => 'url' },
-                     'jira_custom_fields' =>
-                         { 'pivotal_points' => 'piv_points',
-                           'pivotal_url' => 'piv_url' } } }
+    let(:config) {
+      { custom_fields:
+        { 'piv_points' => 'points',
+          'piv_url' => 'url' },
+          'jira_custom_fields' =>
+        { 'pivotal_points' => 'piv_points',
+          'pivotal_url' => 'piv_url' }
+      }
+    }
     let(:attrs) { double 'attrs' }
     subject { jira_issue.assign_to_pivotal_issue(story_url, config) }
 
-    context 'when status is closed ' do
+    context 'when status is closed' do
       let(:fields) { { 'status' => { 'name' => 'Closed' } } }
       it { is_expected.to eq false }
     end
 
     describe 'non closed status' do
-      let(:fields) { { 'issuetype' => { 'name' => 'name' },
-                       'timetracking' => 'originalEstimate',
-                       'reporter' => 'reporter' } }
-      let(:not_equal_fields) { { 'issuetype' => { 'name' => 'names' },
-                                 'timetracking' => 'originalEstimate',
-                                 'reporter' => 'reporter' } }
+      let(:fields) do
+        { 'issuetype' => { 'name' => 'name' },
+          'timetracking' => 'originalEstimate',
+          'reporter' => 'reporter' }
+      end
+
+      let(:not_equal_fields) { { 'issuetype' => { 'name' => 'names' } } }
       let(:attrs) { { 'fields' => not_equal_fields } }
       let(:permissions) { { 'modify_reporter' => { 'havePermission' => false } } }
 
@@ -123,20 +127,25 @@ describe JiraToPivotal::Jira::Issue do
       context 'without exception' do
         before { allow(issue).to receive(:save!) { issue } }
         specify 'issue without points' do
-          is_expected.to eq issue
+          is_expected.to be true
         end
 
         context 'issue with points' do
-          let(:fields) { { 'issuetype' => { 'name' => 'Chore' },
-                           'timetracking' => 'originalEstimate',
-                           'reporter' => 'reporter' } }
-          it { is_expected.to eq issue }
+          let(:fields) do
+            {
+              'issuetype' => { 'name' => 'Chore' },
+              'timetracking' => 'originalEstimate',
+              'reporter' => 'reporter'
+            }
+          end
+
+          it { is_expected.to be true }
         end
       end
 
       context 'with exception' do
         before { allow(issue).to receive(:save!) { fail(JIRA::HTTPError, e) } }
-        it { is_expected.to eq 'error_log' }
+        it { is_expected.to eq false }
       end
     end
   end
@@ -170,16 +179,24 @@ describe JiraToPivotal::Jira::Issue do
     before { allow(story).to receive(:story_status_to_issue_status) { 'bug' } }
 
     context 'when issue is subtask' do
-      let(:fields) { { 'issuetype' => { 'name' => 'Sub-task' },
-                       'timetracking' => 'originalEstimate',
-                       'reporter' => 'reporter' } }
+      let(:fields) do
+        {
+          'issuetype' => { 'name' => 'Sub-task' },
+          'timetracking' => 'originalEstimate',
+          'reporter' => 'reporter'
+        }
+      end
+
       it { is_expected.to eq false }
     end
 
     context 'when can change status and non subtask' do
-      let(:fields) { { 'issuetype' => { 'name' => 'Bug' },
-                       'timetracking' => 'originalEstimate',
-                       'reporter' => 'reporter' } }
+      let(:fields) do
+        { 'issuetype' => { 'name' => 'Bug' },
+          'timetracking' => 'originalEstimate',
+          'reporter' => 'reporter' }
+      end
+
       it { is_expected.to eq 'send_post' }
 
       specify 'post return JIRA::HTTPerror' do
