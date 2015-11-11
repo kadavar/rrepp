@@ -36,7 +36,7 @@ describe ProjectsController do
   end
 
   describe '#stop' do
-    subject  { get :stop,params }
+    subject { get :stop,params }
     before { allow(Process).to receive(:kill).and_return('stub') }
     context 'when Process.kill is success' do
       it { is_expected.to redirect_to projects_path }
@@ -45,7 +45,7 @@ describe ProjectsController do
 
   describe '#destroy' do
 
-    let(:params_2) { {id: project_2.id} }
+    let(:params_2) { { id: project_2.id } }
     let!(:project_2) { create :project, :online, :with_config, name: 'testp2' }
     subject { response }
 
@@ -53,9 +53,15 @@ describe ProjectsController do
       expect { delete :destroy, params }.to change(Project, :count).by(-1)
     end
 
-    context 'redirect to project path ' do
+    context 'redirect to project path' do
       before { delete :destroy, params_2 }
       it { is_expected.to redirect_to projects_url }
     end
+  end
+
+  describe '#index' do
+    subject { response }
+    before { get :index }
+    it { is_expected.to render_template(:index) }
   end
 end
