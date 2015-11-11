@@ -1,56 +1,56 @@
 require 'rails_helper'
 include PivotalStoryHelpers
 
-describe JiraToPivotal::Pivotal::Story do
+describe JiraToPivotal::Pivotal::Story, type: :module do
   let(:project) { create :project }
-  let(:conf) { create :config }
   let(:inner_story) { double 'inner story' }
-  let!(:pivotal_story) { JiraToPivotal::Pivotal::Story.new(project, inner_story, conf) }
+  let!(:pivotal_story) { JiraToPivotal::Pivotal::Story.new(project, inner_story, config) }
   let(:custom_fields) { { 'points' => 'Story Points', 'url' => 'Pivotal Tracker URL' } }
+  let(:config) {  create :config }
   let(:logger) { double 'logger' }
 
-  before { allow(pivotal_story).to receive(:story) { inner_story } }
-  before { allow(Airbrake).to receive(:notify_or_ignore) {} }
-
   before do
-    allow(conf).to receive(:airbrake_message_parameters) {}
-    allow(conf).to receive(:[]).with('retry_count') { 2 }
-    allow(conf).to receive(:[]).with('repeat_delay') { 2 }
-    allow(conf).to receive(:[]).with('tracker_project_id') { 2 }
+    allow(Airbrake).to receive(:notify_or_ignore) {}
+    allow(pivotal_story).to receive(:story) { inner_story }
+    allow(config).to receive(:airbrake_message_parameters) {}
+    allow(config).to receive(:[]) { 2 }
+    allow(logger).to receive(:error_log) {}
+    allow(pivotal_story).to receive(:logger) { logger }
+    pivotal_story.instance_variable_set(:@config, config)
   end
-
-  before { allow(logger).to receive(:error_log) {} }
-  before { allow(pivotal_story).to receive(:logger) { logger } }
 
   describe '#to_jira' do
     subject { pivotal_story.to_jira(custom_fields) }
     let(:ownership_handler) { double 'ownership handler' }
-    before { allow(conf).to receive(:[]).with(:ownership_handler) { ownership_handler } }
+
     before do
       allow(pivotal_story).to receive(:main_attrs) do
         {
-            'summary' => 'summary',
-            'description' => 'description',
-            'issuetype' => { 'id' => '1' }
+          'summary'      => 'summary',
+          'description'  => 'description',
+          'issuetype'    => { 'id' => '1' }
         }
       end
+
       allow(pivotal_story).to receive(:original_estimate_attrs) { { 'estimate' => 'estimate' } }
       allow(pivotal_story).to receive(:custom_fields_attrs) { { 'pivotal' => 'pivotal' } }
-    end
-    before do
+
+
       allow(ownership_handler).to receive(:reporter_and_asignee_attrs) { { 'reporter' => 'reporter' } }
+
+      allow(pivotal_story).to receive(:ownership_handler) { ownership_handler }
     end
 
     context 'without error' do
       it 'returns valid jira issue' do
         is_expected.to eq(
-                           'summary' => 'summary',
-                           'description' => 'description',
-                           'issuetype' => { 'id' => '1' },
-                           'estimate' => 'estimate',
-                           'pivotal' => 'pivotal',
-                           'reporter' => 'reporter'
-                        )
+          'summary'      => 'summary',
+          'description'  => 'description',
+          'issuetype'    => { 'id' => '1' },
+          'estimate'     => 'estimate',
+          'pivotal'      => 'pivotal',
+          'reporter'     => 'reporter'
+        )
       end
     end
 
@@ -66,13 +66,13 @@ describe JiraToPivotal::Pivotal::Story do
   end
 
   describe '#main_attrs' do
+
     subject(:attrs) { pivotal_story.main_attrs }
-    let(:issue_types) { { 'bug' => '3', 'feature' => '4', 'chore' => '5' } }
+
     before do
-      allow(inner_story).to receive(:description) { 'description' }
-      allow(inner_story).to receive(:story_type) { 'bug' }
+      allow(pivotal_story).to receive(:description_with_replaced_image_tag) { 'description' }
+      allow(pivotal_story).to receive(:story_type_to_issue_type) { '3' }
     end
-    before { allow(conf).to receive(:[]).with('jira_issue_types') { issue_types } }
 
     context 'with clear summary' do
       before { allow(inner_story).to receive(:name) { 'clear name' } }
@@ -107,6 +107,7 @@ describe JiraToPivotal::Pivotal::Story do
   end
 
   describe '#description_with_replaced_image_tag' do
+
     subject { pivotal_story.description_with_replaced_image_tag }
 
     let(:description) { double 'description' }
@@ -137,10 +138,11 @@ describe JiraToPivotal::Pivotal::Story do
   end
 
   describe '#set_original_estimate?' do
+
     subject { pivotal_story.set_original_estimate? }
 
     before do
-      allow(inner_story).to receive(:current_state) { 'nonstarted' }
+      allow(inner_story).to receive(:current_state) { 'nonustarted' }
       allow(inner_story).to receive(:story_type) { 'type' }
       allow(inner_story).to receive(:estimate) { '-1' }
     end
@@ -179,6 +181,7 @@ describe JiraToPivotal::Pivotal::Story do
   end
 
   describe '#original_estimate_attrs' do
+
     subject { pivotal_story.original_estimate_attrs }
 
     before { allow(inner_story).to receive(:estimate) { '2' } }
@@ -197,6 +200,7 @@ describe JiraToPivotal::Pivotal::Story do
   end
 
   describe '#custom_fields_attrs' do
+
     subject(:fields_attrs) { pivotal_story.custom_fields_attrs(custom_fields) }
 
     before do
@@ -212,8 +216,8 @@ describe JiraToPivotal::Pivotal::Story do
       before do
         allow(pivotal_story).to receive(:config) do
           {
-              'jira_custom_fields' => { 'pivotal_url' => '',
-                                        'pivotal_points' => 'Story Points' }
+            'jira_custom_fields' => { 'pivotal_url' => '',
+                                      'pivotal_points' => 'Story Points' }
           }
         end
       end
@@ -240,8 +244,8 @@ describe JiraToPivotal::Pivotal::Story do
       before do
         allow(pivotal_story).to receive(:config) do
           {
-              'jira_custom_fields' => { 'pivotal_url' => 'Pivotal Tracker URL',
-                                        'pivotal_points' => 'Story Points' }
+            'jira_custom_fields' => { 'pivotal_url' => 'Pivotal Tracker URL',
+                                      'pivotal_points' => 'Story Points' }
           }
         end
       end
@@ -290,7 +294,6 @@ describe JiraToPivotal::Pivotal::Story do
       allow(integrations).to receive(:select) { [integration] }
       allow(integrations).to receive(:body) { integrations }
     end
-
     let(:client) { double 'client' }
     before { allow(client).to receive(:get) { integrations } }
 
@@ -304,6 +307,7 @@ describe JiraToPivotal::Pivotal::Story do
       allow(project).to receive(:story) { story }
       allow(project).to receive(:client) { client }
     end
+
     subject { pivotal_story.assign_to_jira_issue(key, jira_url) }
 
     context 'when integration present' do
@@ -323,19 +327,46 @@ describe JiraToPivotal::Pivotal::Story do
 
   describe '#jira_issue_id' do
     before { allow(inner_story).to receive(:external_id) { 'external_id' } }
+
     subject { pivotal_story.jira_issue_id }
     it { is_expected.to eq 'external_id' }
   end
 
-  describe '#current_story_status_to_issue_status' do
-    before { allow(inner_story).to receive(:current_state) { 'rejected' } }
-    subject { pivotal_story.current_story_status_to_issue_status }
-    it { is_expected.to eq 'Reopened' }
+  describe '#regexp_for_image_tag_replace' do
+    let(:result) { /\!\[\w+ *\w+\]\(([\w\p{P}\p{S}]+) *\"*\w* *\w*\"*\)/u }
+
+    subject { pivotal_story.regexp_for_image_tag_replace }
+    it { is_expected.to eq result }
   end
 
-  describe '#story_status_to_issue_status' do
+  describe '#ownership_handler' do
+
+    subject { pivotal_story.ownership_handler }
+    before { allow(config).to receive(:[]).and_call_original }
+    let(:config) { { ownership_handler: 'handler' } }
+    it { is_expected.to eq 'handler' }
+  end
+
+  describe '#story_type_to_issue_type' do
+    let(:config) { { 'jira_issue_types' => { 'bug' => 'bug', 'feature' => 'feature', 'chore' => 'chore' } } }
+    before { allow(inner_story).to receive(:story_type) { 'bug' } }
+    before { allow(config).to receive(:[]).and_call_original }
+
+    subject { pivotal_story.story_type_to_issue_type }
+    it { is_expected.to eq 'bug' }
+  end
+
+  describe '#current_story_status_to_issue_status' do
+
+    subject { pivotal_story.current_story_status_to_issue_status }
     before { allow(inner_story).to receive(:current_state) { 'rejected' } }
+    it { is_expected.to eq 'Reopened' }
+  end
+  describe '#story_status_to_issue_status' do
+
     subject { pivotal_story.story_status_to_issue_status }
+    before { allow(inner_story).to receive(:current_state) { 'rejected' } }
     it { is_expected.to eq 'Reopen Issue' }
   end
 end
+
