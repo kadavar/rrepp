@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151112131229) do
+ActiveRecord::Schema.define(version: 20151112131845) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -85,6 +85,10 @@ ActiveRecord::Schema.define(version: 20151112131229) do
     t.string   "last_synchronization_status"
     t.string   "last_synchronization_message"
     t.string   "current_job_id"
+    t.integer  "pivotal_account_id"
+    t.integer  "jira_account_id"
+    t.string   "jira_project"
+    t.integer  "tracker_project_id"
   end
 
 end
