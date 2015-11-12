@@ -2,8 +2,8 @@ module JiraToPivotal
   class Bridge < JiraToPivotal::Base
     attr_reader :config
 
-    def initialize(hash)
-      @config = JiraToPivotal::Config.new(decrypt_config(hash))
+    def initialize(conf)
+      @config = JiraToPivotal::Config.new(conf)
     end
 
     def jira
@@ -20,7 +20,6 @@ module JiraToPivotal
 
     def sync!
       return unless check_projects
-      ThorHelpers::Redis.last_update(@config['project_name'], Time.zone.now)
 
       logger.update_config(options)
 
@@ -88,15 +87,6 @@ module JiraToPivotal
       end
 
       valid
-    end
-
-    def decrypt_config(hash)
-      crypt = ActiveSupport::MessageEncryptor.new(hash)
-
-      encrypted_data = Sidekiq.redis { |connection| connection.get(hash) }
-      decrypted_back = crypt.decrypt_and_verify(encrypted_data)
-
-      JSON.parse(decrypted_back)
     end
 
     def pivotal_jira_connection(issues, stories)

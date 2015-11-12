@@ -125,7 +125,15 @@ RSpec.describe JiraToPivotal::Jira::Issue do
       context 'without exception' do
         before { allow(issue).to receive(:save!) { issue } }
         specify 'issue without points' do
-          is_expected.to be true
+
+          is_expected.to eq true
+        end
+
+        context 'issue with points' do
+          let(:fields) { { 'issuetype' => { 'name' => 'Chore' },
+                           'timetracking' => 'originalEstimate',
+                           'reporter' => 'reporter' } }
+          it { is_expected.to eq true }
         end
 
         context 'issue with points' do

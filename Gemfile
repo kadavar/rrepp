@@ -2,11 +2,8 @@ source 'https://rubygems.org'
 
 gem 'rails', '4.2'
 gem 'certified'
-gem 'thor'
-gem 'thor-rails'
 gem 'colorize'
 gem 'highline'
-gem 'rufus-scheduler'
 gem 'airbrake'
 gem 'figaro'
 gem 'simple_form'
@@ -18,9 +15,12 @@ gem 'highlight', require: 'simplabs/highlight'
 gem 'kaminari'
 
 # Background jobber
-gem 'sidekiq'
+gem 'sidekiq', '3.4.2'
 gem 'sidekiq-failures'
 gem 'sidekiq-limit_fetch'
+gem 'sidekiq-middleware'
+gem 'sidetiq'
+gem 'sidekiq-status'
 
 gem 'sinatra', require: false
 gem 'differ', github: 'emintham/differ'

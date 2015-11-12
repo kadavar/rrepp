@@ -8,40 +8,16 @@ describe ProjectsController do
 
 
   describe '#force_sync' do
-    specify 'it passes right config to redis' do
-      expect(ThorHelpers::Redis).to receive(:insert_config) do |config, random_hash|
-        expect(%w(jira_password tracker_token).all? { |key| config.key? key }).to be true
+    specify 'it invokes sync_worker' do
+      expect(SyncWorker).to receive(:perform_async) do |project_id|
+        expect(project_id).to be project.id
       end
 
       get :sync_project, params
     end
   end
 
-  describe '#synchronize' do
-    specify 'it render flash error ' do
-      allow(ProjectsHandler).to receive(:perform).and_return(false)
-      get :synchronize
-      expect(flash[:error]).to be_present
-    end
 
-    specify 'it redirect to projects_path' do
-      get :synchronize
-      expect(response).to redirect_to projects_path
-    end
-
-    specify 'it render flash success' do
-      get :synchronize
-      expect(flash[:success]).to be_present
-    end
-  end
-
-  describe '#stop' do
-    subject { get :stop,params }
-    before { allow(Process).to receive(:kill).and_return('stub') }
-    context 'when Process.kill is success' do
-      it { is_expected.to redirect_to projects_path }
-    end
-  end
 
   describe '#destroy' do
 
@@ -59,9 +35,11 @@ describe ProjectsController do
     end
   end
 
+
   describe '#index' do
     subject { response }
     before { get :index }
     it { is_expected.to render_template(:index) }
   end
 end
+

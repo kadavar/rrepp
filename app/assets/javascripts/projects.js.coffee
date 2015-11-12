@@ -1,3 +1,7 @@
-# Place all the behaviors and hooks related to the matching controller here.
-# All this logic will automatically be available in application.js.
-# You can use CoffeeScript in this file: http://coffeescript.org/
+refreshStatuses = ->
+  $.ajax
+    url: 'projects/status'
+
+$(document).ready ->
+  if  $('div.projects-index').length
+    setInterval refreshStatuses, 2000
