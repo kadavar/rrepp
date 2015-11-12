@@ -1,7 +1,9 @@
 require 'sidekiq/web'
 
 Rails.application.routes.draw do
-  resources :pivotal_accounts
+  resources :jira_accounts,only: [:index, :create, :destroy, :update, :edit]
+
+  resources :pivotal_accounts,only: [:index, :create, :destroy, :update, :edit]
 
   mount Sidekiq::Web => '/sidekiq'
 

@@ -12,6 +12,7 @@ logs/
 daemons.rb.output
 daemons.rb.pid
 /config/application.yml
+/config/settings.yml
 /config/newrelic.yml
 /config/integrations
 /config/database.yml

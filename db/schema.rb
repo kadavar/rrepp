@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151112080616) do
+ActiveRecord::Schema.define(version: 20151112131229) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,6 +34,16 @@ ActiveRecord::Schema.define(version: 20151112080616) do
     t.string   "jira_password"
     t.string   "tracker_token"
   end
+
+  create_table "jira_accounts", force: :cascade do |t|
+    t.string   "login"
+    t.string   "password"
+    t.integer  "jira_filter"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "jira_accounts", ["login"], name: "index_jira_accounts_on_login", unique: true, using: :btree
 
   create_table "jira_custom_fields", force: :cascade do |t|
     t.string   "name"
@@ -61,6 +71,8 @@ ActiveRecord::Schema.define(version: 20151112080616) do
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
   end
+
+  add_index "pivotal_accounts", ["tracker_token"], name: "index_pivotal_accounts_on_tracker_token", unique: true, using: :btree
 
   create_table "projects", force: :cascade do |t|
     t.string   "name"

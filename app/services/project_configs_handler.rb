@@ -4,6 +4,8 @@ class ProjectConfigsHandler
     @writer = ProjectConfigsWriter.new
     @composer = ConfigComposer.new
     @path = PathHandler.new
+    @settings=SettingsLoader.new.load!
+
   end
 
   def synchronize

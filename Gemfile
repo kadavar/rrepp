@@ -46,7 +46,7 @@ gem 'tracker_api', github: 'dashofcode/tracker_api', branch: 'master'
 
 # Jira Api
 gem 'jira-ruby'
-
+gem 'hashie'
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
