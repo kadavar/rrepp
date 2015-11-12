@@ -41,13 +41,15 @@ RSpec.describe SyncWorker, type: :service do
   let(:story) { double 'story' }
   let(:to_create_stories) { double 'to_create_stories' }
   let(:hash_name) { SecureRandom.random_bytes(64) }
-  let(:project) { double 'project' }
+  let(:project) { create :project, :with_config }
   let(:worker) { SyncWorker.new }
   let(:bridge) { JiraToPivotal::Bridge.new(hash_name) }
   let(:logger) { double 'logger' }
   let(:jira_logger) { double 'jira_logger' }
+  let(:jid) { double 'jid' }
 
   before do
+    allow(Project).to receive(:current_job_id) { jid }
     allow(issue).to receive(:send) { 'url' }
     allow(issue).to receive(:key) { 'url' }
     allow(issue).to receive(:issue) { issue }
@@ -112,7 +114,7 @@ RSpec.describe SyncWorker, type: :service do
   after { Sidekiq.redis { |connection| connection.del(hash_name) } }
 
   describe '#sync!' do
-    subject { worker.perform(project, hash_name) }
+    subject { worker.perform(project.id) }
 
     context 'when check_projects return nil' do
       let(:inner_jira_project) { nil }
@@ -126,8 +128,4 @@ RSpec.describe SyncWorker, type: :service do
     end
   end
 
-  describe '#from_jira_to_pivotal!' do
-    subject { bridge.from_jira_to_pivotal! }
-    it { is_expected.to eq 'create_task' }
-  end
 end

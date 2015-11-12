@@ -125,7 +125,7 @@ RSpec.describe JiraToPivotal::Jira::Issue do
       context 'without exception' do
         before { allow(issue).to receive(:save!) { issue } }
         specify 'issue without points' do
-<<<<<<< HEAD
+
           is_expected.to eq true
         end
 
@@ -134,8 +134,6 @@ RSpec.describe JiraToPivotal::Jira::Issue do
                            'timetracking' => 'originalEstimate',
                            'reporter' => 'reporter' } }
           it { is_expected.to eq true }
-=======
-          is_expected.to be true
         end
 
         context 'issue with points' do
@@ -148,7 +146,6 @@ RSpec.describe JiraToPivotal::Jira::Issue do
           end
 
           it { is_expected.to be true }
->>>>>>> release-2015.w46
         end
       end
 
