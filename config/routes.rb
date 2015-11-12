@@ -1,17 +1,18 @@
 require 'sidekiq/web'
-require 'sidetiq/web'
 
 Rails.application.routes.draw do
+  resources :pivotal_accounts
+
   mount Sidekiq::Web => '/sidekiq'
 
-  resources :projects, only: [:index, :new, :destroy, :update] do
+  resources :projects, only: [:index, :new, :create, :destroy] do
     member do
       get :stop
       get :start
       get :sync_project
     end
     collection do
-      get :status
+      get :synchronize
     end
   end
 

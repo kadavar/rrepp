@@ -1,0 +1,24 @@
+.container.white.project_block
+  = simple_form_for :pivotal_account do |f|
+    .form-group.col-md-2.config-form
+      = f.input :tracker_token, input_html: { class: 'form-control' }
+      = f.button :submit
+
+  %h2.text-center Pivotal Accounts
+  .col-md-12
+    %table.table.project-table.table-striped
+      %thead
+        %tr
+          %th Id
+          %th name
+          %th Token
+          %th Actions
+      %tbody
+        - @accounts.each_with_index do |account, index|
+          %tr
+            %td= index + 1
+            %td= account.name
+            %td= account.tracker_token
+            %td
+              = link_to 'Edit', edit_pivotal_account_path(account), class: 'btn btn-warning btn-xs'
+              = link_to 'Delete', pivotal_account_url(account), class: 'btn btn-danger btn-xs', method: :delete, data: { confirm: 'Are you sure?' }

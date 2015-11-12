@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151106133414) do
+ActiveRecord::Schema.define(version: 20151112080616) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,6 +53,13 @@ ActiveRecord::Schema.define(version: 20151106133414) do
 
   create_table "logs", force: :cascade do |t|
     t.string "name"
+  end
+
+  create_table "pivotal_accounts", force: :cascade do |t|
+    t.string   "name"
+    t.string   "tracker_token"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
   end
 
   create_table "projects", force: :cascade do |t|
