@@ -1,0 +1,15 @@
+global:
+    jira_host: 'jira_host'
+    jira_uri_scheme: 'http'
+    jira_port: '80'
+    script_first_start: '5'
+    script_repeat_time: '5m'
+    retry_count: '3'
+production:
+    jira_host: 'jira_host'
+    jira_uri_scheme: 'http'
+    jira_port: '80'
+    script_first_start: '5'
+    script_repeat_time: '5m'
+    retry_count: '3'
+  

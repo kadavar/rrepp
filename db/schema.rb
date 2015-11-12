@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151112131845) do
+ActiveRecord::Schema.define(version: 20151112141206) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,29 +36,27 @@ ActiveRecord::Schema.define(version: 20151112131845) do
   end
 
   create_table "jira_accounts", force: :cascade do |t|
-    t.string   "login"
     t.string   "password"
     t.integer  "jira_filter"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.string   "name"
   end
-
-  add_index "jira_accounts", ["login"], name: "index_jira_accounts_on_login", unique: true, using: :btree
 
   create_table "jira_custom_fields", force: :cascade do |t|
     t.string   "name"
-    t.integer  "config_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string   "value"
+    t.integer  "project_id"
   end
 
   create_table "jira_issue_types", force: :cascade do |t|
     t.string   "name"
     t.integer  "jira_id"
-    t.integer  "config_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "project_id"
   end
 
   create_table "logs", force: :cascade do |t|

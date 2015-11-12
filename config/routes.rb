@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   mount Sidekiq::Web => '/sidekiq'
 
-  resources :projects, only: [:index, :new, :create, :destroy] do
+  resources :projects, only: [:index, :new, :create, :destroy, :edit, :update] do
     member do
       get :stop
       get :start

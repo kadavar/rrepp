@@ -1,14 +1,18 @@
 class ProjectsController < BaseController
-  before_filter :find_project, only: [:start, :stop, :sync_project, :destroy, :update]
+  before_filter :find_project, only: [:start, :stop, :sync_project, :destroy, :update, :edit]
 
   def index
     @projects = Project.all
   end
 
+  def new
+    render 'edit'
+  end
+
   def update
     @project.update_attributes(project_params)
 
-    render nothing: true
+    redirect_to projects_path
   end
 
   def destroy
@@ -34,6 +38,7 @@ class ProjectsController < BaseController
   end
 
   def project_params
-    params[:project].permit(:active)
+    params[:project].permit(:name, :tracker_project_id,
+                            :jira_project, :pivotal_account_id, :jira_account_id, :active )
   end
 end

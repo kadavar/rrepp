@@ -1,7 +1,7 @@
 .container.white.project_block
   = simple_form_for :jira_account do |f|
     .form-group.col-md-2.config-form
-      = f.input :login,label:'Jira Login'
+      = f.input :name,label:'Jira Login'
       = f.input :password,label:'Jira Password', :as => :string
 
       = f.input :jira_filter,label:'Jira Filter'

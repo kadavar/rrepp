@@ -1,6 +1,9 @@
 .container.white.project_block.projects-index
   %h2.text-center.col-md-12 Projects
   .col-md-12
+    .pull-right.btn-synchronize
+    / # = link_to 'New Config', new_project_config_path, class: 'btn btn-primary btn-large'
+    = link_to 'New project', new_project_path, class: 'btn btn-success btn-large'
     %table.table.project-table.table-striped
       %thead
         %tr
@@ -17,8 +20,7 @@
         - @projects.each_with_index do |project, index|
           %tr
             %td= index + 1
-            %td= project.config.jira_project
-            %td= link_to project.config.try(:name), project_config_path(project.config), class: 'table-link'
+            %td= project.jira_project
             %td= project.pid
             %td= project.last_update
             %td= link_to project.log_name, project_log_path(project.log_name), class: 'table-link'
@@ -29,5 +31,6 @@
                   %i.fa.fa-refresh
                 = link_to project_path(project), id: "id-#{project.id}", class: 'action-link white', method: :delete do
                   %i.fa.fa-times
+                = link_to 'Edit',  edit_project_path(project), class: 'btn btn-warning btn-xs'
             %td
               = check_box_tag "active-#{project.id}", project.id, project.active, class: 'project-active', data: { project_id: project.id }
