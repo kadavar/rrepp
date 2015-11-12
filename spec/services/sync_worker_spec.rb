@@ -41,7 +41,7 @@ RSpec.describe SyncWorker, type: :service do
   let(:story) { double 'story' }
   let(:to_create_stories) { double 'to_create_stories' }
   let(:hash_name) { SecureRandom.random_bytes(64) }
-  let(:project) { create :project, :with_config }
+  let(:project) { create :project ,:with_config}
   let(:worker) { SyncWorker.new }
   let(:bridge) { JiraToPivotal::Bridge.new(hash_name) }
   let(:logger) { double 'logger' }
@@ -49,7 +49,6 @@ RSpec.describe SyncWorker, type: :service do
   let(:jid) { double 'jid' }
 
   before do
-    allow(Project).to receive(:current_job_id) { jid }
     allow(issue).to receive(:send) { 'url' }
     allow(issue).to receive(:key) { 'url' }
     allow(issue).to receive(:issue) { issue }
