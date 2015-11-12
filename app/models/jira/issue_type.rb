@@ -1,3 +1,3 @@
 class Jira::IssueType < ActiveRecord::Base
-  belongs_to :config, class: Project::Config
+  belongs_to :project
 end
