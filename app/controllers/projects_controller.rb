@@ -6,7 +6,13 @@ class ProjectsController < BaseController
   end
 
   def new
+    @project=Project.new
     render 'edit'
+  end
+
+  def create
+    Project.create(project_params)
+    redirect_to projects_path
   end
 
   def update

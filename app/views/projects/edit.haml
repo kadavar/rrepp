@@ -1,14 +1,12 @@
 .container
   .col-md-10.col-md-offset-1
-    %h2.black="Edit #{@project.name} config"
+    %h2.black="Edit #{@project.name if @project} config"
 
-    = simple_form_for @project, url: project_path, html: { method: :put, class: 'form-horizontal' } do |f|
-      .form-group.col-md-6.config-form
+    = simple_form_for @project do |f|
+      .form-group.col-md-4.config-form
         = f.input :name, input_html: { class: 'form-control' }
         = f.input :tracker_project_id
         = f.input :jira_project, input_html: { class: 'form-control' }
-        .form-group.col-md-6.config-form
-          = f.association :pivotal_account
-          = f.association :jira_account, default: @project.pivotal_account.id if @project.pivotal_account
-
-          = f.submit class: 'btn btn-primary'
+        = f.input :pivotal_account_id, collection: PivotalAccount.all, default: @project.pivotal_account if @project.pivotal_account
+        = f.input :jira_account_id, collection: JiraAccount.all, default: @project.jira_account if @project.jira_account
+        = f.submit class: 'btn btn-primary'

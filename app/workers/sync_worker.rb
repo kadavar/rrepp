@@ -10,7 +10,7 @@ class SyncWorker
       project.update_attributes(current_job_id: jid)
       config_composer = ConfigComposer.new
       config = config_composer.compose_project_config(project)
-
+      binding.pry
       bridge = JiraToPivotal::Bridge.new(config)
       bridge.sync!
     end
