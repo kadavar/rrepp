@@ -7,6 +7,6 @@
         = f.input :name, input_html: { class: 'form-control' }
         = f.input :tracker_project_id
         = f.input :jira_project, input_html: { class: 'form-control' }
-        = f.input :pivotal_account_id, collection: PivotalAccount.all, default: @project.pivotal_account if @project.pivotal_account
-        = f.input :jira_account_id, collection: JiraAccount.all, default: @project.jira_account if @project.jira_account
+        = f.input :pivotal_account_id, collection: PivotalAccount.all
+        = f.input :jira_account_id, collection: JiraAccount.all
         = f.submit class: 'btn btn-primary'
